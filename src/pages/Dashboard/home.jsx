@@ -1,8 +1,7 @@
-import React from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import Header from './header';
-import AllCategory from './homeComponent/allCatagery';  // Corrected import
-
+import React from "react";
+import "bootstrap/dist/css/bootstrap.min.css";
+import Header from "../../components/header";
+import AllCategory from "../../components/allCatagery"; // Corrected import
 
 const HomePage = () => {
   return (
@@ -31,27 +30,55 @@ const HomePage = () => {
               <div id="carouselExample" className="carousel slide">
                 <div className="carousel-inner">
                   <div className="carousel-item active">
-                    <img src="https://via.placeholder.com/900x300" className="d-block w-100" alt="Headphone" />
+                    <img
+                      src="https://via.placeholder.com/900x300"
+                      className="d-block w-100"
+                      alt="Headphone"
+                    />
                   </div>
                   <div className="carousel-item">
-                    <img src="https://via.placeholder.com/900x300" className="d-block w-100" alt="Macbook Promo" />
+                    <img
+                      src="https://via.placeholder.com/900x300"
+                      className="d-block w-100"
+                      alt="Macbook Promo"
+                    />
                   </div>
                   <div className="carousel-item">
-                    <img src="https://via.placeholder.com/900x300" className="d-block w-100" alt="Toys Promo" />
+                    <img
+                      src="https://via.placeholder.com/900x300"
+                      className="d-block w-100"
+                      alt="Toys Promo"
+                    />
                   </div>
                 </div>
-                <button className="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
-                  <span className="carousel-control-prev-icon" aria-hidden="true"></span>
+                <button
+                  className="carousel-control-prev"
+                  type="button"
+                  data-bs-target="#carouselExample"
+                  data-bs-slide="prev"
+                >
+                  <span
+                    className="carousel-control-prev-icon"
+                    aria-hidden="true"
+                  ></span>
                 </button>
-                <button className="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
-                  <span className="carousel-control-next-icon" aria-hidden="true"></span>
+                <button
+                  className="carousel-control-next"
+                  type="button"
+                  data-bs-target="#carouselExample"
+                  data-bs-slide="next"
+                >
+                  <span
+                    className="carousel-control-next-icon"
+                    aria-hidden="true"
+                  ></span>
                 </button>
               </div>
             </section>
 
             {/* Our Products */}
             <section className="products-section mb-4">
-              <AllCategory />  {/* Corrected component name */}
+              <AllCategory /> {/* Corrected component name */}
             </section>
 
             {/* New Arrivals */}
@@ -60,7 +87,11 @@ const HomePage = () => {
               <div className="row">
                 <div className="col-md-3">
                   <div className="card">
-                    <img src="https://via.placeholder.com/150" className="card-img-top" alt="Monopoly" />
+                    <img
+                      src="https://via.placeholder.com/150"
+                      className="card-img-top"
+                      alt="Monopoly"
+                    />
                     <div className="card-body">
                       <h5 className="card-title">Monopoly Board Game</h5>
                       <p className="card-text">$37.99</p>
@@ -69,7 +100,11 @@ const HomePage = () => {
                 </div>
                 <div className="col-md-3">
                   <div className="card">
-                    <img src="https://via.placeholder.com/150" className="card-img-top" alt="TV" />
+                    <img
+                      src="https://via.placeholder.com/150"
+                      className="card-img-top"
+                      alt="TV"
+                    />
                     <div className="card-body">
                       <h5 className="card-title">50 inch Ultra HD TV</h5>
                       <p className="card-text">$1200</p>
@@ -78,7 +113,11 @@ const HomePage = () => {
                 </div>
                 <div className="col-md-3">
                   <div className="card">
-                    <img src="https://via.placeholder.com/150" className="card-img-top" alt="Laptop" />
+                    <img
+                      src="https://via.placeholder.com/150"
+                      className="card-img-top"
+                      alt="Laptop"
+                    />
                     <div className="card-body">
                       <h5 className="card-title">Dell Latitude</h5>
                       <p className="card-text">$1500</p>

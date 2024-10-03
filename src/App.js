@@ -1,9 +1,9 @@
-import './App.css';
-import Card from './cards.jsx';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import CheckoutPage from './checkout.jsx';
-import HomePage from './home.jsx';
-import Guest from './homeComponent/loginpage/guest.jsx';
+import "./assets/styles/App.css";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import Card from "./pages/cards.jsx";
+import CheckoutPage from "./pages/checkout.jsx";
+import HomePage from "./pages/Dashboard/home.jsx";
+import Guest from "./pages/loginpage/guest.jsx";
 
 function App() {
   return (
@@ -12,11 +12,10 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="api/cart" element={<Card />} />
         <Route path="/checkout" element={<CheckoutPage />} />
-        <Route path="/guest" element={<Guest/>} />
+        <Route path="/guest" element={<Guest />} />
       </Routes>
     </Router>
   );
 }
 
 export default App;
-
