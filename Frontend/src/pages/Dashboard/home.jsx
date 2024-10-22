@@ -1,7 +1,7 @@
 import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Header from "../../components/header";
-import AllCategory from "../../components/allCatagery";
+import OurProduct from "../../components/OurProduct";
 import ProductList from "./ProductList";
 import FilterSidebar from "./FilterSidebar";
 import Banner from "./Banner";
@@ -29,10 +29,10 @@ const HomePage = () => {
             <Banner />
 
             {/* Our Products */}
-            <section className="products-section mb-4">
-              <AllCategory />
-              
-            </section>
+            <section className="products-section mb-4"></section>
+            <OurProduct />
+
+            <></>
 
             {/* New Arrivals */}
             <Newarrival />
@@ -43,9 +43,7 @@ const HomePage = () => {
       <div
         className="container-fluid"
         style={{ maxWidth: "1400px", margin: "0 auto" }}
-      >
-        <ProductList />
-      </div>
+      ></div>
       <Footer />
     </>
   );

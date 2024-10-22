@@ -9,225 +9,537 @@ import {
   Card,
   CardContent,
   CardMedia,
+  Divider,
+  useTheme,
 } from "@mui/material";
-import StorefrontIcon from "@mui/icons-material/Storefront";
-import HistoryIcon from "@mui/icons-material/History";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
-import ShoppingBasketIcon from "@mui/icons-material/ShoppingBasket";
+import {
+  Storefront as StorefrontIcon,
+  History as HistoryIcon,
+  LocationOn as LocationOnIcon,
+  ShoppingBasket as ShoppingBasketIcon,
+} from "@mui/icons-material";
+import Header from "../../components/header";
+import Footer from "../../components/footer";
+import { motion } from "framer-motion";
 
 const AboutPage = () => {
+  const theme = useTheme();
 
   return (
-    <Box sx={{ bgcolor: "background.default", minHeight: "100vh" }}>
-      <Container maxWidth="lg" sx={{ py: 8 }}>
-        {/* Hero Section */}
-        <Paper
-          elevation={0}
-          sx={{
-            p: 4,
-            mb: 6,
-            borderRadius: 2,
-            backgroundImage: 'url("/api/placeholder/1200/400")',
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            position: "relative",
-            "&::before": {
-              content: '""',
-              position: "absolute",
-              top: 0,
-              right: 0,
-              bottom: 0,
-              left: 0,
-              backgroundColor: "rgba(0,0,0,0.5)",
-              borderRadius: 2,
-            },
-          }}
-        >
-          <Box position="relative" zIndex={1} textAlign="center" color="white">
-            <StorefrontIcon sx={{ fontSize: 60, mb: 2 }} />
-            <Typography
-              variant="h2"
-              component="h1"
-              sx={{ fontWeight: "bold", mb: 2 }}
-            >
-              C-Store
-            </Typography>
-            <Typography variant="h5" sx={{ mb: 4 }}>
-              Your Trusted Partner in Quality Products Since 1983
-            </Typography>
-            <Button
-              variant="contained"
-              color="secondary"
-              size="large"
-              sx={{
-                px: 4,
-                py: 1.5,
-                borderRadius: 2,
-                boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                "&:hover": {
-                  boxShadow: "0 6px 8px rgba(0, 0, 0, 0.15)",
-                },
-              }}
-            >
-              Explore Our Story
-            </Button>
-          </Box>
-        </Paper>
-
-        {/* History Section */}
-        <Card sx={{ mb: 6, overflow: "visible" }}>
-          <Grid container>
-            <Grid item xs={12} md={6}>
-              <CardMedia
-                component="img"
-                height="100%"
-                image="/api/placeholder/600/400"
-                alt="C-Store History"
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <CardContent sx={{ p: 4 }}>
-                <Box display="flex" alignItems="center" mb={2}>
-                  <HistoryIcon
-                    sx={{ fontSize: 30, color: "secondary.main", mr: 2 }}
-                  />
-                  <Typography variant="h4" component="h2">
-                    Our History
-                  </Typography>
-                </Box>
-                <Typography paragraph>
-                  Founded in 1983, C-Stor Store has been a pillar of the Texas
-                  community for four decades. What started as a small
-                  family-owned shop has grown into a trusted name in quality
-                  products across the Lone Star State.
-                </Typography>
-                <Typography paragraph>
-                  With 40 years of experience, we've learned to adapt and grow
-                  with the times, always keeping our customers' needs at the
-                  forefront of our business.
-                </Typography>
-              </CardContent>
-            </Grid>
-          </Grid>
-        </Card>
-
-        {/* Presence Section */}
-        <Card sx={{ mb: 6, overflow: "visible" }}>
-          <Grid container>
-            <Grid item xs={12} md={6} sx={{ order: { xs: 2, md: 1 } }}>
-              <CardContent sx={{ p: 4 }}>
-                <Box display="flex" alignItems="center" mb={2}>
-                  <LocationOnIcon
-                    sx={{ fontSize: 30, color: "secondary.main", mr: 2 }}
-                  />
-                  <Typography variant="h4" component="h2">
-                    Our Presence
-                  </Typography>
-                </Box>
-                <Typography paragraph>
-                  Over the years, we've established a strong presence across
-                  Texas, with branches in major cities serving thousands of
-                  satisfied customers. Our local stores have been community
-                  landmarks, known for excellent service and quality products.
-                </Typography>
-                <Typography paragraph>
-                  Now, we're excited to bring the C-Stor experience to the
-                  digital world, making our extensive range of products
-                  available to customers nationwide through our new online
-                  platform.
-                </Typography>
-              </CardContent>
-            </Grid>
-            <Grid item xs={12} md={6} sx={{ order: { xs: 1, md: 2 } }}>
-              <CardMedia
-                component="img"
-                height="100%"
-                image="/api/placeholder/600/400"
-                alt="C-Stor Store Locations"
-              />
-            </Grid>
-          </Grid>
-        </Card>
-
-        {/* Products Section */}
-        <Card sx={{ mb: 6 }}>
-          <CardContent sx={{ p: 4 }}>
-            <Box display="flex" alignItems="center" mb={2}>
-              <ShoppingBasketIcon
-                sx={{ fontSize: 30, color: "secondary.main", mr: 2 }}
-              />
-              <Typography variant="h4" component="h2">
-                Our Products
+    <>
+      <Header />
+      <Box sx={{ bgcolor: "background.default", minHeight: "100vh" }}>
+        <Container maxWidth="lg" sx={{ py: 8 }}>
+          {/* Hero Section */}
+          <Paper
+            component={motion.div}
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            elevation={0}
+            sx={{
+              p: { xs: 4, md: 8 },
+              mb: 8,
+              borderRadius: 3,
+              backgroundImage: 'url("https://picsum.photos/1200/600?store")',
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              position: "relative",
+              color: "#fff",
+              overflow: "hidden",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              height: { xs: 300, md: 500 },
+              "&::before": {
+                content: '""',
+                position: "absolute",
+                top: 0,
+                right: 0,
+                bottom: 0,
+                left: 0,
+                backgroundColor: "rgba(0,0,0,0.5)",
+                borderRadius: 3,
+              },
+            }}
+          >
+            <Box position="relative" zIndex={1} textAlign="center">
+              <StorefrontIcon sx={{ fontSize: 80, mb: 2 }} />
+              <Typography
+                variant="h2"
+                component="h1"
+                sx={{
+                  fontWeight: "bold",
+                  mb: 2,
+                  textShadow: "2px 2px 4px rgba(0,0,0,0.6)",
+                  fontFamily: "'Roboto Slab', serif",
+                }}
+              >
+                C-Store
               </Typography>
+              <Typography
+                variant="h5"
+                sx={{
+                  mb: 4,
+                  textShadow: "1px 1px 3px rgba(0,0,0,0.5)",
+                  fontFamily: "'Open Sans', sans-serif",
+                }}
+              >
+                Elevating Your Shopping Experience Since 1983
+              </Typography>
+              <Button
+                variant="contained"
+                color="secondary"
+                size="large"
+                sx={{
+                  px: 5,
+                  py: 1.5,
+                  borderRadius: "50px",
+                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+                  textTransform: "none",
+                  fontWeight: "bold",
+                  fontFamily: "'Open Sans', sans-serif",
+                  "&:hover": {
+                    boxShadow: "0 6px 16px rgba(0, 0, 0, 0.3)",
+                  },
+                }}
+                aria-label="Discover More about C-Store"
+              >
+                Discover More
+              </Button>
             </Box>
-            <Typography paragraph>
-              At C-Stor Store, we pride ourselves on offering a wide range of
-              high-quality products. From household essentials to innovative
-              gadgets, we carefully curate our selection to meet the diverse
-              needs of our customers. Our commitment to quality and value has
-              been the cornerstone of our success for the past 40 years.
+          </Paper>
+
+          {/* Company Description Section */}
+          <Grid container spacing={6} sx={{ mb: 8 }}>
+            <Grid item xs={12} md={6}>
+              <Typography
+                variant="h4"
+                gutterBottom
+                sx={{ fontFamily: "'Roboto Slab', serif" }}
+              >
+                About C-Store
+              </Typography>
+              <Divider sx={{ width: 60, bgcolor: "secondary.main", mb: 2 }} />
+              <Typography
+                variant="body1"
+                paragraph
+                sx={{ fontFamily: "'Open Sans', sans-serif" }}
+              >
+                Founded in 1983, C-Store has been a cornerstone of the Texas
+                community for over four decades. What began as a small,
+                family-owned shop has grown into a trusted name, renowned for
+                delivering quality products and exceptional customer service.
+              </Typography>
+              <Typography
+                variant="body1"
+                paragraph
+                sx={{ fontFamily: "'Open Sans', sans-serif" }}
+              >
+                Our dedication to excellence and community engagement has
+                enabled us to adapt and thrive in the ever-evolving retail
+                landscape. Today, C-Store stands as a testament to resilience,
+                offering a diverse range of products to meet the varied needs of
+                our customers both in-store and online.
+              </Typography>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Box
+                component={motion.div}
+                whileHover={{ scale: 1.05 }}
+                sx={{
+                  borderRadius: 2,
+                  overflow: "hidden",
+                  boxShadow: theme.shadows[4],
+                  height: "100%",
+                }}
+              >
+                <CardMedia
+                  component="img"
+                  image="https://picsum.photos/600/400?family,store"
+                  alt="C-Store Team"
+                  sx={{
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                  loading="lazy"
+                />
+              </Box>
+            </Grid>
+          </Grid>
+
+          {/* Our Values Section */}
+          <Grid container spacing={6} sx={{ mb: 8 }}>
+            <Grid item xs={12} md={4}>
+              <Card
+                component={motion.div}
+                whileHover={{ y: -10, boxShadow: theme.shadows[8] }}
+                sx={{
+                  borderRadius: 3,
+                  padding: 4,
+                  textAlign: "center",
+                  bgcolor: theme.palette.grey[50],
+                }}
+              >
+                <HistoryIcon
+                  sx={{ fontSize: 50, color: "secondary.main", mb: 2 }}
+                />
+                <Typography
+                  variant="h6"
+                  gutterBottom
+                  sx={{ fontFamily: "'Roboto Slab', serif" }}
+                >
+                  Heritage
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{ fontFamily: "'Open Sans', sans-serif" }}
+                >
+                  With a rich history spanning over 40 years, our legacy is
+                  built on trust, quality, and unwavering commitment to our
+                  customers.
+                </Typography>
+              </Card>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Card
+                component={motion.div}
+                whileHover={{ y: -10, boxShadow: theme.shadows[8] }}
+                sx={{
+                  borderRadius: 3,
+                  padding: 4,
+                  textAlign: "center",
+                  bgcolor: theme.palette.grey[50],
+                }}
+              >
+                <ShoppingBasketIcon
+                  sx={{ fontSize: 50, color: "secondary.main", mb: 2 }}
+                />
+                <Typography
+                  variant="h6"
+                  gutterBottom
+                  sx={{ fontFamily: "'Roboto Slab', serif" }}
+                >
+                  Quality
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{ fontFamily: "'Open Sans', sans-serif" }}
+                >
+                  We prioritize offering only the finest products, ensuring our
+                  customers receive unparalleled value and satisfaction.
+                </Typography>
+              </Card>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Card
+                component={motion.div}
+                whileHover={{ y: -10, boxShadow: theme.shadows[8] }}
+                sx={{
+                  borderRadius: 3,
+                  padding: 4,
+                  textAlign: "center",
+                  bgcolor: theme.palette.grey[50],
+                }}
+              >
+                <LocationOnIcon
+                  sx={{ fontSize: 50, color: "secondary.main", mb: 2 }}
+                />
+                <Typography
+                  variant="h6"
+                  gutterBottom
+                  sx={{ fontFamily: "'Roboto Slab', serif" }}
+                >
+                  Community
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{ fontFamily: "'Open Sans', sans-serif" }}
+                >
+                  Our deep-rooted connections within the community drive us to
+                  support local initiatives and foster meaningful relationships.
+                </Typography>
+              </Card>
+            </Grid>
+          </Grid>
+
+          {/* Our Locations Section */}
+          <Grid container spacing={6} sx={{ mb: 8 }}>
+            <Grid item xs={12} md={6}>
+              <Box
+                component={motion.div}
+                whileHover={{ scale: 1.05 }}
+                sx={{
+                  borderRadius: 2,
+                  overflow: "hidden",
+                  boxShadow: theme.shadows[4],
+                  height: "100%",
+                }}
+              >
+                <CardMedia
+                  component="img"
+                  image="https://picsum.photos/600/400?store,locations"
+                  alt="C-Store Locations"
+                  sx={{
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                  loading="lazy"
+                />
+              </Box>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Typography
+                variant="h4"
+                gutterBottom
+                sx={{ fontFamily: "'Roboto Slab', serif" }}
+              >
+                Our Locations
+              </Typography>
+              <Divider sx={{ width: 60, bgcolor: "secondary.main", mb: 2 }} />
+              <Typography
+                variant="body1"
+                paragraph
+                sx={{ fontFamily: "'Open Sans', sans-serif" }}
+              >
+                With numerous branches across major Texan cities, C-Store has
+                become a familiar name in communities big and small. Each
+                location is strategically situated to provide easy access to our
+                vast array of products and exceptional services.
+              </Typography>
+              <Typography
+                variant="body1"
+                paragraph
+                sx={{ fontFamily: "'Open Sans', sans-serif" }}
+              >
+                Whether you prefer the personalized experience of our in-store
+                shopping or the convenience of our online platform, C-Store is
+                committed to meeting your needs wherever you are.
+              </Typography>
+              <Button
+                variant="outlined"
+                color="secondary"
+                sx={{
+                  mt: 2,
+                  borderRadius: "50px",
+                  textTransform: "none",
+                  fontWeight: "bold",
+                  fontFamily: "'Open Sans', sans-serif",
+                  "&:hover": {
+                    backgroundColor: "secondary.main",
+                    color: "#fff",
+                  },
+                }}
+                aria-label="Find a Store Near You"
+              >
+                Find a Store Near You
+              </Button>
+            </Grid>
+          </Grid>
+
+          {/* Our Products Section */}
+          <Box sx={{ mb: 8 }}>
+            <Typography
+              variant="h4"
+              gutterBottom
+              align="center"
+              sx={{ fontFamily: "'Roboto Slab', serif" }}
+            >
+              Our Offerings
             </Typography>
-            <Grid container spacing={2} mt={2}>
-              {[1, 2, 3, 4].map((item) => (
-                <Grid item xs={6} md={3} key={item}>
-                  <Card>
+            <Divider
+              sx={{ width: 80, bgcolor: "secondary.main", mb: 4, mx: "auto" }}
+            />
+            <Grid container spacing={4}>
+              {[
+                {
+                  title: "Home Essentials",
+                  img: "https://picsum.photos/300/200?home,essentials",
+                },
+                {
+                  title: "Electronics",
+                  img: "https://picsum.photos/300/200?electronics",
+                },
+                {
+                  title: "Fashion & Apparel",
+                  img: "https://picsum.photos/300/200?fashion,apparel",
+                },
+                {
+                  title: "Health & Wellness",
+                  img: "https://picsum.photos/300/200?health,wellness",
+                },
+              ].map((category, index) => (
+                <Grid item xs={12} sm={6} md={3} key={index}>
+                  <Card
+                    component={motion.div}
+                    whileHover={{ scale: 1.05 }}
+                    sx={{
+                      borderRadius: 2,
+                      overflow: "hidden",
+                      boxShadow: theme.shadows[3],
+                      cursor: "pointer",
+                      transition: "transform 0.3s",
+                    }}
+                    aria-label={`${category.title} category`}
+                  >
                     <CardMedia
                       component="img"
-                      height="140"
-                      image={`/api/placeholder/300/200`}
-                      alt={`Product Category ${item}`}
+                      height="160"
+                      image={category.img}
+                      alt={category.title}
+                      sx={{ objectFit: "cover" }}
+                      loading="lazy"
                     />
                     <CardContent>
-                      <Typography variant="subtitle1" component="div">
-                        Product Category {item}
+                      <Typography
+                        variant="h6"
+                        component="div"
+                        align="center"
+                        sx={{ fontFamily: "'Roboto Slab', serif" }}
+                      >
+                        {category.title}
                       </Typography>
                     </CardContent>
                   </Card>
                 </Grid>
               ))}
             </Grid>
-          </CardContent>
-        </Card>
+          </Box>
 
-        {/* CTA Section */}
-        <Paper
-          elevation={3}
-          sx={{
-            p: 4,
-            bgcolor: "primary.main",
-            color: "primary.contrastText",
-            borderRadius: 2,
-          }}
-        >
-          <Typography variant="h4" align="center" gutterBottom>
-            Join Us in Our Digital Journey
-          </Typography>
-          <Typography align="center" paragraph>
-            Experience the same trust, quality, and customer care that Texas has
-            known for 40 years, now from the comfort of your home.
-          </Typography>
-          <Box display="flex" justifyContent="center">
+          {/* Testimonials Section */}
+          <Box sx={{ mb: 8 }}>
+            <Typography
+              variant="h4"
+              gutterBottom
+              align="center"
+              sx={{ fontFamily: "'Roboto Slab', serif" }}
+            >
+              What Our Customers Say
+            </Typography>
+            <Divider
+              sx={{ width: 80, bgcolor: "secondary.main", mb: 4, mx: "auto" }}
+            />
+            <Grid container spacing={4}>
+              {[
+                {
+                  name: "Jane Doe",
+                  feedback:
+                    "C-Store has been my go-to for quality products. Their customer service is exceptional!",
+                  avatar: "https://picsum.photos/100/100?woman,portrait",
+                },
+                {
+                  name: "John Smith",
+                  feedback:
+                    "I love the variety and the seamless online shopping experience. Highly recommend C-Store!",
+                  avatar: "https://picsum.photos/100/100?man,portrait",
+                },
+                {
+                  name: "Emily Johnson",
+                  feedback:
+                    "C-Store consistently provides top-notch products at great prices. Their commitment to quality is unmatched.",
+                  avatar: "https://picsum.photos/100/100?woman,face",
+                },
+                {
+                  name: "Michael Brown",
+                  feedback:
+                    "Shopping at C-Store is always a pleasure. They understand customer needs and deliver superbly.",
+                  avatar: "https://picsum.photos/100/100?man,face",
+                },
+              ].map((customer, index) => (
+                <Grid item xs={12} md={6} key={index}>
+                  <Box display="flex" alignItems="center">
+                    <Box
+                      component="img"
+                      src={customer.avatar}
+                      alt={customer.name}
+                      sx={{
+                        width: 60,
+                        height: 60,
+                        borderRadius: "50%",
+                        mr: 2,
+                        objectFit: "cover",
+                        border: `2px solid ${theme.palette.primary.main}`,
+                      }}
+                    />
+                    <Box>
+                      <Typography
+                        variant="h6"
+                        sx={{ fontFamily: "'Roboto Slab', serif" }}
+                      >
+                        {customer.name}
+                      </Typography>
+                      <Typography
+                        variant="body1"
+                        color="textSecondary"
+                        sx={{ fontFamily: "'Open Sans', sans-serif" }}
+                      >
+                        "{customer.feedback}"
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
+
+          {/* Call-to-Action Section */}
+          <Paper
+            component={motion.div}
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            elevation={3}
+            sx={{
+              p: { xs: 4, md: 8 },
+              bgcolor: "primary.main",
+              color: "primary.contrastText",
+              borderRadius: 3,
+              textAlign: "center",
+            }}
+          >
+            <Typography
+              variant="h4"
+              gutterBottom
+              sx={{ fontFamily: "'Roboto Slab', serif" }}
+            >
+              Join Us on Our Digital Journey
+            </Typography>
+            <Typography
+              variant="h6"
+              paragraph
+              sx={{ fontFamily: "'Open Sans', sans-serif" }}
+            >
+              Experience unparalleled convenience and the trusted quality of
+              C-Store, now available online. Embrace the future of shopping with
+              us.
+            </Typography>
             <Button
               variant="contained"
               color="secondary"
               size="large"
               sx={{
                 mt: 2,
-                px: 4,
+                px: 5,
                 py: 1.5,
-                borderRadius: 2,
-                boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                borderRadius: "50px",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+                textTransform: "none",
+                fontWeight: "bold",
+                fontFamily: "'Open Sans', sans-serif",
                 "&:hover": {
-                  boxShadow: "0 6px 8px rgba(0, 0, 0, 0.15)",
+                  boxShadow: "0 6px 16px rgba(0, 0, 0, 0.3)",
                 },
               }}
+              aria-label="Shop Now at C-Store"
             >
               Shop Now
             </Button>
-          </Box>
-        </Paper>
-      </Container>
-    </Box>
+          </Paper>
+        </Container>
+      </Box>
+      <Footer />
+    </>
   );
 };
 

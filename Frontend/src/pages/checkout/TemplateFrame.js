@@ -1,51 +1,66 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
 import { createTheme, ThemeProvider, styled } from '@mui/material/styles';
+import "@fontsource/poppins"; // Import Poppins font
 
-import Box from '@mui/material/Box';
-import AppBar from '@mui/material/AppBar';
-import Toolbar from '@mui/material/Toolbar';
-import getCheckoutTheme from '../../theme/getCheckoutTheme';
+import Box from "@mui/material/Box";
+import AppBar from "@mui/material/AppBar";
+import Toolbar from "@mui/material/Toolbar";
+import getCheckoutTheme from "../../theme/getCheckoutTheme";
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
-  position: 'relative',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
+  position: "relative",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
   flexShrink: 0,
-  borderBottom: '1px solid',
+  borderBottom: "1px solid",
   borderColor: theme.palette.divider,
   backgroundColor: theme.palette.background.paper,
-  boxShadow: 'none',
-  backgroundImage: 'none',
+  boxShadow: "none",
+  backgroundImage: "none",
   zIndex: theme.zIndex.drawer + 1,
-  flex: '0 0 auto',
+  flex: "0 0 auto",
+  // Remove upper margin if any
+  marginTop: 0,
 }));
 
-function TemplateFrame({
-  mode,
-  children,
-}) {
-  
-  const checkoutTheme = createTheme(getCheckoutTheme(mode));
+function TemplateFrame({ mode, children }) {
+  const checkoutTheme = createTheme({
+    ...getCheckoutTheme(mode),
+    typography: {
+      fontFamily: "Poppins, Arial",
+      // You can customize other typography settings here
+    },
+  });
 
   return (
     <ThemeProvider theme={checkoutTheme}>
-      <Box sx={{ height: '100dvh', display: 'flex', flexDirection: 'column' }}>
+      <Box
+        sx={{
+          height: "100dvh",
+          display: "flex",
+          flexDirection: "column",
+          marginTop: 0,
+        }}
+      >
         <StyledAppBar>
           <Toolbar
             variant="dense"
             disableGutters
             sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              width: '100%',
-              p: '8px 12px',
+              display: "flex",
+              justifyContent: "space-between",
+              width: "100%",
+              p: "8px 12px",
             }}
           >
+            {/* You can add Toolbar content here if needed */}
           </Toolbar>
         </StyledAppBar>
-        <Box sx={{ flex: '1 1', overflow: 'auto' }}>{children}</Box>
+        <Box sx={{ flex: "1 1", overflow: "auto", paddingTop: 0 }}>
+          {children}
+        </Box>
       </Box>
     </ThemeProvider>
   );

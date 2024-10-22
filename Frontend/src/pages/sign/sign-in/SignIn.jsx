@@ -92,30 +92,41 @@ export default function SignIn(props) {
     const password = data.get("password");
 
     try {
-      const response = await fetch('/api/customers/login', {
-        method: 'POST',
+      const response = await fetch("/api/customers/login", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ email, password }),
       });
 
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        throw new Error("Network response was not ok");
       }
 
       const responseData = await response.json();
 
       // Store the JWT token in local storage
-      localStorage.setItem('token', responseData.token);
+      localStorage.setItem("token", responseData.token);
+
+      // **Save the username in localStorage as "Name"**
+      // Assuming the API response includes a `username` field
+      if (responseData.customer.username) {
+        localStorage.setItem("Name", responseData.customer.username);
+        localStorage.setItem("customerId", responseData.customer.customer.id);
+      } else {
+        // If username isn't directly available, use email as a fallback
+        localStorage.setItem("Name", responseData.customer.email_address);
+        localStorage.setItem("customerId", responseData.customer.customer.id);
+      }
 
       // Redirect to the homepage or a protected route
-      navigate('/'); // Change '/home' to your desired route
+      navigate("/"); // Change '/home' to your desired route
 
-      console.log('Login successful:', responseData);
+      console.log("Login successful:", responseData);
     } catch (error) {
-      console.error('Error logging in customer:', error);
-      setLoginError('Invalid email or password'); // Set login error message
+      console.error("Error logging in customer:", error);
+      setLoginError("Invalid email or password"); // Set login error message
     }
   };
 
@@ -158,12 +169,12 @@ export default function SignIn(props) {
           <Typography
             component="h1"
             variant="h4"
-            sx={{ 
-              width: "100%", 
-              fontSize: "clamp(1.75rem, 5vw, 2.25rem)", 
+            sx={{
+              width: "100%",
+              fontSize: "clamp(1.75rem, 5vw, 2.25rem)",
               fontWeight: 600,
               textAlign: "center",
-              marginBottom: (theme) => theme.spacing(2)
+              marginBottom: (theme) => theme.spacing(2),
             }}
           >
             Sign in
