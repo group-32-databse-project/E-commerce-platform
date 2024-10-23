@@ -11,13 +11,9 @@ class Category {
     return rows[0];
   }
 
-  static async createCategory(categoryData) {
-    const { category_name, parent_category_id, category_image } = categoryData;
-    const [result] = await db.query(
-      'INSERT INTO category (category_name, parent_category_id, category_image) VALUES (?, ?, ?)',
-      [category_name, parent_category_id, category_image]
-    );
-    return result.insertId;
+  static async getEleAndToy() {
+    const [rows] = await db.query('SELECT * FROM category WHERE parent_category_id = 1 OR parent_category_id = 2');
+    return rows;
   }
 
   // Add more methods as needed

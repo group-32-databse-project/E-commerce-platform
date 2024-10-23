@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import {
   AppBar,
   Toolbar,
@@ -39,6 +39,7 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { Link } from "react-router-dom";
 import logo from "../assets/images/logo.svg"; // Ensure the path is correct
 import { formatDistanceToNow } from "date-fns"; // Install via npm if not already
+
 
 // Custom styles
 const Search = styled("div")(({ theme }) => ({
@@ -104,7 +105,39 @@ const DrawerHeader = styled("div")(({ theme }) => ({
   ...theme.mixins.toolbar,
 }));
 
+const ResultsList = styled('ul')(({ theme }) => ({
+  display: 'none',
+  backgroundColor: 'white',
+  color: '#3b3835',
+  border: '1px solid rgba(0,0,0,0.3)',
+  borderTop: 0,
+  float: 'left',
+  left: 0,
+  listStyle: 'none',
+  margin: 20,
+  padding: 8,
+  position: 'absolute',
+  top: 31,
+  width: 180,
+  zIndex: 1000,
+  WebkitBorderRadius: '4px',
+  MozBorderRadius: '4px',
+  borderRadius: '4px',
+  WebkitBoxShadow: '0 1px 3px rgba(0,0,0,0.25)',
+  MozBoxShadow: '0 1px 3px rgba(0,0,0,0.25)',
+  boxShadow: '0 1px 3px rgba(0,0,0,0.25)',
+}));
+
+const ResultItem = styled('li')(({ theme }) => ({
+  padding: theme.spacing(1),
+  '&:hover': {
+    backgroundColor: alpha(theme.palette.primary.main, 0.1),
+  },
+}));
+
+
 const Header = () => {
+  const [state, setState] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
@@ -117,6 +150,9 @@ const Header = () => {
   const [openNavMenu, setOpenNavMenu] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [notificationAnchorEl, setNotificationAnchorEl] = useState(null);
+  const [searchResults, setSearchResults] = useState([]);
+  const [toyset, setToyset] = useState([]);
+  const [elecset, setElecset] = useState([]);
   const [notifications, setNotifications] = useState([
     {
       id: 1,
@@ -144,8 +180,35 @@ const Header = () => {
   // State for Login Dialog
 
   // Handle Login Dialog
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      fetch('/api/verify-token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      .then(response => {
+        
+        if (response.ok) {
+          setIsLoggedIn(true);
+        } else {
+          localStorage.removeItem('token');
+          setIsLoggedIn(false);
+        }
+      })
+      .catch(error => {
+        console.error('Error verifying token:', error);
+        localStorage.removeItem('token');
+        setIsLoggedIn(false);
+      });
+    }
+  }, []);
   
   const handleLogout = () => {
+    localStorage.removeItem('token');
     setIsLoggedIn(false);
     setIsProfileMenuOpen(false);
     setAnchorEl(null);
@@ -197,11 +260,8 @@ const Header = () => {
 
   const categories = [
     { name: "Electronics" },
-    { name: "Fashion" },
-    { name: "Home & Garden" },
     { name: "Toys" },
-    { name: "Sporting Goods" },
-    { name: "Automotive" },
+   
   ];
 
   const navigationLinks = [
@@ -253,6 +313,31 @@ const Header = () => {
     }
   };
 
+  useEffect(() => {
+    if (searchQuery.length > 0) {
+      // Make a request to the backend when query changes
+      console.log("searchQuery", searchQuery);
+      fetch(`/api/search?q=${searchQuery}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log("data", data);
+          setSearchResults(data);
+        })
+        .catch(error => {
+          console.error('Error fetching the search results:', error);
+        });
+    } else {
+      setSearchResults([]); // Clear results if query is empty
+    }
+  }, [searchQuery]);
+
+  console.log("serchresult",searchResults);
+
   return (
     <AppBar
       position="static" // Changed from "fixed" to "static" to make it unfixed
@@ -286,6 +371,11 @@ const Header = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 inputProps={{ "aria-label": "search" }}
               />
+              <ul className="suggestionBox">
+                {searchResults.map((item) => (
+                  <li key={item.product_id}>{item.product_name}</li>
+                ))}
+              </ul>
             </Search>
           )}
 
@@ -506,7 +596,7 @@ const Header = () => {
                 <IconButton
                   color="inherit"
                   component={Link}
-                  to="/cart"
+                  to="/api/cart"
                   sx={{ ml: 1 }}
                 >
                   <ShoppingCartIcon sx={{ color: "#333333" }} />

@@ -111,7 +111,7 @@ export default function SignIn(props) {
 
       // Redirect to the homepage or a protected route
       navigate('/'); // Change '/home' to your desired route
-
+      
       console.log('Login successful:', responseData);
     } catch (error) {
       console.error('Error logging in customer:', error);

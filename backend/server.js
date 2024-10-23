@@ -9,6 +9,8 @@ const customerRoutes = require('./routes/customerRoutes');
 const cartRoutes = require('./routes/cartRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 const deliveryRoutes = require('./routes/deliveryRoutes');
+const searchRoutes = require('./routes/searchRoutes');
+const authRoutes = require('./routes/authRoutes');
 
 const app = express();
 app.use(cors());
@@ -23,6 +25,8 @@ app.use('/api/customers', customerRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/delivery', deliveryRoutes);
+app.use('/api/search', searchRoutes);
+app.use('/api', authRoutes);
 
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
