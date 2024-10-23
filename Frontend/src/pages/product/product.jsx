@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -32,6 +33,10 @@ import {
 } from "@mui/icons-material";
 import Header from "../../components/header";
 import Footer from "../../components/footer";
+import axios from "axios"; // Make sure to import axios at the top of your file
+import addToCart from "../../services/addToCart";
+
+import changeQuantity from "../../services/changeQuantity";
 
 // Create a custom theme with standard measurements and professional style
 const theme = createTheme({
@@ -153,13 +158,89 @@ const StyledChip = styled(Chip)(({ theme }) => ({
 }));
 
 const ProductPage = () => {
+  const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
+  const [product, setProduct] = useState(null);
+  const [variants, setVariants] = useState([]);
+  const [selectedVariant, setSelectedVariant] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Sample images with standardized dimensions
-  const images = Array(5)
-    .fill()
-    .map(() => `https://picsum.photos/800/600?random=${Math.random()}`);
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const id = localStorage.getItem("product_id");
+        const response = await fetch(`/api/products/${id}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch product");
+        }
+        const data = await response.json();
+        setProduct(data);
+        setVariants(data.variants || []);
+        if (data.variants && data.variants.length > 0) {
+          setSelectedVariant(data.variants[0]);
+        }
+        setLoading(false);
+      } catch (err) {
+        setError(err.message);
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, []);
+
+  if (loading) return <Typography>Loading...</Typography>;
+  if (error) return <Typography color="error">{error}</Typography>;
+  if (!product) return <Typography>Product not found</Typography>;
+
+  const images = [
+    ...variants.map((variant, index) => ({
+      src: variant.variant_image,
+      variantIndex: index,
+    })),
+  ].filter((img) => img.src);
+
+  const handleImageSelect = (index) => {
+    setActiveImage(index);
+    const selectedImage = images[index];
+    if (
+      selectedImage.variantIndex >= 0 &&
+      variants[selectedImage.variantIndex]
+    ) {
+      setSelectedVariant(variants[selectedImage.variantIndex]);
+    } else {
+      setSelectedVariant(variants[0] || null);
+    }
+  };
+
+  const formatPrice = (price) => {
+    const numPrice = Number(price);
+    return !isNaN(numPrice)
+      ? `US $${numPrice.toFixed(2)}`
+      : "Price not available";
+  };
+
+  const price = selectedVariant ? selectedVariant.total_price : null;
+
+  const handleAddToCart = () => {
+    if (selectedVariant) {
+      const cartItem = {
+        product_id: product.product_id,
+        variant_id: selectedVariant.variant_id,
+        quantity: quantity, // Use the quantity state here
+      };
+      console.log("Adding to cart:", cartItem);
+      addToCart(cartItem);
+    } else {
+      console.error("No variant selected");
+    }
+  };
+
+  const handleQuantityChange = (newQuantity) => {
+    setQuantity(Math.max(1, Math.min(100, newQuantity)));
+  };
 
   return (
     <>
@@ -185,7 +266,7 @@ const ProductPage = () => {
                     />
                     <CardMedia
                       component="img"
-                      image={images[activeImage]}
+                      image={images[activeImage].src}
                       alt="Product Image"
                       sx={{
                         height: { xs: 350, sm: 450, md: 550 },
@@ -242,7 +323,7 @@ const ProductPage = () => {
                       <CardMedia
                         key={index}
                         component="img"
-                        image={img}
+                        image={img.src}
                         alt={`Thumbnail ${index + 1}`}
                         sx={{
                           width: 100,
@@ -258,7 +339,7 @@ const ProductPage = () => {
                           transition: "border-color 0.3s ease",
                           "&:hover": { borderColor: "primary.light" },
                         }}
-                        onClick={() => setActiveImage(index)}
+                        onClick={() => handleImageSelect(index)}
                       />
                     ))}
                   </Box>
@@ -267,8 +348,7 @@ const ProductPage = () => {
                 {/* Right column - Product details */}
                 <Grid item xs={12} md={5} lg={4}>
                   <Typography variant="h4" gutterBottom color="primary.dark">
-                    Apple MacBook Pro 13" Late 2020 M1 1TB SSD 16GB RAM Space
-                    Gray - Good
+                    {product.product_name}
                   </Typography>
                   <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
                     <Avatar
@@ -314,53 +394,51 @@ const ProductPage = () => {
                     color="primary.dark"
                     gutterBottom
                   >
-                    US $811.99
+                    {formatPrice(price)}
                   </Typography>
                   <Box sx={{ mb: 4 }}>
-                    <Typography
-                      variant="body1"
-                      fontWeight="medium"
-                      sx={{ display: "flex", alignItems: "center" }}
-                    >
-                      Condition:{" "}
-                      <Typography component="span" fontWeight="normal" ml={1}>
-                        Good - Refurbished
-                      </Typography>{" "}
-                      <InfoIcon
-                        fontSize="small"
-                        color="action"
-                        sx={{ ml: 1, cursor: "pointer" }}
-                      />
-                    </Typography>
                     <Typography variant="body2" color="text.secondary" mt={1}>
-                      "This Product has been determined to be fully working by
-                      our industry leading functionality"...{" "}
-                      <Link href="#" color="primary" fontWeight="medium">
-                        Read more
-                      </Link>
+                      {product.description}
                     </Typography>
                   </Box>
                   <Box sx={{ display: "flex", alignItems: "center", mb: 4 }}>
                     <Typography variant="body1" mr={2}>
                       Quantity:
                     </Typography>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() => handleQuantityChange(quantity - 1)}
+                      disabled={quantity <= 1}
+                    >
+                      -
+                    </Button>
                     <TextField
                       type="number"
                       value={quantity}
                       onChange={(e) =>
-                        setQuantity(
-                          Math.max(
-                            1,
-                            Math.min(100, parseInt(e.target.value) || 1)
-                          )
-                        )
+                        handleQuantityChange(parseInt(e.target.value, 10))
                       }
                       inputProps={{ min: 1, max: 100 }}
                       size="small"
-                      sx={{ width: 80 }}
+                      sx={{
+                        width: 60,
+                        mx: 1,
+                        "& input": { textAlign: "center" },
+                      }}
                     />
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() => handleQuantityChange(quantity + 1)}
+                      disabled={quantity >= 100}
+                    >
+                      +
+                    </Button>
                     <Typography variant="body2" color="text.secondary" ml={2}>
-                      More than 10 available • 10 sold
+                      {selectedVariant && selectedVariant.stock > 0
+                        ? `${selectedVariant.stock} available`
+                        : "Out of stock"}
                     </Typography>
                   </Box>
                   <Box
@@ -385,6 +463,10 @@ const ProductPage = () => {
                       color="primary"
                       size="large"
                       sx={{ height: 48 }}
+                      onClick={() => {
+                        handleAddToCart();
+                        navigate("/cart");
+                      }}
                     >
                       Add to Cart
                     </Button>

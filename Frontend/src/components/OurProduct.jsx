@@ -555,6 +555,7 @@ const OurProduct = () => {
                 <StyledButton
                   color="success"
                   onClick={() => {
+                    localStorage.setItem("product_id", product.product_id);
                     navigate(`/product/${product.product_id}`);
                   }}
                   fullWidth

@@ -31,6 +31,7 @@ import {
 import Header from "../../components/header";
 import Footer from "../../components/footer";
 import { motion } from "framer-motion";
+import changeQuantity from "../../services/changeQuantity"; // Fixed import path
 
 const Cart = () => {
   const [cartData, setCartData] = useState(null);
@@ -46,6 +47,7 @@ const Cart = () => {
   const [error, setError] = useState("");
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const [changeQuantityLoading, setChangeQuantityLoading] = useState(0);
 
   // Retrieve customerId from localStorage when component mounts
   useEffect(() => {
@@ -90,59 +92,48 @@ const Cart = () => {
     };
 
     fetchCartData();
-  }, []);
+  }, [changeQuantityLoading]);
 
-  // Handle quantity changes
-  const handleQuantityChange = async (itemId, change) => {
-    if (!cartData) return;
+  const handleQuantityChange = async (item, operation, index) => {
+    // Initialize with a default value
 
-    const updatedItems = cartData.items.map((item) => {
-      if (item.shopping_cart_item_id === itemId) {
-        const newQuantity = Math.max(1, item.quantity + change);
-        return {
-          ...item,
-          quantity: newQuantity,
-          total_price: (
-            newQuantity *
-            (parseFloat(item.total_price) / item.quantity)
-          ).toFixed(2),
-        };
-      }
-      return item;
-    });
-
-    setCartData({ ...cartData, items: updatedItems });
+    if (operation === "increment") {
+      setChangeQuantityLoading(1);
+    } else if (operation === "decrement") {
+      setChangeQuantityLoading(-1);
+    } else {
+      console.warn(`Unknown operation: ${operation}`);
+      // Optionally, handle unexpected operations here
+    }
 
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(`/api/cart/${cartData.customer_id}/remove`, {
-        method: "PATCH", // Assuming PATCH is used for updating quantity
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          shopping_cart_item_id: itemId,
-          quantity: updatedItems.find(
-            (item) => item.shopping_cart_item_id === itemId
-          ).quantity,
-        }),
-      });
+      const cartItem = {
+        variant_id: item.variant_id,
+        change: changeQuantityLoading, // Now 'change' is defined in this scope
+      };
 
-      if (!response.ok) {
-        throw new Error("Failed to update item quantity.");
+      console.log(
+        `Updating quantity for item at index: ${index} with change: ${changeQuantityLoading}`
+      );
+
+      const updatedCart = await changeQuantity(cartItem, operation);
+
+      if (updatedCart) {
+        console.log("Updated cart data:", updatedCart);
+        setCartData(updatedCart); // Update cartData directly
+        setSnackbar({
+          open: true,
+          message: `Quantity ${operation}ed successfully.`,
+          severity: "success",
+        });
+      } else {
+        throw new Error("No data returned from changeQuantity.");
       }
-
+    } catch (error) {
+      console.error(`Error ${operation}ing quantity:`, error);
       setSnackbar({
         open: true,
-        message: "Quantity updated.",
-        severity: "success",
-      });
-    } catch (err) {
-      console.error("Error updating quantity:", err);
-      setSnackbar({
-        open: true,
-        message: err.message,
+        message: `Failed to ${operation} quantity. Please try again.`,
         severity: "error",
       });
     }
@@ -293,6 +284,16 @@ const Cart = () => {
     setSnackbar({ ...snackbar, open: false });
   };
 
+  // Helper function to generate a random color
+  const getRandomColor = () => {
+    const letters = "0123456789ABCDEF";
+    let color = "";
+    for (let i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  };
+
   if (loading) {
     return (
       <Box
@@ -310,23 +311,27 @@ const Cart = () => {
 
   if (error) {
     return (
-      <Box sx={{ textAlign: "center", mt: 5 }}>
-        <Typography color="error" variant="h6">
-          {error}
-        </Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => window.location.reload()}
-          sx={{ mt: 2 }}
-        >
-          Retry
-        </Button>
-      </Box>
+      <>
+        <Header />
+        <Box sx={{ textAlign: "center", mt: 5 }}>
+          <Typography color="error" variant="h6">
+            {error}
+          </Typography>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => window.location.reload()}
+            sx={{ mt: 2 }}
+          >
+            Retry
+          </Button>
+        </Box>
+        <Footer />
+      </>
     );
   }
 
-  if (!cartData || cartData.items.length === 0) {
+  if (!cartData?.items?.length) {
     return (
       <>
         <Header />
@@ -392,105 +397,137 @@ const Cart = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {cartData.items.map((item) => (
-                    <Fade in key={item.shopping_cart_item_id}>
-                      <TableRow
-                        hover
-                        sx={{
-                          "&:last-child td, &:last-child th": { border: 0 },
-                          transition: "background-color 0.3s",
-                          "&:hover": {
-                            backgroundColor: theme.palette.action.hover,
-                          },
-                        }}
-                      >
-                        <TableCell
-                          component="th"
-                          scope="row"
-                          sx={{ display: "flex", alignItems: "center" }}
-                        >
-                          <img
-                            src={item.image_url}
-                            alt={item.product_name}
-                            style={{
-                              width: 80,
-                              height: 80,
-                              objectFit: "cover",
-                              marginRight: 16,
-                              borderRadius: 12,
-                              boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                  {cartData.items.map(
+                    (item, index) => (
+                      console.log(item),
+                      (
+                        <Fade in key={item.shopping_cart_item_id}>
+                          <TableRow
+                            hover
+                            sx={{
+                              "&:last-child td, &:last-child th": { border: 0 },
+                              transition: "background-color 0.3s",
+                              "&:hover": {
+                                backgroundColor: theme.palette.action.hover,
+                              },
                             }}
-                          />
-                          <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                            {item.product_name}
-                          </Typography>
-                        </TableCell>
-                        <TableCell align="right">
-                          <Typography variant="body1" color="text.primary">
-                            ${parseFloat(item.total_price) / item.quantity}
-                          </Typography>
-                        </TableCell>
-                        <TableCell align="center">
-                          <IconButton
-                            onClick={() =>
-                              handleQuantityChange(
-                                item.shopping_cart_item_id,
-                                -1
-                              )
-                            }
-                            color="primary"
-                            size="small"
-                            aria-label="decrease quantity"
                           >
-                            <RemoveIcon />
-                          </IconButton>
-                          <Typography variant="body1" sx={{ mx: 1 }}>
-                            {item.quantity}
-                          </Typography>
-                          <IconButton
-                            onClick={() =>
-                              handleQuantityChange(
-                                item.shopping_cart_item_id,
-                                1
-                              )
-                            }
-                            color="primary"
-                            size="small"
-                            aria-label="increase quantity"
-                          >
-                            <AddIcon />
-                          </IconButton>
-                        </TableCell>
-                        <TableCell align="right">
-                          <Typography variant="body1" color="text.primary">
-                            ${parseFloat(item.total_price).toFixed(2)}
-                          </Typography>
-                        </TableCell>
-                        <TableCell align="center">
-                          <IconButton
-                            onClick={() =>
-                              handleSaveForLater(item.shopping_cart_item_id)
-                            }
-                            color="secondary"
-                            size="small"
-                            aria-label="save for later"
-                          >
-                            <SaveIcon />
-                          </IconButton>
-                          <IconButton
-                            onClick={() =>
-                              handleRemoveItem(item.shopping_cart_item_id)
-                            }
-                            color="error"
-                            size="small"
-                            aria-label="remove item"
-                          >
-                            <DeleteOutlineIcon />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    </Fade>
-                  ))}
+                            <TableCell
+                              component="th"
+                              scope="row"
+                              sx={{ display: "flex", alignItems: "center" }}
+                            >
+                              <img
+                                src={`https://via.placeholder.com/80x80/${getRandomColor()}/${getRandomColor()}?text=${encodeURIComponent(
+                                  item.product_name.charAt(0)
+                                )}`}
+                                alt={item.product_name}
+                                style={{
+                                  width: 80,
+                                  height: 80,
+                                  objectFit: "cover",
+                                  marginRight: 16,
+                                  borderRadius: 12,
+                                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                                }}
+                              />
+                              <Typography
+                                variant="body1"
+                                sx={{ fontWeight: 500 }}
+                              >
+                                {item.product_name}
+                              </Typography>
+                            </TableCell>
+                            <TableCell align="right">
+                              <Typography variant="body1" color="text.primary">
+                                $
+                                {(
+                                  parseFloat(item.total_price) / item.quantity
+                                ).toFixed(2)}
+                              </Typography>
+                            </TableCell>
+                            <TableCell align="center">
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                }}
+                              >
+                                <IconButton
+                                  onClick={() =>
+                                    handleQuantityChange(
+                                      item,
+                                      "decrement",
+                                      index
+                                    )
+                                  }
+                                  color="primary"
+                                  size="small"
+                                  aria-label="decrease quantity"
+                                  id={`decrement-button-${index}`} // Optional: Assign a unique ID
+                                >
+                                  <RemoveIcon fontSize="small" />
+                                </IconButton>
+                                <Typography
+                                  variant="body2"
+                                  sx={{
+                                    mx: 1,
+                                    minWidth: "20px",
+                                    textAlign: "center",
+                                  }}
+                                >
+                                  {item.quantity}
+                                </Typography>
+                                <IconButton
+                                  onClick={() =>
+                                    handleQuantityChange(
+                                      item,
+                                      "increment",
+                                      index
+                                    )
+                                  }
+                                  color="primary"
+                                  size="small"
+                                  aria-label="increase quantity"
+                                  id={`increment-button-${index}`} // Optional: Assign a unique ID
+                                >
+                                  <AddIcon fontSize="small" />
+                                </IconButton>
+                              </Box>
+                            </TableCell>
+                            <TableCell align="right">
+                              <Typography variant="body1" color="text.primary">
+                                ${parseFloat(item.total_price).toFixed(2)}
+                              </Typography>
+                            </TableCell>
+                            <TableCell align="center">
+                              <IconButton
+                                onClick={() =>
+                                  handleSaveForLater(item.shopping_cart_item_id)
+                                }
+                                color="secondary"
+                                size="small"
+                                aria-label="save for later"
+                              >
+                                <SaveIcon />
+                              </IconButton>
+                              <IconButton
+                                onClick={() =>
+                                  handleRemoveItem(item.shopping_cart_item_id)
+                                }
+                                color="error"
+                                size="small"
+                                aria-label="remove item"
+                              >
+                                <DeleteOutlineIcon />
+                              </IconButton>
+                            </TableCell>
+                          </TableRow>
+                        </Fade>
+                      )
+                    )
+                  )}
                 </TableBody>
               </Table>
             </TableContainer>
