@@ -18,21 +18,53 @@ exports.getCart = async (req, res) => {
   }
 };
 
-exports.addItemToCart = async (req, res) => {
+exports.changeQuantity = async (req, res) => {
+  console.log("come");
   const { customerId } = req.params;
-  const { variant_id, quantity } = req.body;
+  const { variant_id, change } = req.body;
   try {
     const cart = await ShoppingCart.getCartByCustomerId(customerId);
     if (cart) {
-      await ShoppingCartItem.addItem(cart.shopping_cart_id, variant_id, quantity);
+      await ShoppingCartItem.changeQuantity(
+        cart.shopping_cart_id,
+        variant_id,
+        change
+      );
       await ShoppingCart.updateCart(cart.shopping_cart_id);
-      res.status(200).json({ message: 'Item added to cart' });
+      res.status(200).json({ message: "Quantity changed" });
     } else {
-      res.status(404).json({ message: 'Cart not found' });
+      res.status(404).json({ message: "Cart not found" });
     }
   } catch (error) {
-    console.error('Error in addItemToCart:', error);
-    res.status(500).json({ message: 'Error adding item to cart', error: error.toString() });
+    console.error("Error in changeQuantity:", error);
+    res
+      .status(500)
+      .json({ message: "Error changing quantity", error: error.toString() });
+  }
+};
+
+exports.addItemToCart = async (req, res) => {
+  const { customerId } = req.params;
+  const { variant_id, quantity } = req.body;
+
+  try {
+    const cart = await ShoppingCart.getCartByCustomerId(customerId);
+    if (cart) {
+      await ShoppingCartItem.addItem(
+        cart.shopping_cart_id,
+        variant_id,
+        quantity
+      );
+      await ShoppingCart.updateCart(cart.shopping_cart_id);
+      res.status(200).json({ message: "Item added to cart" });
+    } else {
+      res.status(404).json({ message: "Cart not found" });
+    }
+  } catch (error) {
+    console.error("Error in addItemToCart:", error);
+    res
+      .status(500)
+      .json({ message: "Error adding item to cart", error: error.toString() });
   }
 };
 
