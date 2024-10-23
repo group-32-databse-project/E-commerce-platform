@@ -32,6 +32,7 @@ import Header from "../../components/header";
 import Footer from "../../components/footer";
 import { motion } from "framer-motion";
 import changeQuantity from "../../services/changeQuantity"; // Fixed import path
+import { useNavigate } from "react-router-dom"; // Added for navigation
 
 const Cart = () => {
   const [cartData, setCartData] = useState(null);
@@ -48,7 +49,21 @@ const Cart = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [loadingStates, setLoadingStates] = useState({}); // Per-item loading states
-  const [changeQuantityLoading, setChangeQuantityLoading] = useState(0);
+  const navigate = useNavigate(); // For navigation
+
+  // Helper function to generate color based on ID
+  const getColorFromId = (id) => {
+    const letters = "0123456789ABCDEF";
+    let hash = 0;
+    for (let i = 0; i < id.length; i++) {
+      hash = id.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    let color = "";
+    for (let i = 0; i < 6; i++) {
+      color += letters[Math.abs((hash >> (i * 4)) & 0xf)];
+    }
+    return color || "000000"; // Fallback to black
+  };
 
   // Fetch cart data function
   const fetchCartData = async () => {
@@ -58,7 +73,16 @@ const Cart = () => {
       const token = localStorage.getItem("token");
 
       if (!customerId || !token) {
-        throw new Error("Customer ID or token not found. Please log in.");
+        setError("Authentication required. Redirecting to login.");
+        setSnackbar({
+          open: true,
+          message: "Please log in to view your cart.",
+          severity: "warning",
+        });
+        setTimeout(() => {
+          navigate("/login");
+        }, 3000);
+        return;
       }
 
       const response = await fetch(`/api/cart/${customerId}`, {
@@ -94,11 +118,11 @@ const Cart = () => {
   // Retrieve customerId from localStorage when component mounts
   useEffect(() => {
     fetchCartData();
-  }, [changeQuantityLoading]); // Empty dependency array ensures it runs once
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Runs only once on mount
 
   const handleQuantityChange = async (item, operation, index) => {
     const changeValue = operation === "increment" ? 1 : -1;
-    setChangeQuantityLoading(changeQuantityLoading + 1);
 
     // Prevent quantity from dropping below 1
     if (changeValue === -1 && item.quantity === 1) {
@@ -268,6 +292,15 @@ const Cart = () => {
       });
     } catch (err) {
       console.error("Error saving item for later:", err);
+      // Rollback UI changes
+      setSavedItems((prev) =>
+        prev.filter((i) => i.shopping_cart_item_id !== itemId)
+      );
+      setCartData((prevData) => ({
+        ...prevData,
+        items: [...prevData.items, itemToSave],
+      }));
+
       setSnackbar({
         open: true,
         message: err.message,
@@ -277,18 +310,48 @@ const Cart = () => {
   };
 
   // Handle applying coupon
-  const handleApplyCoupon = () => {
-    if (coupon.trim().toUpperCase() === "SAVE10") {
-      setDiscount(calculateSubtotal() * 0.1);
+  const handleApplyCoupon = async () => {
+    const enteredCoupon = coupon.trim().toUpperCase();
+    if (!enteredCoupon) {
       setSnackbar({
         open: true,
-        message: "Coupon applied! 10% discount.",
+        message: "Please enter a coupon code.",
+        severity: "warning",
+      });
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+      const customerId = cartData.customer_id;
+
+      const response = await fetch(`/api/coupons/validate`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ code: enteredCoupon }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to validate coupon.");
+      }
+
+      const couponData = await response.json();
+
+      // Assuming the coupon data includes a discount percentage
+      setDiscount(calculateSubtotal() * (couponData.discountPercentage / 100));
+      setSnackbar({
+        open: true,
+        message: `Coupon applied! ${couponData.discountPercentage}% discount.`,
         severity: "success",
       });
-    } else {
+    } catch (err) {
       setSnackbar({
         open: true,
-        message: "Invalid coupon code.",
+        message: err.message,
         severity: "error",
       });
     }
@@ -327,28 +390,22 @@ const Cart = () => {
     setSnackbar({ ...snackbar, open: false });
   };
 
-  // Helper function to generate a random color
-  const getRandomColor = () => {
-    const letters = "0123456789ABCDEF";
-    let color = "";
-    for (let i = 0; i < 6; i++) {
-      color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-  };
-
   if (loading) {
     return (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "80vh",
-        }}
-      >
-        <CircularProgress />
-      </Box>
+      <>
+        <Header />
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: "80vh",
+          }}
+        >
+          <CircularProgress />
+        </Box>
+        <Footer />
+      </>
     );
   }
 
@@ -363,7 +420,7 @@ const Cart = () => {
           <Button
             variant="contained"
             color="primary"
-            onClick={() => window.location.reload()}
+            onClick={fetchCartData} // Retry fetching
             sx={{ mt: 2 }}
           >
             Retry
@@ -441,7 +498,6 @@ const Cart = () => {
                 </TableHead>
                 <TableBody>
                   {cartData.items.map((item, index) => {
-                    console.log(item);
                     return (
                       <Fade in key={item.shopping_cart_item_id}>
                         <TableRow
@@ -459,17 +515,22 @@ const Cart = () => {
                             scope="row"
                             sx={{ display: "flex", alignItems: "center" }}
                           >
-                            <img
-                              src={`https://via.placeholder.com/80x80/${getRandomColor()}/${getRandomColor()}?text=${encodeURIComponent(
+                            <Box
+                              component="img"
+                              src={`https://via.placeholder.com/80x80/${getColorFromId(
+                                item.shopping_cart_item_id
+                              )}/${getColorFromId(
+                                item.shopping_cart_item_id
+                              )}?text=${encodeURIComponent(
                                 item.product_name.charAt(0)
                               )}`}
                               alt={item.product_name}
-                              style={{
+                              sx={{
                                 width: 80,
                                 height: 80,
                                 objectFit: "cover",
-                                marginRight: 16,
-                                borderRadius: 12,
+                                mr: 2,
+                                borderRadius: 2,
                                 boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
                               }}
                             />
@@ -502,11 +563,11 @@ const Cart = () => {
                                 }
                                 color="primary"
                                 size="small"
-                                aria-label="decrease quantity"
-                                id={`decrement-button-${index}`} // Optional: Assign a unique ID
+                                aria-label={`decrease quantity of ${item.product_name}`}
+                                id={`decrement-button-${index}`}
                                 disabled={
                                   loadingStates[item.shopping_cart_item_id]
-                                } // Disable if loading
+                                }
                               >
                                 {loadingStates[item.shopping_cart_item_id] ? (
                                   <CircularProgress size={24} />
@@ -530,11 +591,11 @@ const Cart = () => {
                                 }
                                 color="primary"
                                 size="small"
-                                aria-label="increase quantity"
-                                id={`increment-button-${index}`} // Optional: Assign a unique ID
+                                aria-label={`increase quantity of ${item.product_name}`}
+                                id={`increment-button-${index}`}
                                 disabled={
                                   loadingStates[item.shopping_cart_item_id]
-                                } // Disable if loading
+                                }
                               >
                                 {loadingStates[item.shopping_cart_item_id] ? (
                                   <CircularProgress size={24} />
@@ -556,7 +617,7 @@ const Cart = () => {
                               }
                               color="secondary"
                               size="small"
-                              aria-label="save for later"
+                              aria-label={`save ${item.product_name} for later`}
                             >
                               <SaveIcon />
                             </IconButton>
@@ -566,7 +627,7 @@ const Cart = () => {
                               }
                               color="error"
                               size="small"
-                              aria-label="remove item"
+                              aria-label={`remove ${item.product_name} from cart`}
                             >
                               <DeleteOutlineIcon />
                             </IconButton>
@@ -602,17 +663,18 @@ const Cart = () => {
                             scope="row"
                             sx={{ display: "flex", alignItems: "center" }}
                           >
-                            <img
+                            <Box
+                              component="img"
                               src={`https://source.unsplash.com/60x60/?${encodeURIComponent(
                                 item.product_name
                               )}`}
                               alt={item.product_name}
-                              style={{
+                              sx={{
                                 width: 60,
                                 height: 60,
                                 objectFit: "cover",
-                                marginRight: 16,
-                                borderRadius: 12,
+                                mr: 2,
+                                borderRadius: 2,
                                 boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
                               }}
                             />
@@ -636,8 +698,8 @@ const Cart = () => {
                               variant="text"
                               color="primary"
                               size="small"
-                              onClick={() => {
-                                // Move item back to cart
+                              onClick={async () => {
+                                // Optimistically move item back to cart
                                 setCartData((prev) => ({
                                   ...prev,
                                   items: [...prev.items, item],
@@ -651,9 +713,58 @@ const Cart = () => {
                                 );
                                 setSnackbar({
                                   open: true,
-                                  message: "Item moved to cart.",
-                                  severity: "success",
+                                  message: "Moving item to cart...",
+                                  severity: "info",
                                 });
+
+                                try {
+                                  const token = localStorage.getItem("token");
+                                  const customerId = cartData.customer_id;
+
+                                  const response = await fetch(
+                                    `/api/cart/${customerId}/move-to-cart`,
+                                    {
+                                      method: "PATCH",
+                                      headers: {
+                                        Authorization: `Bearer ${token}`,
+                                        "Content-Type": "application/json",
+                                      },
+                                      body: JSON.stringify({
+                                        shoppingCartItemId:
+                                          item.shopping_cart_item_id,
+                                      }),
+                                    }
+                                  );
+
+                                  if (!response.ok) {
+                                    throw new Error(
+                                      "Failed to move item back to cart."
+                                    );
+                                  }
+
+                                  setSnackbar({
+                                    open: true,
+                                    message: "Item moved to cart successfully.",
+                                    severity: "success",
+                                  });
+                                } catch (err) {
+                                  // Rollback UI changes
+                                  setSavedItems((prev) => [...prev, item]);
+                                  setCartData((prev) => ({
+                                    ...prev,
+                                    items: prev.items.filter(
+                                      (i) =>
+                                        i.shopping_cart_item_id !==
+                                        item.shopping_cart_item_id
+                                    ),
+                                  }));
+
+                                  setSnackbar({
+                                    open: true,
+                                    message: err.message,
+                                    severity: "error",
+                                  });
+                                }
                               }}
                               sx={{
                                 textTransform: "none",
