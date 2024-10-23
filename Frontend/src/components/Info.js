@@ -1,53 +1,35 @@
-import * as React from 'react';
-import PropTypes from 'prop-types';
+import * as React from "react";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemText from "@mui/material/ListItemText";
+import Typography from "@mui/material/Typography";
 
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemText from '@mui/material/ListItemText';
-import Typography from '@mui/material/Typography';
+function Info() {
+  // Static sample data
+  const totalPrice = "$125.98";
+  const products = [
+    { id: 1, name: "Product 1", quantity: 2, price: 29.99 },
+    { id: 2, name: "Product 2", quantity: 1, price: 66.0 },
+  ];
 
-const products = [
-  {
-    name: 'Professional plan',
-    desc: 'Monthly subscription',
-    price: '$15.00',
-  },
-  {
-    name: 'Dedicated support',
-    desc: 'Included in the Professional plan',
-    price: 'Free',
-  },
-  {
-    name: 'Hardware',
-    desc: 'Devices needed for development',
-    price: '$69.99',
-  },
-  {
-    name: 'Landing page template',
-    desc: 'License',
-    price: '$49.99',
-  },
-];
-
-function Info({ totalPrice }) {
   return (
     <React.Fragment>
-      <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>
+      <Typography variant="subtitle2" sx={{ color: "text.secondary" }}>
         Total
       </Typography>
       <Typography variant="h4" gutterBottom>
         {totalPrice}
       </Typography>
       <List disablePadding>
-        {products.map((product) => (
-          <ListItem key={product.name} sx={{ py: 1, px: 0 }}>
+        {products.map((item) => (
+          <ListItem key={item.id} sx={{ py: 1, px: 0 }}>
             <ListItemText
               sx={{ mr: 2 }}
-              primary={product.name}
-              secondary={product.desc}
+              primary={item.name}
+              secondary={`Quantity: ${item.quantity}`}
             />
-            <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
-              {product.price}
+            <Typography variant="body1" sx={{ fontWeight: "medium" }}>
+              ${(item.price * item.quantity).toFixed(2)}
             </Typography>
           </ListItem>
         ))}
@@ -55,9 +37,5 @@ function Info({ totalPrice }) {
     </React.Fragment>
   );
 }
-
-Info.propTypes = {
-  totalPrice: PropTypes.string.isRequired,
-};
 
 export default Info;

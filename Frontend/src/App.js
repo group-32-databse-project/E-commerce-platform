@@ -12,18 +12,19 @@ import Contact from "./pages/contact/contact.jsx";
 import Notification from "./pages/notifications/notification.js";
 import Help from "./pages/help/help.js";
 import NotFound from "./pages/notFound/NotFound.jsx";
-
+import ProductPage from "./pages/product/product.jsx";
 
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/api/cart" element={<Cart />} />
+        <Route path="/product/:productId" element={<ProductPage />} />
+        <Route path="/api/cart" element={<Card />} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
-       
+        <Route path="/cart" element={<Cart />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/notifications" element={<Notification />} />

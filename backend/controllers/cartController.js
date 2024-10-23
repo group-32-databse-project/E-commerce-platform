@@ -37,7 +37,9 @@ exports.addItemToCart = async (req, res) => {
 };
 
 exports.removeItemFromCart = async (req, res) => {
-  const { shoppingCartItemId } = req.params;
+  
+  const { shoppingCartItemId } = req.body;
+  console.log(shoppingCartItemId);
   try {
     await ShoppingCartItem.removeItem(shoppingCartItemId);
     res.status(200).json({ message: 'Item removed from cart' });

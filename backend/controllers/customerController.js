@@ -2,6 +2,7 @@ const Customer = require('../models/Customer');
 const Address = require('../models/Address');
 const ShoppingCart = require('../models/ShoppingCart');
 const bcrypt = require('bcrypt');
+
 const jwt = require('jsonwebtoken');
 
 exports.registerCustomer = async (req, res) => {
