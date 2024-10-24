@@ -11,6 +11,7 @@ const reportRoutes = require('./routes/reportRoutes');
 const deliveryRoutes = require('./routes/deliveryRoutes');
 const searchRoutes = require('./routes/searchRoutes');
 const authRoutes = require('./routes/authRoutes');
+const categoryRoutes = require('./routes/categoryRoutes');
 
 const app = express();
 app.use(cors());
@@ -19,6 +20,7 @@ dotenv.config();
 
 // Use routes
 app.use('/api/products', productRoutes);
+app.use('/api/categories', categoryRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/test', testRoutes);
 app.use('/api/customers', customerRoutes);
