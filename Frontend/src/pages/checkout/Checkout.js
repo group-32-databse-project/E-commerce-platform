@@ -80,7 +80,7 @@ const Checkout = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
-  const totalPrice = activeStep >= 2 ? "$144.97" : "$134.98";
+  const totalPrice = "$144.97";
 
   return (
     <TemplateFrame
@@ -117,7 +117,7 @@ const Checkout = () => {
                 maxWidth: 500,
               }}
             >
-              <Info totalPrice={totalPrice} />
+              <Info />
             </Box>
           </Grid>
 
