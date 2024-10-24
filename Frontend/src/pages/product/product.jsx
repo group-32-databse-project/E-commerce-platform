@@ -35,6 +35,7 @@ import Header from "../../components/header";
 import Footer from "../../components/footer";
 import axios from "axios"; // Make sure to import axios at the top of your file
 import addToCart from "../../services/addToCart";
+import { useParams } from "react-router-dom";
 
 import changeQuantity from "../../services/changeQuantity";
 
@@ -166,12 +167,12 @@ const ProductPage = () => {
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const productId = useParams();
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const id = localStorage.getItem("product_id");
-        const response = await fetch(`/api/products/${id}`);
+        console.log(productId);
+        const response = await fetch(`/api/products/${productId.productId}`);
         if (!response.ok) {
           throw new Error("Failed to fetch product");
         }

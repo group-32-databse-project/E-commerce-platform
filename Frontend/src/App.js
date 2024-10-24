@@ -13,7 +13,7 @@ import Notification from "./pages/notifications/notification.js";
 import Help from "./pages/help/help.js";
 import NotFound from "./pages/notFound/NotFound.jsx";
 import ProductPage from "./pages/product/product.jsx";
-
+import Category from "./pages/category/catagory.js";
 function App() {
   return (
     <Router>
@@ -29,6 +29,7 @@ function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/notifications" element={<Notification />} />
         <Route path="/help" element={<Help />} />
+        <Route path="/category/:categoryId" element={<Category />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
