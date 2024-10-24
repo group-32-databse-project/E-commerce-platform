@@ -29,15 +29,13 @@ import {
   LocalShipping,
   Security,
   Bolt,
-  ShoppingCart,
 } from "@mui/icons-material";
 import Header from "../../components/header";
 import Footer from "../../components/footer";
-import axios from "axios"; // Make sure to import axios at the top of your file
 import addToCart from "../../services/addToCart";
 import { useParams } from "react-router-dom";
-
-import changeQuantity from "../../services/changeQuantity";
+import Variation from "./variation";
+//import changeQuantity from "../../services/changeQuantity";
 
 // Create a custom theme with standard measurements and professional style
 const theme = createTheme({
@@ -167,11 +165,12 @@ const ProductPage = () => {
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [price, setPrice] = useState(null);
   const productId = useParams();
+
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        console.log(productId);
         const response = await fetch(`/api/products/${productId.productId}`);
         if (!response.ok) {
           throw new Error("Failed to fetch product");
@@ -191,6 +190,14 @@ const ProductPage = () => {
 
     fetchProduct();
   }, []);
+
+  useEffect(() => {
+    if (selectedVariant) {
+      setPrice(selectedVariant.total_price * quantity);
+    } else {
+      setPrice(null);
+    }
+  }, [selectedVariant, quantity]);
 
   if (loading) return <Typography>Loading...</Typography>;
   if (error) return <Typography color="error">{error}</Typography>;
@@ -217,13 +224,14 @@ const ProductPage = () => {
   };
 
   const formatPrice = (price) => {
+    if (price === null) {
+      return "Price not available";
+    }
     const numPrice = Number(price);
     return !isNaN(numPrice)
       ? `US $${numPrice.toFixed(2)}`
       : "Price not available";
   };
-
-  const price = selectedVariant ? selectedVariant.total_price : null;
 
   const handleAddToCart = () => {
     if (selectedVariant) {
@@ -352,13 +360,6 @@ const ProductPage = () => {
                     {product.product_name}
                   </Typography>
                   <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
-                    <Avatar
-                      src="https://picsum.photos/24/24"
-                      sx={{ width: 32, height: 32, mr: 1.5 }}
-                    />
-                    <Typography variant="body1" fontWeight="medium" mr={1.5}>
-                      The Cellular Professor eBay Store
-                    </Typography>
                     <StyledChip
                       label="Top Rated Seller"
                       size="small"
@@ -370,24 +371,8 @@ const ProductPage = () => {
                       (17,527)
                     </Typography>
                   </Box>
-                  <Box sx={{ display: "flex", gap: 3, mb: 4 }}>
-                    <Link
-                      href="#"
-                      variant="body1"
-                      color="primary"
-                      fontWeight="medium"
-                    >
-                      Seller's other items
-                    </Link>
-                    <Link
-                      href="#"
-                      variant="body1"
-                      color="primary"
-                      fontWeight="medium"
-                    >
-                      Contact seller
-                    </Link>
-                  </Box>
+                  <Variation productId={productId.productId} />
+
                   <Divider sx={{ my: 4 }} />
                   <Typography
                     variant="h4"
@@ -454,7 +439,6 @@ const ProductPage = () => {
                       variant="contained"
                       color="primary"
                       size="large"
-                      startIcon={<ShoppingCart />}
                       sx={{ height: 48 }}
                     >
                       Buy It Now
@@ -474,7 +458,6 @@ const ProductPage = () => {
                     <Button
                       variant="outlined"
                       color="primary"
-                      startIcon={<FavoriteBorder />}
                       sx={{ height: 48 }}
                     >
                       Add to Watchlist

@@ -5,20 +5,14 @@ import ListItemText from "@mui/material/ListItemText";
 import Typography from "@mui/material/Typography";
 
 import { useState, useEffect } from "react";
-import { useTheme } from "@mui/material/styles";
 import CircularProgress from "@mui/material/CircularProgress";
 import Alert from "@mui/material/Alert";
 
 function Info() {
   const [cartData, setCartData] = useState(null);
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success",
-  });
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const theme = useTheme();
 
   // Fetch cart data function
   const fetchCartData = async () => {
@@ -51,11 +45,6 @@ function Info() {
     } catch (err) {
       console.error("Error fetching cart data:", err);
       setError(err.message);
-      setSnackbar({
-        open: true,
-        message: err.message,
-        severity: "error",
-      });
     } finally {
       setLoading(false);
     }
@@ -77,7 +66,9 @@ function Info() {
     return <Typography>No items in cart</Typography>;
   }
 
-  const totalPrice = 100;
+  const totalPrice = cartData.items
+    .map((item) => item.total_price * item.quantity)
+    .reduce((acc, curr) => acc + curr, 0);
 
   return (
     <React.Fragment>

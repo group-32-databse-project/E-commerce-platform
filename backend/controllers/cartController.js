@@ -5,12 +5,15 @@ exports.getCart = async (req, res) => {
   const { customerId } = req.params;
   try {
     const cart = await ShoppingCart.getCartByCustomerId(customerId);
+    console.log(cart.shopping_cart_id);
     if (cart) {
-      const items = await ShoppingCartItem.getItemsByCartId(cart.shopping_cart_id);
+      const items = await ShoppingCartItem.getItemsByCartId(
+        cart.shopping_cart_id
+      );
       cart.items = items;
       res.json(cart);
     } else {
-      res.status(404).json({ message: 'Cart not found' });
+      res.status(404).json({ message: "Cart not found" });
     }
   } catch (error) {
     console.error('Error in getCart:', error);
