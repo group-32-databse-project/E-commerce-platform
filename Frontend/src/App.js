@@ -13,6 +13,7 @@ import Notification from "./pages/notifications/notification.js";
 import Help from "./pages/help/help.js";
 import NotFound from "./pages/notFound/NotFound.jsx";
 import ProductPage from "./pages/product/product.jsx";
+import Profile from "./pages/profile/profile.js";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/notifications" element={<Notification />} />
         <Route path="/help" element={<Help />} />
+        <Route path="/profile" element={<Profile />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
