@@ -310,23 +310,7 @@ const Header = () => {
     { name: "Deals", link: "/deals" },
     { name: "Contact", link: "/contact" },
     { name: "About", link: "/about" },]
-    // ...categories.map((cat) => ({
-    //   name: cat.name,
-
-    //   link: `/${cat.category_name}`,
-      //hasDropdown: true,
-      // dropdownItems: [{...elecset.map((elec) => ({
-      //   name: elec.category_name,
-      //   link: `/electronics/${elec.category_id}`,
-      // }))}
-      //   ,{ ...toyset.map((toy) => ({
-      //     name: toy.category_name,
-      //     link: `/toys/${toy.category_id}`,
-      //   }))}
-       
-      // ]
-      
-
+    
       const getNotificationIcon = (type) => {
         switch (type) {
           case "order":
@@ -368,7 +352,7 @@ const Header = () => {
           <ListItem 
             button 
             key={item.name} 
-            onClick={() => navigate(`/${item.name}`)}
+            onClick={() => navigate(`/product/${item.id}`)}
             sx={{ cursor: 'pointer' }} // Change cursor to pointer
           >
             <ListItemText primary={item.name} />
@@ -806,10 +790,12 @@ const Header = () => {
           <Box sx={{ display: { xs: "none", md: "flex" }, fontFamily: "fantasy", color:"black" }}>
             {renderDropdown('Toys', toyset.map((toy) => ({
               name: toy.category_name,
+              id:toy.category_id,
               link: `/toys/${toy.category_id}`,
             })), toysDropdownOpen, setToysDropdownOpen)}
             {renderDropdown('Electronics', elecset.map((elec) => ({
               name: elec.category_name,
+              id:elec.category_id,
               link: `/electronics/${elec.category_id}`,
             })), electronicsDropdownOpen, setElectronicsDropdownOpen)}
           </Box>        

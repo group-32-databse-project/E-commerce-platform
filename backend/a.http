@@ -14,3 +14,10 @@ Content-Type: application/json
 GET http://localhost:5001/api/categories/toys
 Content-Type: application/json
 
+###GET
+GET http://localhost:5001/api/customers/1
+Content-Type: application/json
+
+###GET
+GET http://localhost:5001/api/customers/1/addresses
+Content-Type: application/json

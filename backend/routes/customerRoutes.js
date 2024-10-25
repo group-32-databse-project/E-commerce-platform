@@ -12,6 +12,9 @@ router.get("/:id", customerController.getCustomerById);
 // POST /api/customers/login
 router.post("/login", customerController.loginCustomer);
 
+// GET /api/customers/:id/addresses
+router.get("/:id/addresses", customerController.getAddressesByCustomerId);
+
 // Add more routes as needed (update, delete, etc.)
 
 module.exports = router;

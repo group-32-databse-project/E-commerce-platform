@@ -10,7 +10,7 @@ class Customer {
   }
 
   static async getCustomerById(id) {
-    const [rows] = await db.query('SELECT * FROM customer WHERE customer_id = ?', [id]);
+    const [rows] = await db.query('SELECT * FROM customer left outer join customer_phone_number using (customer_id) WHERE customer_id = ?', [id]);
     return rows[0];
   }
 

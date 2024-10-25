@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { FaUserCircle } from 'react-icons/fa';
+import { jwtDecode } from 'jwt-decode'; // Use named import
 
 const CustomerDeatailForm = () => {
   const [customerData, setCustomerData] = useState({
@@ -11,18 +12,31 @@ const CustomerDeatailForm = () => {
     birthday: '',
     gender: 'Male',
   });
+  const token = localStorage.getItem('token');
+  let id = null;
+
+  if (token) {
+    try {
+      const decodedToken = jwtDecode(token); // Use named import
+      id = decodedToken.customerId; // Assuming the token contains an 'id' field
+     console.log('Decoded id:', id);
+    } catch (error) {
+      console.error('Error decoding token:', error);
+    }
+  }
 
   useEffect(() => {
     // Fetch data from backend
-    fetch('/api/customers/:id')
+    fetch(`/api/customers/${id}`)
       .then(response => response.json())
       .then(data => {
         setCustomerData(data);
+        console.log('Profile data:', customerData);
       })
       .catch(error => {
         console.error('Error fetching profile data:', error);
       });
-  }, []);
+  }, [id]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -59,14 +73,14 @@ const CustomerDeatailForm = () => {
           <Input
             type="text"
             name="firstName"
-            value={customerData.firstName}
+            value={customerData.first_name}
             onChange={handleInputChange}
           />
           <Label>Last Name</Label>
           <Input
             type="text"
             name="lastName"
-            value={customerData.lastName}
+            value={customerData.last_name}
             onChange={handleInputChange}
           />
         </FormRow>
@@ -75,7 +89,7 @@ const CustomerDeatailForm = () => {
           <Input
             type="email"
             name="email"
-            value={customerData.email}
+            value={customerData.email_address}
             onChange={handleInputChange}
           />
         </FormRow>
@@ -88,15 +102,7 @@ const CustomerDeatailForm = () => {
             onChange={handleInputChange}
           />
         </FormRow>
-        <FormRow>
-          <Label>Birthday</Label>
-          <Input
-            type="date"
-            name="birthday"
-            value={customerData.birthday}
-            onChange={handleInputChange}
-          />
-        </FormRow>
+       
         <FormRow>
           <Label>Gender</Label>
           <GenderOptions>
