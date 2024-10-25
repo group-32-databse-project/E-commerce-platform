@@ -32,6 +32,9 @@ import Header from "../../components/header";
 import Footer from "../../components/footer";
 import { motion } from "framer-motion";
 import changeQuantity from "../../services/changeQuantity"; // Fixed import path
+import calculateShipping from "../../services/shipping";
+import axios from "axios";
+import { calculateTotal, calculateTax } from "../../services/calculateTotal";
 
 const Cart = () => {
   const [cartData, setCartData] = useState(null);
@@ -48,7 +51,6 @@ const Cart = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [loadingStates, setLoadingStates] = useState({}); // Per-item loading states
-  const [changeQuantityLoading, setChangeQuantityLoading] = useState(0);
   const [isSavedItemsLoading, setIsSavedItemsLoading] = useState(0);
 
   useEffect(() => {
@@ -259,24 +261,6 @@ const Cart = () => {
         0
       ) || 0
     );
-  };
-
-  // Calculate shipping (example logic)
-  const calculateShipping = () => {
-    return calculateSubtotal() > 50 ? 0 : 15;
-  };
-
-  // Calculate tax (example logic)
-  const calculateTax = () => {
-    return (calculateSubtotal() * 0.08).toFixed(2); // 8% tax
-  };
-
-  // Calculate total
-  const calculateTotal = () => {
-    const subtotal = calculateSubtotal();
-    const shipping = calculateShipping();
-    const tax = parseFloat(calculateTax());
-    return (subtotal + shipping + tax - discount).toFixed(2);
   };
 
   // Handle snackbar close
@@ -743,7 +727,10 @@ const Cart = () => {
                       mb: 1.5,
                     }}
                   >
-                    changeQuantityLoading
+                    <Typography>Shipping</Typography>
+                    <Typography>
+                      ${calculateShipping(calculateSubtotal())}
+                    </Typography>
                   </Box>
                   <Box
                     sx={{
@@ -781,7 +768,7 @@ const Cart = () => {
                       Total
                     </Typography>
                     <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                      ${calculateTotal()}
+                      ${calculateTotal(cartData, discount)}
                     </Typography>
                   </Box>
                   <Button
@@ -804,6 +791,15 @@ const Cart = () => {
                   >
                     Proceed to Checkout
                   </Button>
+                  {calculateShipping(calculateSubtotal()) === 0 ? (
+                    <Typography variant="body2" color="text.secondary">
+                      Free shipping
+                    </Typography>
+                  ) : (
+                    <Typography variant="body2" color="text.secondary">
+                      Shipping is $15 (Free on orders over $50)
+                    </Typography>
+                  )}
                 </Box>
               </Box>
             </Box>
