@@ -306,3 +306,4 @@ JOIN
     shop_order so ON c.customer_id = so.user_id
 GROUP BY 
     c.customer_id, customer_name;
+
