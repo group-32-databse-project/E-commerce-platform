@@ -1,26 +1,34 @@
-import React from "react";
+import React, { useState, useCallback } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Header from "../../components/header";
 import OurProduct from "../../components/OurProduct";
-import ProductList from "./ProductList";
 import FilterSidebar from "./FilterSidebar";
 import Banner from "./Banner";
 import Newarrival from "./Newarrival";
-import Footer from "../../components/footer"; // Update if necessary
+import Footer from "../../components/footer";
 
 const HomePage = () => {
+  const [filters, setFilters] = useState({
+    categories: [],
+    subcategories: [],
+    priceRange: [0, 1500],
+  });
+
+  // Memoize handleFilterChange to maintain stable identity
+  const handleFilterChange = useCallback((newFilters) => {
+    console.log("Received New Filters:", newFilters);
+    setFilters(newFilters);
+  }, []);
+
   return (
     <>
       <Header />
 
-      <div
-        className="container-fluid"
-        style={{ maxWidth: "1550px", margin: "0 auto" }}
-      >
+      <div className="container-fluid" style={{ maxWidth: "1550px", margin: "0 auto" }}>
         <div className="row">
           {/* Sidebar */}
           <div className="col-md-3">
-            <FilterSidebar />
+            <FilterSidebar onFilterChange={handleFilterChange} />
           </div>
 
           {/* Main Content */}
@@ -29,10 +37,9 @@ const HomePage = () => {
             <Banner />
 
             {/* Our Products */}
-            <section className="products-section mb-4"></section>
-            <OurProduct />
-
-            <></>
+            <section className="products-section mb-4">
+              <OurProduct filters={filters} />
+            </section>
 
             {/* New Arrivals */}
             <Newarrival />
@@ -40,10 +47,6 @@ const HomePage = () => {
         </div>
       </div>
 
-      <div
-        className="container-fluid"
-        style={{ maxWidth: "1400px", margin: "0 auto" }}
-      ></div>
       <Footer />
     </>
   );

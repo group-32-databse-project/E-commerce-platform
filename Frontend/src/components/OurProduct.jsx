@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import axios from "axios";
 import {
   Grid,
   Card,
@@ -315,7 +316,7 @@ const IconWrapper = styled("span")(({ theme }) => ({
   },
 }));
 
-const OurProduct = () => {
+const OurProduct = ({ filters }) => {
   const [products, setProducts] = useState([]);
   const [error, setError] = useState("");
   const [openSnackbar, setOpenSnackbar] = useState(false);
@@ -327,24 +328,52 @@ const OurProduct = () => {
   const [carouselIndex, setCarouselIndex] = useState(0);
   const navigate = useNavigate();
 
-  // Fetch products from API
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await fetch("/api/products");
-        if (!response.ok) {
-          throw new Error("Failed to fetch products.");
-        }
-        const data = await response.json();
-        setProducts(data);
-        setLoading(false);
-      } catch (err) {
-        setError(err.message || "An error occurred.");
-        setLoading(false);
+ // Fetch products based on filters
+ useEffect(() => {
+  const fetchProducts = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const { categories, subcategories, priceRange } = filters;
+      const queryParams = new URLSearchParams();
+
+      if (categories.length > 0) {
+        queryParams.append("categories", categories.join(","));
       }
-    };
-    fetchProducts();
-  }, []);
+
+      if (subcategories.length > 0) {
+        queryParams.append("subcategories", subcategories.join(","));
+      }
+
+      if (priceRange[0] !== 0) {
+        queryParams.append("minPrice", priceRange[0]);
+      }
+
+      if (priceRange[1] !== 1500) {
+        queryParams.append("maxPrice", priceRange[1]);
+      }
+
+      const apiEndpoint =
+        queryParams.toString() === ""
+          ? "/api/products" // No filters applied, fetch all products
+          : `/api/filters/products?${queryParams.toString()}`;
+
+      console.log("Fetching Products from:", apiEndpoint);
+
+      const response = await axios.get(apiEndpoint);
+      console.log("Fetched Products:", response.data);
+      setProducts(response.data);
+    } catch (err) {
+      console.error("Error fetching products:", err);
+      setError("Failed to load products.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchProducts();
+}, [filters]);
+
 
   // Handle Add to Cart
   const onAddToCart = (variantId) => {
@@ -366,10 +395,7 @@ const OurProduct = () => {
   // Pagination Logic
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const currentProducts = products.slice(
-    indexOfFirstProduct,
-    indexOfLastProduct
-  );
+  const currentProducts = products.slice(indexOfFirstProduct, indexOfLastProduct);
   const totalPages = Math.ceil(products.length / productsPerPage);
 
   const handleNextPage = () => {
@@ -422,7 +448,13 @@ const OurProduct = () => {
   return (
     <ProductsSection>
       {/* Add a button to navigate home */}
-      <ProductHeading variant="h2">Our Featured Products</ProductHeading>
+      <ProductHeading variant="h2">Our Products</ProductHeading>
+      {products.length === 0 ? (
+        <Typography variant="h6" align="center">
+          No products found.
+        </Typography>
+      ) : (
+        <>
       <Grid container spacing={4} justifyContent="center">
         {currentProducts.map((product) => (
           <Grid
@@ -571,7 +603,8 @@ const OurProduct = () => {
           </Grid>
         ))}
       </Grid>
-      /////
+      </>
+      )}
       {/* Pagination Controls */}
       <Grid
         container
