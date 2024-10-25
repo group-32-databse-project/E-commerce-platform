@@ -41,6 +41,19 @@ exports.loginCustomer = async (req, res) => {
   }
 };
 
+exports.addAddress = async (req, res) => {
+  try {
+    const { customerId, formData } = req.body;
+    const addressId = await Address.getAddressIdbyCustomerId(customerId);
+    await Address.createAddress(customerId, formData);
+    res.status(200).json({ message: "Address added" });
+  } catch (error) {
+    console.error("Error in addAddress:", error);
+    res
+      .status(500)
+      .json({ message: "Error adding address", error: error.toString() });
+  }
+};
 
 
 exports.getCustomerById = async (req, res) => {

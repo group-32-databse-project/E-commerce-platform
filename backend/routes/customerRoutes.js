@@ -6,6 +6,9 @@ const router = express.Router();
 // POST /api/customers/register
 router.post("/register", customerController.registerCustomer);
 
+//post /api/customers/addAddress
+router.post("/addAddress", customerController.addAddress);
+
 // GET /api/customers/:id
 router.get("/:id", customerController.getCustomerById);
 
