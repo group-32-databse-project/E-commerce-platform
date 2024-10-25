@@ -99,3 +99,19 @@ exports.clearCart = async (req, res) => {
     res.status(500).json({ message: 'Error clearing cart', error: error.toString() });
   }
 };
+
+exports.saveForLater = async (req, res) => {
+  const { customerId } = req.params;
+  const itemId = req.body.shopping_cart_item_id;
+  try {
+    const cart = await ShoppingCart.getCartByCustomerId(customerId);
+    await ShoppingCartItem.saveForLater(itemId, cart.shopping_cart_id);
+    res.status(200).json({ message: "Item saved for later" });
+  } catch (error) {
+    console.error("Error in saveForLater:", error);
+    res.status(500).json({
+      message: "Error saving item for later",
+      error: error.toString(),
+    });
+  }
+};

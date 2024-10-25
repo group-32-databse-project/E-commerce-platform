@@ -248,7 +248,7 @@ const Cart = () => {
       const token = localStorage.getItem("token");
       const customerId = cartData.customer_id;
 
-      const response = await fetch(`/api/cart/${customerId}/save`, {
+      const response = await fetch(`/api/cart/${customerId}/saveItem`, {
         method: "PATCH",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -440,141 +440,151 @@ const Cart = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {cartData.items.map((item, index) => {
-                    console.log(item);
-                    return (
-                      <Fade in key={item.shopping_cart_item_id}>
-                        <TableRow
-                          hover
-                          sx={{
-                            "&:last-child td, &:last-child th": { border: 0 },
-                            transition: "background-color 0.3s",
-                            "&:hover": {
-                              backgroundColor: theme.palette.action.hover,
-                            },
-                          }}
-                        >
-                          <TableCell
-                            component="th"
-                            scope="row"
-                            sx={{ display: "flex", alignItems: "center" }}
+                  {cartData.items
+                    .filter((item) => item.saved_for_later === 0)
+                    .map((item, index) => {
+                      console.log(item);
+                      return (
+                        <Fade in key={item.shopping_cart_item_id}>
+                          <TableRow
+                            hover
+                            sx={{
+                              "&:last-child td, &:last-child th": { border: 0 },
+                              transition: "background-color 0.3s",
+                              "&:hover": {
+                                backgroundColor: theme.palette.action.hover,
+                              },
+                            }}
                           >
-                            <img
-                              src={`https://via.placeholder.com/80x80/${getRandomColor()}/${getRandomColor()}?text=${encodeURIComponent(
-                                item.product_name.charAt(0)
-                              )}`}
-                              alt={item.product_name}
-                              style={{
-                                width: 80,
-                                height: 80,
-                                objectFit: "cover",
-                                marginRight: 16,
-                                borderRadius: 12,
-                                boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                              }}
-                            />
-                            <Typography
-                              variant="body1"
-                              sx={{ fontWeight: 500 }}
+                            <TableCell
+                              component="th"
+                              scope="row"
+                              sx={{ display: "flex", alignItems: "center" }}
                             >
-                              {item.product_name}
-                            </Typography>
-                          </TableCell>
-                          <TableCell align="right">
-                            <Typography variant="body1" color="text.primary">
-                              $
-                              {(
-                                parseFloat(item.total_price) / item.quantity
-                              ).toFixed(2)}
-                            </Typography>
-                          </TableCell>
-                          <TableCell align="center">
-                            <Box
-                              sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                              }}
-                            >
-                              <IconButton
-                                onClick={() =>
-                                  handleQuantityChange(item, "decrement", index)
-                                }
-                                color="primary"
-                                size="small"
-                                aria-label="decrease quantity"
-                                id={`decrement-button-${index}`} // Optional: Assign a unique ID
-                                disabled={
-                                  loadingStates[item.shopping_cart_item_id]
-                                } // Disable if loading
-                              >
-                                {loadingStates[item.shopping_cart_item_id] ? (
-                                  <CircularProgress size={24} />
-                                ) : (
-                                  <RemoveIcon fontSize="small" />
-                                )}
-                              </IconButton>
+                              <img
+                                src={`https://via.placeholder.com/80x80/${getRandomColor()}/${getRandomColor()}?text=${encodeURIComponent(
+                                  item.product_name.charAt(0)
+                                )}`}
+                                alt={item.product_name}
+                                style={{
+                                  width: 80,
+                                  height: 80,
+                                  objectFit: "cover",
+                                  marginRight: 16,
+                                  borderRadius: 12,
+                                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                                }}
+                              />
                               <Typography
-                                variant="body2"
+                                variant="body1"
+                                sx={{ fontWeight: 500 }}
+                              >
+                                {item.product_name}
+                              </Typography>
+                            </TableCell>
+                            <TableCell align="right">
+                              <Typography variant="body1" color="text.primary">
+                                $
+                                {(
+                                  parseFloat(item.total_price) / item.quantity
+                                ).toFixed(2)}
+                              </Typography>
+                            </TableCell>
+                            <TableCell align="center">
+                              <Box
                                 sx={{
-                                  mx: 1,
-                                  minWidth: "20px",
-                                  textAlign: "center",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
                                 }}
                               >
-                                {item.quantity}
+                                <IconButton
+                                  onClick={() =>
+                                    handleQuantityChange(
+                                      item,
+                                      "decrement",
+                                      index
+                                    )
+                                  }
+                                  color="primary"
+                                  size="small"
+                                  aria-label="decrease quantity"
+                                  id={`decrement-button-${index}`} // Optional: Assign a unique ID
+                                  disabled={
+                                    loadingStates[item.shopping_cart_item_id]
+                                  } // Disable if loading
+                                >
+                                  {loadingStates[item.shopping_cart_item_id] ? (
+                                    <CircularProgress size={24} />
+                                  ) : (
+                                    <RemoveIcon fontSize="small" />
+                                  )}
+                                </IconButton>
+                                <Typography
+                                  variant="body2"
+                                  sx={{
+                                    mx: 1,
+                                    minWidth: "20px",
+                                    textAlign: "center",
+                                  }}
+                                >
+                                  {item.quantity}
+                                </Typography>
+                                <IconButton
+                                  onClick={() =>
+                                    handleQuantityChange(
+                                      item,
+                                      "increment",
+                                      index
+                                    )
+                                  }
+                                  color="primary"
+                                  size="small"
+                                  aria-label="increase quantity"
+                                  id={`increment-button-${index}`} // Optional: Assign a unique ID
+                                  disabled={
+                                    loadingStates[item.shopping_cart_item_id]
+                                  } // Disable if loading
+                                >
+                                  {loadingStates[item.shopping_cart_item_id] ? (
+                                    <CircularProgress size={24} />
+                                  ) : (
+                                    <AddIcon fontSize="small" />
+                                  )}
+                                </IconButton>
+                              </Box>
+                            </TableCell>
+                            <TableCell align="right">
+                              <Typography variant="body1" color="text.primary">
+                                ${parseFloat(item.total_price).toFixed(2)}
                               </Typography>
+                            </TableCell>
+                            <TableCell align="center">
                               <IconButton
                                 onClick={() =>
-                                  handleQuantityChange(item, "increment", index)
+                                  handleSaveForLater(item.shopping_cart_item_id)
                                 }
-                                color="primary"
+                                color="secondary"
                                 size="small"
-                                aria-label="increase quantity"
-                                id={`increment-button-${index}`} // Optional: Assign a unique ID
-                                disabled={
-                                  loadingStates[item.shopping_cart_item_id]
-                                } // Disable if loading
+                                aria-label="save for later"
                               >
-                                {loadingStates[item.shopping_cart_item_id] ? (
-                                  <CircularProgress size={24} />
-                                ) : (
-                                  <AddIcon fontSize="small" />
-                                )}
+                                <SaveIcon />
                               </IconButton>
-                            </Box>
-                          </TableCell>
-                          <TableCell align="right">
-                            <Typography variant="body1" color="text.primary">
-                              ${parseFloat(item.total_price).toFixed(2)}
-                            </Typography>
-                          </TableCell>
-                          <TableCell align="center">
-                            <IconButton
-                              onClick={() =>
-                                handleSaveForLater(item.shopping_cart_item_id)
-                              }
-                              color="secondary"
-                              size="small"
-                              aria-label="save for later"
-                            >
-                              <SaveIcon />
-                            </IconButton>
-                            <IconButton
-                              onClick={() =>
-                                handleRemoveItem(item.shopping_cart_item_id)
-                              }
-                              color="error"
-                              size="small"
-                              aria-label="remove item"
-                            >
-                              <DeleteOutlineIcon />
-                            </IconButton>
-                          </TableCell>
-                        </TableRow>
-                      </Fade>
-                    );
-                  })}
+                              <IconButton
+                                onClick={() =>
+                                  handleRemoveItem(item.shopping_cart_item_id)
+                                }
+                                color="error"
+                                size="small"
+                                aria-label="remove item"
+                              >
+                                <DeleteOutlineIcon />
+                              </IconButton>
+                            </TableCell>
+                          </TableRow>
+                        </Fade>
+                      );
+                    })}
                 </TableBody>
               </Table>
             </TableContainer>

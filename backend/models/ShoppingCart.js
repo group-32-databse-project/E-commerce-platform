@@ -9,10 +9,9 @@ class ShoppingCart {
     return result.insertId;
   }
 
-
   static async getCartByCustomerId(customerId) {
     const [rows] = await db.query(
-      "SELECT * FROM shopping_cart WHERE customer_id = ?",
+      "SELECT * FROM shopping_cart WHERE customer_id = ? ",
       [customerId]
     );
     return rows[0];

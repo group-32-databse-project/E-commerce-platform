@@ -20,4 +20,7 @@ router.delete('/item/:shoppingCartItemId', cartController.removeItemFromCart);
 // POST /api/cart/:customerId/clear
 router.post('/:customerId/clear', cartController.clearCart);
 
+//patch /api/cart/:customerId/saveItem
+router.patch('/:customerId/saveItem', cartController.saveForLater);
+
 module.exports = router;

@@ -61,6 +61,12 @@ class ShoppingCartItem {
       [cartId]
     );
   }
+  static async saveForLater(itemId, cartId) {
+    await db.query(
+      "UPDATE shopping_cart_item SET saved_for_later = 1 WHERE shopping_cart_item_id = ? AND shopping_cart_id = ?",
+      [itemId, cartId]
+    );
+  }
 
   // Add more methods as needed
 }
