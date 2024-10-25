@@ -8,7 +8,10 @@ router.get('/:customerId', cartController.getCart);
 // POST /api/cart/:customerId/add
 router.post('/:customerId/add', cartController.addItemToCart);
 
-// DELETE /api/cart/:customerId/remove
+// Patch /api/cart/:customerId/changeQuantity
+router.patch('/:customerId/changeQuantity', cartController.changeQuantity);
+
+// DELETEx
 router.delete('/:customerId/remove', cartController.removeItemFromCart);
 
 // DELETE /api/cart/item/:shoppingCartItemId

@@ -2,8 +2,7 @@ const db = require('../config/database');
 
 class Category {
   static async getAllCategories() {
-    const [rows] = await db.query('SELECT * FROM category');
-    console.log('getAllCategories rows:', rows);
+    const [rows] = await db.query("SELECT * FROM category");
     return rows;
   }
 
@@ -32,7 +31,14 @@ class Category {
     return rows;
   }
 
-  // Add more methods as needed
+  static async createCategory(categoryData) {
+    const { category_name, parent_category_id, category_image } = categoryData;
+    const [result] = await db.query(
+      "INSERT INTO category (category_name, parent_category_id, category_image) VALUES (?, ?, ?)",
+      [category_name, parent_category_id, category_image]
+    );
+    return result.insertId;
+  }
 }
 
 module.exports = Category;

@@ -15,6 +15,7 @@ import NotFound from "./pages/notFound/NotFound.jsx";
 import ProductPage from "./pages/product/product.jsx";
 import Profile from "./pages/profile/profile.js";
 
+import Category from "./pages/category/catagory.js";
 function App() {
   return (
     <Router>
@@ -31,6 +32,7 @@ function App() {
         <Route path="/notifications" element={<Notification />} />
         <Route path="/help" element={<Help />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/category/:categoryId" element={<Category />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
