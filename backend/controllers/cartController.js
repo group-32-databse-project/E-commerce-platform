@@ -115,3 +115,34 @@ exports.saveForLater = async (req, res) => {
     });
   }
 };
+
+exports.savePrice = async (req, res) => {
+  const { customerId } = req.params;
+  const { price } = req.body;
+  try {
+    const cart = await ShoppingCart.getCartByCustomerId(customerId);
+    await ShoppingCart.savePrice(cart.shopping_cart_id, price);
+    res.status(200).json({ message: "Price saved" });
+  } catch (error) {
+    console.error("Error in savePrice:", error);
+    res
+      .status(500)
+      .json({ message: "Error saving price", error: error.toString() });
+  }
+};
+
+exports.unsaveItem = async (req, res) => {
+  const { customerId } = req.params;
+  const itemId = req.body.shopping_cart_item_id;
+  try {
+    const cart = await ShoppingCart.getCartByCustomerId(customerId);
+    await ShoppingCartItem.unsaveItem(itemId, cart.shopping_cart_id);
+    res.status(200).json({ message: "Item unsaved" });
+  } catch (error) {
+    console.error("Error in unsaveItem:", error);
+    res.status(500).json({
+      message: "Error unsaving item",
+      error: error.toString(),
+    });
+  }
+};

@@ -73,7 +73,7 @@ const Checkout = () => {
   };
 
   const handleNext = () => {
-    if (activeStep == 0) {
+    if (activeStep === 0) {
       AddressForm.onGetValidatedAddress();
     }
     setActiveStep((prevActiveStep) => prevActiveStep + 1);

@@ -24,6 +24,13 @@ class ShoppingCart {
     );
   }
 
+  static async savePrice(cartId, price) {
+    await db.query(
+      "UPDATE shopping_cart SET total_price = ? WHERE shopping_cart_id = ?",
+      [price, cartId]
+    );
+  }
+
   // Add more methods as needed
 }
 

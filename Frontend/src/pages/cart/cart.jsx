@@ -33,7 +33,7 @@ import Footer from "../../components/footer";
 import { motion } from "framer-motion";
 import changeQuantity from "../../services/changeQuantity"; // Fixed import path
 import calculateShipping from "../../services/shipping";
-import axios from "axios";
+
 import { calculateTotal, calculateTax } from "../../services/calculateTotal";
 
 const Cart = () => {
