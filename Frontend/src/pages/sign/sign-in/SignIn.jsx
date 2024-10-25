@@ -113,11 +113,11 @@ export default function SignIn(props) {
       // Assuming the API response includes a `username` field
       if (responseData.customer.username) {
         localStorage.setItem("Name", responseData.customer.username);
-        localStorage.setItem("customerId", responseData.customer.customer.id);
+        localStorage.setItem("customerId", responseData.customer.customer_id);
       } else {
         // If username isn't directly available, use email as a fallback
         localStorage.setItem("Name", responseData.customer.email_address);
-        localStorage.setItem("customerId", responseData.customer.customer.id);
+        localStorage.setItem("customerId", responseData.customer.customer_id);
       }
 
       // Redirect to the homepage or a protected route

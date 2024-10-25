@@ -1,14 +1,13 @@
 import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Header from "../../components/header";
-import OurProduct from "../../components/OurProduct";
+import CategoryList from "../../components/catagoryList";
 
 import FilterSidebar from "../../components/FilterSidebar";
-import Banner from "./Banner";
-import Newarrival from "./Newarrival";
+
 import Footer from "../../components/footer"; // Update if necessary
 
-const HomePage = () => {
+const Category = () => {
   return (
     <>
       <Header />
@@ -26,16 +25,10 @@ const HomePage = () => {
           {/* Main Content */}
           <main className="col-md-9">
             {/* Hero Section */}
-            <Banner />
 
             {/* Our Products */}
             <section className="products-section mb-4"></section>
-            <OurProduct />
-
-            <></>
-
-            {/* New Arrivals */}
-            <Newarrival />
+            <CategoryList />
           </main>
         </div>
       </div>
@@ -49,4 +42,4 @@ const HomePage = () => {
   );
 };
 
-export default HomePage;
+export default Category;

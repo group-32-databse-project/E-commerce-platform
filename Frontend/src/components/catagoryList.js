@@ -28,7 +28,7 @@ import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import "../assets/styles/allcategory.css";
 import { keyframes } from "@mui/system";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 // Styled Components
 
@@ -326,12 +326,14 @@ const OurProduct = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const navigate = useNavigate();
+  const { categoryId } = useParams(); // Extract categoryId from URL params
 
   // Fetch products from API
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch("/api/products");
+        console.log(categoryId);
+        const response = await fetch(`/api/products/category/${categoryId}`);
         if (!response.ok) {
           throw new Error("Failed to fetch products.");
         }
@@ -344,7 +346,7 @@ const OurProduct = () => {
       }
     };
     fetchProducts();
-  }, []);
+  }, [categoryId]); // Add categoryId as a dependency
 
   // Handle Add to Cart
   const onAddToCart = (variantId) => {
@@ -515,25 +517,20 @@ const OurProduct = () => {
                     : product.description}
                 </Typography>
                 <Price>
-                  $
-                  {product.variants && product.variants.length > 0
-                    ? product.variants[0].total_price
-                    : "N/A"}
-                  {product.isOnSale &&
-                    product.variants &&
-                    product.variants.length > 0 && (
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        component="span"
-                        style={{
-                          textDecoration: "line-through",
-                          marginLeft: "8px",
-                        }}
-                      >
-                        ${product.variants[0].total_price}
-                      </Typography>
-                    )}
+                  ${product.total_price}
+                  {product.isOnSale && (
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      component="span"
+                      style={{
+                        textDecoration: "line-through",
+                        marginLeft: "8px",
+                      }}
+                    >
+                      ${product.original_price}
+                    </Typography>
+                  )}
                 </Price>
                 <Typography variant="body2" color="text.secondary">
                   Weight: {product.weight}
@@ -577,7 +574,6 @@ const OurProduct = () => {
           </Grid>
         ))}
       </Grid>
-      /////
       {/* Pagination Controls */}
       <Grid
         container
