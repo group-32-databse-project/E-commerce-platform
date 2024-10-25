@@ -26,11 +26,21 @@ import InfoMobile from "../../components/InfoMobile";
 import TemplateFrame from "./TemplateFrame";
 import { LogoIcon } from "../sign/CustomIcons";
 import getCheckoutTheme from "../../theme/getCheckoutTheme";
-import axios from "axios";
 import AddressValidationErrorDialog from "../../components/AddressValidationErrorDialog";
 
 const steps = ["Shipping Address", "Payment Details", "Review Your Order"];
-
+const renderStepContent = (step) => {
+  switch (step) {
+    case 0:
+      return <AddressForm />;
+    case 1:
+      return <PaymentForm />;
+    case 2:
+      return <Review />;
+    default:
+      return null;
+  }
+};
 const Checkout = () => {
   const [mode, setMode] = useState("light");
   const [showCustomTheme, setShowCustomTheme] = useState(true);
@@ -64,11 +74,12 @@ const Checkout = () => {
   };
 
   const handleNext = () => {
+    console.log("Next button clicked. Current step:", activeStep);
     if (activeStep === 0) {
+      setActiveStep((prevActiveStep) => prevActiveStep + 1);
       try {
-        // Note: Make sure AddressForm.onGetValidatedAddress is a valid function
+        // Ensure this function exists and is correctly implemented
         AddressForm.onGetValidatedAddress();
-        setActiveStep((prevActiveStep) => prevActiveStep + 1);
       } catch (error) {
         console.error(error);
         setErrorMessage(
@@ -76,9 +87,10 @@ const Checkout = () => {
         );
         setOpenErrorDialog(true);
       }
-    } else {
-      setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    } else if (activeStep === 1) {
+      console.log("Moving to step:", activeStep + 1);
     }
+    setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
 
   const handleCloseErrorDialog = () => {
@@ -87,7 +99,7 @@ const Checkout = () => {
 
   const handleTryAgain = () => {
     setOpenErrorDialog(false);
-    // You can add any additional logic here before retrying
+    // Add any additional logic here before retrying
     handleNext();
   };
 
@@ -96,23 +108,6 @@ const Checkout = () => {
   };
 
   const totalPrice = activeStep >= 2 ? "$144.97" : "$134.98";
-  const renderStepContent = () => {
-    switch (activeStep) {
-      case 0:
-        return <AddressForm />;
-      case 1:
-        return <PaymentForm />;
-      case 2:
-        return <Review />;
-      default:
-        return null;
-    }
-  };
-
-  // Add this useEffect to log activeStep changes
-  useEffect(() => {
-    console.log("Active step changed:", activeStep);
-  }, [activeStep]);
 
   return (
     <TemplateFrame
@@ -149,7 +144,7 @@ const Checkout = () => {
                 maxWidth: 500,
               }}
             >
-              <Info totalPrice={totalPrice} />
+              <Info />
             </Box>
           </Grid>
 
@@ -222,7 +217,7 @@ const Checkout = () => {
                   </Typography>
                   <Typography variant="body1">{totalPrice}</Typography>
                 </Box>
-                <InfoMobile totalPrice={totalPrice} />
+                <InfoMobile />
               </CardContent>
             </Card>
 
@@ -288,7 +283,7 @@ const Checkout = () => {
                 </Stack>
               ) : (
                 <Fragment>
-                  {renderStepContent()}
+                  {renderStepContent(activeStep)}
                   <Box
                     sx={[
                       {
