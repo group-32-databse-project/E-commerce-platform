@@ -7,9 +7,6 @@ import {
   Triangle,
   Square,
   Hexagon,
-  Cloud,
-  Sun,
-  Moon,
 } from "lucide-react";
 
 const Loading = () => {
@@ -44,6 +41,7 @@ const Loading = () => {
     const x = Math.cos(angle) * radius;
     const y = Math.sin(angle) * radius;
     const scale = 0.5 + Math.sin(time / 20 + i * 0.5) * 0.3;
+    console.log(isHovering);
 
     return (
       <div

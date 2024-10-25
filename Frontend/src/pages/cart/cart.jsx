@@ -49,57 +49,65 @@ const Cart = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [loadingStates, setLoadingStates] = useState({}); // Per-item loading states
   const [changeQuantityLoading, setChangeQuantityLoading] = useState(0);
+  const [isSavedItemsLoading, setIsSavedItemsLoading] = useState(0);
+
+  useEffect(() => {
+    const fetchCartData = async () => {
+      setLoading(true);
+      try {
+        const customerId = localStorage.getItem("customerId");
+        const token = localStorage.getItem("token");
+
+        if (!customerId || !token) {
+          throw new Error("Customer ID or token not found. Please log in.");
+        }
+
+        const response = await fetch(`/api/cart/${customerId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(
+            `HTTP error! status: ${response.status}, body: ${errorText}`
+          );
+        }
+
+        const data = await response.json();
+        console.log("Fetched cart data:", data);
+        setCartData(data);
+      } catch (err) {
+        console.error("Error fetching cart data:", err);
+        setError(err.message);
+        setSnackbar({
+          open: true,
+          message: err.message,
+          severity: "error",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCartData();
+  }, []);
+
+  useEffect(() => {
+    if (cartData) {
+      setSavedItems(
+        cartData.items.filter((item) => item.saved_for_later === 1)
+      );
+    }
+  }, [cartData, isSavedItemsLoading]);
 
   // Fetch cart data function
-  const fetchCartData = async () => {
-    setLoading(true);
-    try {
-      const customerId = localStorage.getItem("customerId");
-      const token = localStorage.getItem("token");
-
-      if (!customerId || !token) {
-        throw new Error("Customer ID or token not found. Please log in.");
-      }
-
-      const response = await fetch(`/api/cart/${customerId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(
-          `HTTP error! status: ${response.status}, body: ${errorText}`
-        );
-      }
-
-      const data = await response.json();
-      console.log("Fetched cart data:", data);
-      setCartData(data);
-    } catch (err) {
-      console.error("Error fetching cart data:", err);
-      setError(err.message);
-      setSnackbar({
-        open: true,
-        message: err.message,
-        severity: "error",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Retrieve customerId from localStorage when component mounts
-  useEffect(() => {
-    fetchCartData();
-  }, [changeQuantityLoading]); // Empty dependency array ensures it runs once
 
   const handleQuantityChange = async (item, operation, index) => {
     const changeValue = operation === "increment" ? 1 : -1;
-    setChangeQuantityLoading(changeQuantityLoading + 1);
-
+    item.quantity += changeValue;
+    setIsSavedItemsLoading(isSavedItemsLoading + 1);
     // Prevent quantity from dropping below 1
     if (changeValue === -1 && item.quantity === 1) {
       setSnackbar({
@@ -109,23 +117,6 @@ const Cart = () => {
       });
       return;
     }
-
-    // Optimistically update the UI
-    setCartData((prevCartData) => {
-      const updatedItems = prevCartData.items.map((i) =>
-        i.shopping_cart_item_id === item.shopping_cart_item_id
-          ? {
-              ...i,
-              quantity: i.quantity + changeValue,
-              total_price: (
-                parseFloat(i.total_price) +
-                changeValue * parseFloat(i.unit_price)
-              ).toFixed(2),
-            }
-          : i
-      );
-      return { ...prevCartData, items: updatedItems };
-    });
 
     // Set loading state for this item
     setLoadingStates((prev) => ({
@@ -140,34 +131,8 @@ const Cart = () => {
       };
 
       const updatedCart = await changeQuantity(cartItem, operation);
-
-      if (updatedCart && updatedCart.items) {
-        setCartData(updatedCart);
-        setSnackbar({
-          open: true,
-          message: `Quantity ${operation}ed successfully.`,
-          severity: "success",
-        });
-      } else {
-        throw new Error("Invalid data returned from changeQuantity.");
-      }
     } catch (error) {
       // Rollback the optimistic update
-      setCartData((prevCartData) => {
-        const updatedItems = prevCartData.items.map((i) =>
-          i.shopping_cart_item_id === item.shopping_cart_item_id
-            ? {
-                ...i,
-                quantity: i.quantity - changeValue,
-                total_price: (
-                  parseFloat(i.total_price) -
-                  changeValue * parseFloat(i.unit_price)
-                ).toFixed(2),
-              }
-            : i
-        );
-        return { ...prevCartData, items: updatedItems };
-      });
 
       setSnackbar({
         open: true,
@@ -227,22 +192,14 @@ const Cart = () => {
 
   // Handle saving item for later
   const handleSaveForLater = async (itemId) => {
-    if (!cartData) return;
-
+    setIsSavedItemsLoading(isSavedItemsLoading + 1);
     const itemToSave = cartData.items.find(
       (item) => item.shopping_cart_item_id === itemId
     );
 
-    if (!itemToSave) return;
+    itemToSave.saved_for_later = 1;
 
-    // Optimistically update the UI
-    setSavedItems((prev) => [...prev, itemToSave]);
-    setCartData((prevData) => ({
-      ...prevData,
-      items: prevData.items.filter(
-        (item) => item.shopping_cart_item_id !== itemId
-      ),
-    }));
+    if (!itemToSave) return;
 
     try {
       const token = localStorage.getItem("token");
@@ -298,7 +255,7 @@ const Cart = () => {
   const calculateSubtotal = () => {
     return (
       cartData?.items.reduce(
-        (total, item) => total + parseFloat(item.total_price),
+        (total, item) => total + parseFloat(item.total_price * item.quantity),
         0
       ) || 0
     );
@@ -327,6 +284,49 @@ const Cart = () => {
     setSnackbar({ ...snackbar, open: false });
   };
 
+  const handleMoveToCart = async (item) => {
+    item.saved_for_later = 0;
+
+    //remove from saveditems
+    setSavedItems(
+      savedItems.filter(
+        (i) => i.shopping_cart_item_id !== item.shopping_cart_item_id
+      )
+    );
+
+    try {
+      const token = localStorage.getItem("token");
+      const customerId = cartData.customer_id;
+
+      const response = await fetch(`/api/cart/${customerId}/unsaveItem`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          shopping_cart_item_id: item.shopping_cart_item_id,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save item for later.");
+      }
+
+      setSnackbar({
+        open: true,
+        message: "Item back to cart.",
+        severity: "success",
+      });
+    } catch (err) {
+      console.error("Error add to cart:", err);
+      setSnackbar({
+        open: true,
+        message: err.message,
+        severity: "error",
+      });
+    }
+  };
   // Helper function to generate a random color
   const getRandomColor = () => {
     const letters = "0123456789ABCDEF";
@@ -426,7 +426,6 @@ const Cart = () => {
                 Your Shopping Cart
               </Typography>
             </Box>
-
             {/* Cart Items */}
             <TableContainer component={Paper} sx={{ mb: 4, boxShadow: "none" }}>
               <Table>
@@ -443,7 +442,6 @@ const Cart = () => {
                   {cartData.items
                     .filter((item) => item.saved_for_later === 0)
                     .map((item, index) => {
-                      console.log(item);
                       return (
                         <Fade in key={item.shopping_cart_item_id}>
                           <TableRow
@@ -484,10 +482,7 @@ const Cart = () => {
                             </TableCell>
                             <TableCell align="right">
                               <Typography variant="body1" color="text.primary">
-                                $
-                                {(
-                                  parseFloat(item.total_price) / item.quantity
-                                ).toFixed(2)}
+                                ${parseFloat(item.total_price).toFixed(2)}
                               </Typography>
                             </TableCell>
                             <TableCell align="center">
@@ -556,7 +551,10 @@ const Cart = () => {
                             </TableCell>
                             <TableCell align="right">
                               <Typography variant="body1" color="text.primary">
-                                ${parseFloat(item.total_price).toFixed(2)}
+                                $
+                                {parseFloat(
+                                  item.total_price * item.quantity
+                                ).toFixed(2)}
                               </Typography>
                             </TableCell>
                             <TableCell align="center">
@@ -588,9 +586,8 @@ const Cart = () => {
                 </TableBody>
               </Table>
             </TableContainer>
-
-            {/* Saved for Later Section */}
-            {savedItems.length > 0 && (
+            ;{/* Saved for Later Section */}
+            {
               <Box sx={{ mb: 4 }}>
                 <Typography variant="h5" gutterBottom>
                   Saved for Later
@@ -605,82 +602,66 @@ const Cart = () => {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {savedItems.map((item) => (
-                        <TableRow key={item.shopping_cart_item_id}>
-                          <TableCell
-                            component="th"
-                            scope="row"
-                            sx={{ display: "flex", alignItems: "center" }}
-                          >
-                            <img
-                              src={`https://source.unsplash.com/60x60/?${encodeURIComponent(
-                                item.product_name
-                              )}`}
-                              alt={item.product_name}
-                              style={{
-                                width: 60,
-                                height: 60,
-                                objectFit: "cover",
-                                marginRight: 16,
-                                borderRadius: 12,
-                                boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                              }}
-                            />
-                            <Typography
-                              variant="body1"
-                              sx={{ fontWeight: 500 }}
+                      {savedItems.length > 0 &&
+                        savedItems.map((item) => (
+                          <TableRow key={item.shopping_cart_item_id}>
+                            <TableCell
+                              component="th"
+                              scope="row"
+                              sx={{ display: "flex", alignItems: "center" }}
                             >
-                              {item.product_name}
-                            </Typography>
-                          </TableCell>
-                          <TableCell align="right">
-                            <Typography variant="body1" color="text.primary">
-                              $
-                              {(
-                                parseFloat(item.total_price) / item.quantity
-                              ).toFixed(2)}
-                            </Typography>
-                          </TableCell>
-                          <TableCell align="center">
-                            <Button
-                              variant="text"
-                              color="primary"
-                              size="small"
-                              onClick={() => {
-                                // Move item back to cart
-                                setCartData((prev) => ({
-                                  ...prev,
-                                  items: [...prev.items, item],
-                                }));
-                                setSavedItems((prev) =>
-                                  prev.filter(
-                                    (i) =>
-                                      i.shopping_cart_item_id !==
-                                      item.shopping_cart_item_id
-                                  )
-                                );
-                                setSnackbar({
-                                  open: true,
-                                  message: "Item moved to cart.",
-                                  severity: "success",
-                                });
-                              }}
-                              sx={{
-                                textTransform: "none",
-                                fontWeight: 600,
-                              }}
-                            >
-                              Move to Cart
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                              <img
+                                src={`https://source.unsplash.com/60x60/?${encodeURIComponent(
+                                  item.product_name
+                                )}`}
+                                alt={item.product_name}
+                                style={{
+                                  width: 60,
+                                  height: 60,
+                                  objectFit: "cover",
+                                  marginRight: 16,
+                                  borderRadius: 12,
+                                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                                }}
+                              />
+                              <Typography
+                                variant="body1"
+                                sx={{ fontWeight: 500 }}
+                              >
+                                {item.product_name}
+                              </Typography>
+                            </TableCell>
+                            <TableCell align="right">
+                              <Typography variant="body1" color="text.primary">
+                                $
+                                {(
+                                  parseFloat(item.total_price) * item.quantity
+                                ).toFixed(2)}
+                              </Typography>
+                            </TableCell>
+                            <TableCell align="center">
+                              <Button
+                                variant="text"
+                                color="primary"
+                                size="small"
+                                onClick={() => {
+                                  handleMoveToCart(item);
+                                }}
+                                sx={{
+                                  textTransform: "none",
+                                  fontWeight: 600,
+                                }}
+                              >
+                                Move to Cart
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
                     </TableBody>
                   </Table>
                 </TableContainer>
               </Box>
-            )}
-
+            }
             {/* Coupon and Order Summary */}
             <Box
               sx={{
@@ -762,8 +743,7 @@ const Cart = () => {
                       mb: 1.5,
                     }}
                   >
-                    <Typography>Shipping</Typography>
-                    <Typography>${calculateShipping().toFixed(2)}</Typography>
+                    changeQuantityLoading
                   </Box>
                   <Box
                     sx={{
