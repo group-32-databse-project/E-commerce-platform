@@ -9,14 +9,20 @@ class Address {
     return rows;
   }
 
-  static async createAddress(addressId, addressData) {
+  static async createAddress(formData) {
+    console.log("formData");
+    console.log(formData);
     const { address_line1, address_line2, city, postal_code, is_main_city } =
-      addressData;
-    const [result] = await db.query(
-      "INSERT INTO address (address_id, address_line1, address_line2,  city, postal_code, is_main_city) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      [addressId, address_line1, address_line2, city, postal_code, is_main_city]
-    );
-    return result.insertId;
+      formData;
+    try {
+      const [result] = await db.query(
+        "INSERT INTO address (address_line1, address_line2, city, postal_code, is_main_city) VALUES (?, ?, ?, ?, ?)",
+        [address_line1, address_line2, city, postal_code, is_main_city]
+      );
+      return result.insertId;
+    } catch (error) {
+      console.error("Error in createAddress:", error);
+    }
   }
 
   // Add more methods as needed

@@ -1,6 +1,7 @@
 const Customer = require('../models/Customer');
 const Address = require('../models/Address');
 const ShoppingCart = require('../models/ShoppingCart');
+const CustomerAddress = require("../models/CustomerAddress");
 const bcrypt = require('bcrypt');
 
 const jwt = require('jsonwebtoken');
@@ -43,11 +44,14 @@ exports.loginCustomer = async (req, res) => {
 
 exports.addAddress = async (req, res) => {
   try {
-    const { customerId, formData } = req.body;
-    const addressId = await Address.getAddressIdbyCustomerId(customerId);
-    await Address.createAddress(customerId, formData);
+    const customerId = req.params.customerId;
+    const formData = req.body;
+
+    const addressId = await Address.createAddress(formData);
+    await CustomerAddress.createCustomerAddress(customerId, addressId);
     res.status(200).json({ message: "Address added" });
   } catch (error) {
+    console.log(error);
     console.error("Error in addAddress:", error);
     res
       .status(500)

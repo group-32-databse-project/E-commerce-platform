@@ -12,6 +12,9 @@ router.post("/addAddress", customerController.addAddress);
 // GET /api/customers/:id
 router.get("/:id", customerController.getCustomerById);
 
+// Get  /api/customers/${customerId}/addAddress
+router.post("/:customerId/addAddress", customerController.addAddress);
+
 // POST /api/customers/login
 router.post("/login", customerController.loginCustomer);
 
