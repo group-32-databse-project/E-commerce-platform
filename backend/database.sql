@@ -167,6 +167,16 @@ CREATE TABLE `shop_order` (
   FOREIGN KEY (`payment_method_id`) REFERENCES `payment_method`(`payment_method_id`)
 );
 
+-- Create the notifications table
+CREATE TABLE `notifications` (
+  `notification_id` INT AUTO_INCREMENT,
+  `order_id` INT,
+  `message` VARCHAR(255),
+  `is_read` TINYINT DEFAULT 0,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`notification_id`),
+  FOREIGN KEY (`order_id`) REFERENCES `shop_order`(`order_id`) ON DELETE CASCADE
+);
 
 CREATE TABLE `customer_phone_number` (
   `phone_number` varchar(20),
@@ -279,6 +289,25 @@ BEGIN
   END IF;
 END$$
 
+-- Trigger to insert a notification when a new order is placed
+CREATE TRIGGER notify_order_created
+AFTER INSERT ON shop_order
+FOR EACH ROW
+BEGIN
+  INSERT INTO notifications (order_id, message)
+  VALUES (NEW.order_id, CONCAT('Your order #', NEW.order_id, ' has been placed successfully.'));
+END$$
+
+-- Trigger to insert a notification when an order's status is updated
+CREATE TRIGGER notify_order_status_updated
+AFTER UPDATE ON shop_order
+FOR EACH ROW
+BEGIN
+  IF OLD.order_status <> NEW.order_status THEN
+    INSERT INTO notifications (order_id, message)
+    VALUES (NEW.order_id, CONCAT('Your order #', NEW.order_id, ' status has been updated to ', NEW.order_status, '.'));
+  END IF;
+END$$
 
 DELIMITER ;
 

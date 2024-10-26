@@ -2,7 +2,8 @@ import React, { useState, useCallback } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Header from "../../components/header";
 import OurProduct from "../../components/OurProduct";
-import FilterSidebar from "./FilterSidebar";
+
+import FilterSidebar from "../../components/FilterSidebar";
 import Banner from "./Banner";
 import Newarrival from "./Newarrival";
 import Footer from "../../components/footer";

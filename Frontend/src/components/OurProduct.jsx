@@ -547,20 +547,25 @@ const OurProduct = ({ filters }) => {
                     : product.description}
                 </Typography>
                 <Price>
-                  ${product.total_price}
-                  {product.isOnSale && (
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      component="span"
-                      style={{
-                        textDecoration: "line-through",
-                        marginLeft: "8px",
-                      }}
-                    >
-                      ${product.original_price}
-                    </Typography>
-                  )}
+                  $
+                  {product.variants && product.variants.length > 0
+                    ? product.variants[0].total_price
+                    : "N/A"}
+                  {product.isOnSale &&
+                    product.variants &&
+                    product.variants.length > 0 && (
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        component="span"
+                        style={{
+                          textDecoration: "line-through",
+                          marginLeft: "8px",
+                        }}
+                      >
+                        ${product.variants[0].total_price}
+                      </Typography>
+                    )}
                 </Price>
                 <Typography variant="body2" color="text.secondary">
                   Weight: {product.weight}
@@ -587,6 +592,7 @@ const OurProduct = ({ filters }) => {
                 <StyledButton
                   color="success"
                   onClick={() => {
+                    localStorage.setItem("product_id", product.product_id);
                     navigate(`/product/${product.product_id}`);
                   }}
                   fullWidth
