@@ -16,6 +16,7 @@ const searchRoutes = require('./routes/searchRoutes');
 const authRoutes = require('./routes/authRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const paymentRoutes = require("./routes/paymentRoutes");
+const testRoutes = require('./routes/testRoutes');
 
 // Initialize express
 const app = express();

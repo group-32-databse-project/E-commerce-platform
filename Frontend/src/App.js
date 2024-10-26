@@ -16,7 +16,7 @@ import ProductPage from "./pages/product/product.jsx";
 import Profile from "./pages/profile/profile.js";
 import Category from "./pages/category/catagory.js";
 import Loading from "./pages/loading/loading.js";
-import Category from "./pages/category/catagory.js";
+
 function App() {
   return (
     <Router>

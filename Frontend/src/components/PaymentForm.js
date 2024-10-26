@@ -15,8 +15,8 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { jwtDecode } from 'jwt-decode'; // Use named import
 
-import { styled } from '@mui/material/styles';
-import { useEffect, useState, useCallback } from "react";
+
+
 import { fetchPaymentData } from "../services/paymentstypes";
 import { styled } from "@mui/material/styles";
 
@@ -113,9 +113,9 @@ const FormGrid = styled("div")(() => ({
 
 export default function PaymentForm() {
   const [paymentType, setPaymentType] = React.useState("creditCard");
-  const [cardNumber, setCardNumber] = React.useState("");
-  const [cvv, setCvv] = React.useState("");
-  const [expirationDate, setExpirationDate] = React.useState("");
+  // const [cardNumber, setCardNumber] = React.useState("");
+  // const [cvv, setCvv] = React.useState("");
+  // const [expirationDate, setExpirationDate] = React.useState("");
   const [paymentTypes, setPaymentTypes] = React.useState([]); // State for payment types
 
   // State for Modal
@@ -162,7 +162,6 @@ export default function PaymentForm() {
 
     getPaymentTypes();
   }, []);
-  const [paymentType, setPaymentType] = useState('creditCard');
   const [cardNumber, setCardNumber] = useState('');
   const [cvv, setCvv] = useState('');
   const [expirationDate, setExpirationDate] = useState('');
@@ -547,7 +546,6 @@ export default function PaymentForm() {
                   id="card-name"
                   autoComplete="card-name"
                   placeholder="John Smith"
-                  value={customerData.name}
                   required
                   size="small"
                   value={cardName} // Bind to state
