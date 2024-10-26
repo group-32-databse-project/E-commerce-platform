@@ -15,14 +15,12 @@ const deliveryRoutes = require('./routes/deliveryRoutes');
 const searchRoutes = require('./routes/searchRoutes');
 const authRoutes = require('./routes/authRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
+const notificationRoutes = require('./routes/notificationRoutes'); // Import Notification Routes
 
 // Initialize express
 const app = express();
 app.use(cors());
 app.use(express.json());
-dotenv.config();
-
-// Middleware
 
 // API Routes
 app.use('/api/products', productRoutes);
@@ -34,7 +32,8 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/delivery', deliveryRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api', authRoutes);
-app.use('/api/category', categoryRoutes);
+app.use('/api/notifications', notificationRoutes); // Register Notification Routes
+app.use('/api/category', categoryRoutes); // Optional: Review if duplicate
 
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {

@@ -1,62 +1,78 @@
 import React, { useEffect, useState } from "react";
 import Header from "../../components/header";
-import { Container, Paper, Typography, List, ListItem, ListItemAvatar, Avatar, ListItemText, Divider } from "@mui/material";
-import { ShoppingCart, LocalShipping, Loyalty, MonetizationOn } from "@mui/icons-material";
-
-// Define or import these functions
-const joinRoom = (userId) => {
-  // Implement the function to join a room
-  console.log(`Joining room for user ${userId}`);
-};
-
-const listenForNotifications = (callback) => {
-  // Implement the function to listen for notifications
-  console.log("Listening for notifications");
-  // Example: Simulate receiving a notification
-  setTimeout(() => {
-    callback({
-      id: 1,
-      type: "order",
-      message: "Your order has been shipped!",
-      created_at: new Date().toISOString(),
-    });
-  }, 3000);
-};
-
-const disconnectSocket = () => {
-  // Implement the function to disconnect the socket
-  console.log("Disconnecting socket");
-};
+import {
+  Container,
+  Paper,
+  Typography,
+  List,
+  ListItem,
+  ListItemAvatar,
+  Avatar,
+  ListItemText,
+  Divider,
+  Button,
+} from "@mui/material";
+import {
+  ShoppingCart,
+  LocalShipping,
+  Loyalty,
+  MonetizationOn,
+  NotificationsActive,
+} from "@mui/icons-material";
+import { fetchNotifications, markAsRead } from "../../services/notificationService";
+import { useAuth } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const NotificationPage = () => {
   const [notifications, setNotifications] = useState([]);
-  const [userId, setUserId] = useState(null); // Replace with actual user ID from authentication
+  const { authToken, user } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Replace with your actual authentication logic to get the user ID
-    const fetchUserId = async () => {
-      // Example: Fetch user data from auth context or global state
-      const fetchedUserId = 1; // Replace with dynamic user ID
-      setUserId(fetchedUserId);
-      joinRoom(fetchedUserId);
+    const getNotifications = async () => {
+      try {
+        const data = await fetchNotifications(authToken);
+        setNotifications(data);
+      } catch (error) {
+        console.error("Error fetching notifications:", error);
+      }
     };
 
-    fetchUserId();
+    if (authToken) {
+      getNotifications();
+    }
 
-    // Listen for new notifications
-    listenForNotifications((notification) => {
-      setNotifications((prev) => [notification, ...prev]);
-      // Optionally, trigger browser notifications or UI updates here
-      console.log("New Notification:", notification);
-    });
+    // Polling interval (e.g., every 30 seconds)
+    const interval = setInterval(() => {
+      if (authToken) {
+        getNotifications();
+      }
+    }, 30000); // 30 seconds
 
-    // Cleanup on component unmount
-    return () => {
-      disconnectSocket();
-    };
-  }, []);
+    return () => clearInterval(interval);
+  }, [authToken]);
 
-  // Function to dynamically select the appropriate icon based on notification type
+  const handleMarkAsRead = async (notificationId) => {
+    try {
+      await markAsRead(authToken, notificationId);
+      setNotifications((prev) =>
+        prev.map((notif) =>
+          notif.notification_id === notificationId ? { ...notif, is_read: 1 } : notif
+        )
+      );
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
+  };
+
+  const determineNotificationType = (message) => {
+    if (message.toLowerCase().includes("shipped")) return "shipping";
+    if (message.toLowerCase().includes("delivered")) return "refund"; // Example
+    if (message.toLowerCase().includes("placed")) return "order";
+    // Add more conditions as needed
+    return "order";
+  };
+
   const getNotificationIcon = (type) => {
     switch (type) {
       case "order":
@@ -68,8 +84,12 @@ const NotificationPage = () => {
       case "refund":
         return <MonetizationOn />;
       default:
-        return <ShoppingCart />;
+        return <NotificationsActive />;
     }
+  };
+
+  const navigateToOrder = (orderId) => {
+    navigate(`/orders/${orderId}`);
   };
 
   return (
@@ -85,17 +105,24 @@ const NotificationPage = () => {
               <Typography variant="body1">No notifications yet.</Typography>
             ) : (
               notifications.map((notification, index) => (
-                <React.Fragment key={notification.id}>
-                  <ListItem alignItems="flex-start">
+                <React.Fragment key={notification.notification_id}>
+                  <ListItem
+                    alignItems="flex-start"
+                    sx={{
+                      backgroundColor: notification.is_read ? "inherit" : "#f0f0f0",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => navigateToOrder(notification.order_id)}
+                  >
                     <ListItemAvatar>
                       <Avatar sx={{ bgcolor: "primary.main" }}>
-                        {getNotificationIcon(notification.type)}
+                        {getNotificationIcon(determineNotificationType(notification.message))}
                       </Avatar>
                     </ListItemAvatar>
                     <ListItemText
                       primary={notification.message}
                       secondary={
-                        <React.Fragment>
+                        <>
                           <Typography
                             sx={{ display: "inline" }}
                             component="span"
@@ -104,9 +131,20 @@ const NotificationPage = () => {
                           >
                             {new Date(notification.created_at).toLocaleString()}
                           </Typography>
-                        </React.Fragment>
+                        </>
                       }
                     />
+                    {!notification.is_read && (
+                      <Button
+                        variant="text"
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent triggering the onClick of ListItem
+                          handleMarkAsRead(notification.notification_id);
+                        }}
+                      >
+                        Mark as Read
+                      </Button>
+                    )}
                   </ListItem>
                   {index < notifications.length - 1 && (
                     <Divider variant="inset" component="li" />
