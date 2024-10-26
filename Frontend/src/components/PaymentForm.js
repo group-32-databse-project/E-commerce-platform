@@ -1,5 +1,5 @@
 import * as React from 'react';
-
+import { useState, useEffect } from 'react'; // Correct import
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import MuiCard from '@mui/material/Card';
@@ -13,6 +13,7 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import RadioGroup from '@mui/material/RadioGroup';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import { jwtDecode } from 'jwt-decode'; // Use named import
 
 import { styled } from '@mui/material/styles';
 
@@ -86,10 +87,10 @@ const FormGrid = styled('div')(() => ({
 }));
 
 export default function PaymentForm() {
-  const [paymentType, setPaymentType] = React.useState('creditCard');
-  const [cardNumber, setCardNumber] = React.useState('');
-  const [cvv, setCvv] = React.useState('');
-  const [expirationDate, setExpirationDate] = React.useState('');
+  const [paymentType, setPaymentType] = useState('creditCard');
+  const [cardNumber, setCardNumber] = useState('');
+  const [cvv, setCvv] = useState('');
+  const [expirationDate, setExpirationDate] = useState('');
 
   const handlePaymentTypeChange = (event) => {
     setPaymentType(event.target.value);
@@ -117,6 +118,35 @@ export default function PaymentForm() {
       setExpirationDate(formattedValue);
     }
   };
+
+  const [customerData, setCustomerData] = useState({ });
+
+  const token = localStorage.getItem('token');
+  let id = null;
+
+  if (token) {
+    try {
+      const decodedToken = jwtDecode(token); // Use named import
+      id = decodedToken.customerId; // Assuming the token contains an 'id' field
+     console.log('Decoded id:', id);
+    } catch (error) {
+      console.error('Error decoding token:', error);
+    }
+  }
+
+  //fetch from backend
+  useEffect(() => {
+    // Fetch data from backend
+    fetch(`/api/customers/${id}/payment`)
+      .then(response => response.json())
+      .then(data => {
+        setCustomerData(data);
+        console.log('payment data:', customerData);
+      })
+      .catch(error => {
+        console.error('Error fetching profile data:', error);
+      });
+  }, [id]);
 
   return (
     <Stack spacing={{ xs: 3, sm: 6 }} useFlexGap>
@@ -228,7 +258,7 @@ export default function PaymentForm() {
                   placeholder="0000 0000 0000 0000"
                   required
                   size="small"
-                  value={cardNumber}
+                  value={customerData.card_number}
                   onChange={handleCardNumberChange}
                 />
               </FormGrid>
@@ -256,6 +286,7 @@ export default function PaymentForm() {
                   id="card-name"
                   autoComplete="card-name"
                   placeholder="John Smith"
+                  value={customerData.name}
                   required
                   size="small"
                 />
@@ -270,7 +301,7 @@ export default function PaymentForm() {
                   placeholder="MM/YY"
                   required
                   size="small"
-                  value={expirationDate}
+                  value={customerData.expiry_date}
                   onChange={handleExpirationDateChange}
                 />
               </FormGrid>

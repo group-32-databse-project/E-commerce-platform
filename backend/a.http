@@ -21,3 +21,7 @@ Content-Type: application/json
 ###GET
 GET http://localhost:5001/api/customers/1/addresses
 Content-Type: application/json
+
+###GET
+GET http://localhost:5001/api/customers/11/payment
+Content-Type: application/json

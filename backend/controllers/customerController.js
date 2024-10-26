@@ -72,4 +72,22 @@ exports.getAddressesByCustomerId = async (req, res) => {
   }
 };
 
+exports.getPaymentDeatails = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const customer = await Customer.getCustomerById(id);
+    if (customer) {
+      const paymentDetails = await Customer.getPaymentDetailsByCustomerId(customer.customer_id);
+      res.json(paymentDetails);
+      console.log('Payment details:', paymentDetails);
+    } else {
+      res.status(404).json({ message: 'Customer not found' });
+    }
+  } catch (error) {
+    console.error('Error in getPaymentDetails:', error);
+    res.status(500).json({ message: 'Error fetching payment details', error: error.toString() });
+  }
+};
+
 // Add more controller methods as needed (update, delete, etc.)

@@ -32,6 +32,13 @@ class Customer {
     return rows[0];
   }
 
+  static async getPaymentDetailsByCustomerId(id) {
+    const [rows] = await db.query('SELECT concat(first_name," ",last_name) as name ,cp.* FROM customer_payment_method cp left outer join customer c using(customer_id) WHERE cp.customer_id = ?', [id]);
+    console.log('rows:', rows);
+    return rows[0];
+
+  }
+
   // Add more methods (update, delete, etc.)
 }
 
