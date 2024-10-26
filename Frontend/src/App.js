@@ -14,7 +14,8 @@ import Help from "./pages/help/help.js";
 import NotFound from "./pages/notFound/NotFound.jsx";
 import ProductPage from "./pages/product/product.jsx";
 import Profile from "./pages/profile/profile.js";
-
+import Category from "./pages/category/catagory.js";
+import Loading from "./pages/loading/loading.js";
 import Category from "./pages/category/catagory.js";
 function App() {
   return (
@@ -33,6 +34,8 @@ function App() {
         <Route path="/help" element={<Help />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/category/:categoryId" element={<Category />} />
+        <Route path="/loading" element={<Loading />} />
+      
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>

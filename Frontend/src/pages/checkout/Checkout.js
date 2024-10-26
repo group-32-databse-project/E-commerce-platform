@@ -26,10 +26,10 @@ import InfoMobile from "../../components/InfoMobile";
 import TemplateFrame from "./TemplateFrame";
 import { LogoIcon } from "../sign/CustomIcons";
 import getCheckoutTheme from "../../theme/getCheckoutTheme";
+import AddressValidationErrorDialog from "../../components/AddressValidationErrorDialog";
 
 const steps = ["Shipping Address", "Payment Details", "Review Your Order"];
-
-const getStepContent = (step) => {
+const renderStepContent = (step) => {
   switch (step) {
     case 0:
       return <AddressForm />;
@@ -38,14 +38,15 @@ const getStepContent = (step) => {
     case 2:
       return <Review />;
     default:
-      throw new Error("Unknown step");
+      return null;
   }
 };
-
 const Checkout = () => {
   const [mode, setMode] = useState("light");
   const [showCustomTheme, setShowCustomTheme] = useState(true);
   const [activeStep, setActiveStep] = useState(0);
+  const [openErrorDialog, setOpenErrorDialog] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const checkoutTheme = createTheme(getCheckoutTheme(mode));
   const defaultTheme = createTheme({ palette: { mode } });
@@ -73,7 +74,33 @@ const Checkout = () => {
   };
 
   const handleNext = () => {
+    console.log("Next button clicked. Current step:", activeStep);
+    if (activeStep === 0) {
+      setActiveStep((prevActiveStep) => prevActiveStep + 1);
+      try {
+        // Ensure this function exists and is correctly implemented
+        AddressForm.onGetValidatedAddress();
+      } catch (error) {
+        console.error(error);
+        setErrorMessage(
+          error.message || "An error occurred while validating the address."
+        );
+        setOpenErrorDialog(true);
+      }
+    } else if (activeStep === 1) {
+      console.log("Moving to step:", activeStep + 1);
+    }
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
+  };
+
+  const handleCloseErrorDialog = () => {
+    setOpenErrorDialog(false);
+  };
+
+  const handleTryAgain = () => {
+    setOpenErrorDialog(false);
+    // Add any additional logic here before retrying
+    handleNext();
   };
 
   const handleBack = () => {
@@ -117,7 +144,7 @@ const Checkout = () => {
                 maxWidth: 500,
               }}
             >
-              <Info totalPrice={totalPrice} />
+              <Info />
             </Box>
           </Grid>
 
@@ -190,7 +217,7 @@ const Checkout = () => {
                   </Typography>
                   <Typography variant="body1">{totalPrice}</Typography>
                 </Box>
-                <InfoMobile totalPrice={totalPrice} />
+                <InfoMobile />
               </CardContent>
             </Card>
 
@@ -256,7 +283,7 @@ const Checkout = () => {
                 </Stack>
               ) : (
                 <Fragment>
-                  {getStepContent(activeStep)}
+                  {renderStepContent(activeStep)}
                   <Box
                     sx={[
                       {

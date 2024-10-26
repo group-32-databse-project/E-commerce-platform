@@ -16,8 +16,8 @@ import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 
 const FormGrid = styled(Grid)(() => ({
-  display: 'flex',
-  flexDirection: 'column',
+  display: "flex",
+  flexDirection: "column",
 }));
 
 const AddressForm = () => {
