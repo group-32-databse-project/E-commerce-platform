@@ -11,7 +11,6 @@ import {
   CardContent,
   Grid,
   Chip,
-  Avatar,
   Link,
   Paper,
   Divider,
@@ -32,7 +31,7 @@ import {
 } from "@mui/icons-material";
 import Header from "../../components/header";
 import Footer from "../../components/footer";
-import addToCart from "../../services/addToCart";
+import addToCart from "../../api/addToCart";
 import { useParams } from "react-router-dom";
 import Variation from "./variation";
 //import changeQuantity from "../../services/changeQuantity";

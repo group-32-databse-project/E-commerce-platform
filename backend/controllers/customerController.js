@@ -2,8 +2,9 @@ const Customer = require('../models/Customer');
 const Address = require('../models/Address');
 const ShoppingCart = require('../models/ShoppingCart');
 const CustomerAddress = require("../models/CustomerAddress");
-const Order = require("../models/Order");
+const OrderItem = require("../models/OrderItem");
 const bcrypt = require("bcrypt");
+const Order = require("../models/Order");
 
 const jwt = require("jsonwebtoken");
 
@@ -105,6 +106,7 @@ exports.getCustomerById = async (req, res) => {
 exports.getOrdersByCustomerId = async (req, res) => {
   try {
     const orders = await Order.getOrdersByCustomerId(req.params.customerId);
+
     res.json(orders);
   } catch (error) {
     console.error("Error in getOrdersByCustomerId:", error);
@@ -113,4 +115,6 @@ exports.getOrdersByCustomerId = async (req, res) => {
       .json({ message: "Error fetching orders", error: error.toString() });
   }
 };  
+
+
 // Add more controller methods as needed (update, delete, etc.)

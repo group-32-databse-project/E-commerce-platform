@@ -11,11 +11,10 @@ import {
   calculateTotal,
   calculateTax,
   calculateSubtotal,
-} from "../services/calculateTotal";
-import calculateShipping from "../services/shipping";
+} from "../api/calculateTotal";
+import calculateShipping from "../api/shipping";
 import { Card, CardContent, Paper, Box, Stack, Divider } from "@mui/material";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import { useTheme } from "@mui/material/styles";
 
 function Info() {
   const [cartData, setCartData] = useState(null);

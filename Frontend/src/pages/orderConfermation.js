@@ -30,8 +30,12 @@ import {
   ShoppingCart as ShoppingCartIcon,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import { getAddress } from "../services/getAddress";
-import { getOrder } from "../services/getOrder";
+import getAddress from "../api/getAddress";
+import { getOrder } from "../api/getOrder";
+import getCustomerDetail from "../api/custermerDetail";
+import getOrderDetail from "../api/orderDetail";
+import PdfGenerator from "../services/generatePDF";
+import { getOrderItem } from "../api/getorderItem";
 
 const theme = createTheme({
   palette: {
@@ -98,19 +102,32 @@ const theme = createTheme({
   },
 });
 
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  const options = {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  };
+  const formattedDateTime = date.toLocaleString("en-US", options);
+  return formattedDateTime;
+};
+
 const OrderConfirmation = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const navigate = useNavigate();
   const [address, setAddress] = useState(null);
   const [order, setOrder] = useState(null);
+  const [customerDetail, setCustomerDetail] = useState(null);
+  const [orderDetail, setOrderDetail] = useState(null);
 
   // Updated useEffect to handle async function correctly
   useEffect(() => {
     const fetchAddress = async () => {
       try {
-        const fetchedAddress = await getAddress();
-        console.log("address fetched:", fetchedAddress);
-        setAddress(fetchedAddress);
+        const fetchAddress = await getAddress();
+        console.log("fetchAddress -  ", fetchAddress);
+        setAddress(fetchAddress);
       } catch (error) {
         console.error("Failed to fetch address:", error);
       }
@@ -122,7 +139,6 @@ const OrderConfirmation = () => {
     const fetchOrder = async () => {
       try {
         const fetchedOrder = await getOrder();
-        console.log("order fetched:", fetchedOrder);
         setOrder(fetchedOrder);
       } catch (error) {
         console.error("Failed to fetch order:", error);
@@ -131,8 +147,43 @@ const OrderConfirmation = () => {
     fetchOrder();
   }, []);
 
-  console.log("address", address);
+  useEffect(() => {
+    const fetchCustomerDetail = async () => {
+      try {
+        const fetchedCustomerDetail = await getCustomerDetail();
+        setCustomerDetail(fetchedCustomerDetail);
+      } catch (error) {
+        console.error("Failed to fetch customer detail:", error);
+      }
+    };
+    fetchCustomerDetail();
+  }, []);
   console.log("order", order);
+
+  useEffect(() => {
+    const fetchOrderDetail = async () => {
+      try {
+        const fetchedOrderDetail = await getOrderDetail();
+        setOrderDetail(fetchedOrderDetail);
+      } catch (error) {
+        console.error("Failed to fetch order detail:", error);
+      }
+    };
+    const fetchOrderItem = async () => {
+      try {
+        const fetchedOrderItem = await getOrderItem(orderDetail.order_id);
+        orderDetail.items = fetchedOrderItem;
+        console.log(" xxxxxxxxxx ");
+        console.log("❤️", orderDetail);
+        setOrderDetail(orderDetail);
+      } catch (error) {
+        console.error("Failed to fetch order item:", error);
+      }
+    };
+    fetchOrderDetail();
+    fetchOrderItem();
+  }, []);
+  console.log("orderDetail", orderDetail);
 
   const orderDetails = {
     orderId: "ORD-2024-10275",
@@ -271,215 +322,236 @@ const OrderConfirmation = () => {
                 </Paper>
 
                 {/* Progress Section */}
-                <Paper sx={{ p: 3, mb: 3 }}>
-                  <Typography variant="h6" gutterBottom>
-                    Order Progress
-                  </Typography>
-                  <LinearProgress
-                    variant="determinate"
-                    value={orderDetails.progress}
-                    sx={{ height: 8, borderRadius: 4, mb: 2 }}
-                  />
-                  <Grid container spacing={2} justifyContent="space-between">
-                    <Grid item>
-                      <Typography variant="body2" color="primary">
-                        Order Placed
-                      </Typography>
+                {orderDetail && (
+                  <Paper sx={{ p: 3, mb: 3 }}>
+                    <Typography variant="h6" gutterBottom>
+                      Order Progress
+                    </Typography>
+                    <LinearProgress
+                      variant="determinate"
+                      value={
+                        orderDetail.order_status === "pending"
+                          ? 33
+                          : orderDetail.order_status === "shipped"
+                          ? 66
+                          : orderDetail.order_status === "delivered"
+                          ? 100
+                          : 0
+                      }
+                      sx={{ height: 8, borderRadius: 4, mb: 2 }}
+                    />
+                    <Grid container spacing={2} justifyContent="space-between">
+                      <Grid item>
+                        <Typography variant="body2" color="primary">
+                          Order Placed
+                        </Typography>
+                      </Grid>
+                      <Grid item>
+                        <Typography variant="body2" color="text.secondary">
+                          Processing
+                        </Typography>
+                      </Grid>
+                      <Grid item>
+                        <Typography variant="body2" color="text.secondary">
+                          Shipped
+                        </Typography>
+                      </Grid>
+                      <Grid item>
+                        <Typography variant="body2" color="text.secondary">
+                          Delivered
+                        </Typography>
+                      </Grid>
                     </Grid>
-                    <Grid item>
-                      <Typography variant="body2" color="text.secondary">
-                        Processing
-                      </Typography>
-                    </Grid>
-                    <Grid item>
-                      <Typography variant="body2" color="text.secondary">
-                        Shipped
-                      </Typography>
-                    </Grid>
-                    <Grid item>
-                      <Typography variant="body2" color="text.secondary">
-                        Delivered
-                      </Typography>
-                    </Grid>
-                  </Grid>
-                </Paper>
+                  </Paper>
+                )}
 
                 {/* Shipping Information */}
-                <Paper sx={{ p: 3 }}>
-                  <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
-                    <LocationOnIcon sx={{ mr: 2, color: "primary.main" }} />
-                    <Typography variant="h6">Shipping Information</Typography>
-                  </Box>
-                  <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
-                    <Typography
-                      variant="body1"
-                      fontWeight="medium"
-                      gutterBottom
-                    >
-                      {orderDetails.shipping.name}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {orderDetails.shipping.address}
-                      <br />
-                      {orderDetails.shipping.city},{" "}
-                      {orderDetails.shipping.state} {orderDetails.shipping.zip}
-                    </Typography>
-                  </Paper>
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <LocalShippingIcon
-                      sx={{ mr: 1, color: "secondary.main" }}
-                    />
-                    <Typography variant="body2" color="secondary.main">
-                      {orderDetails.shipping.method}
-                    </Typography>
-                  </Box>
-                </Paper>
-              </Grid>
-
-              {/* Right Column */}
-              <Grid item xs={12} md={4}>
-                {/* Order Details Card */}
-                <Paper sx={{ p: 3, mb: 3, position: "sticky", top: 88 }}>
-                  <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
-                    <AccessTimeIcon sx={{ mr: 2, color: "primary.main" }} />
-                    <Typography variant="h6">Order Details</Typography>
-                  </Box>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        gutterBottom
-                      >
-                        Order Number
-                      </Typography>
-                      <Typography variant="body1" fontWeight="medium">
-                        {orderDetails.orderId}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        gutterBottom
-                      >
-                        Order Date
-                      </Typography>
-                      <Typography variant="body1" fontWeight="medium">
-                        {orderDetails.orderDate}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        gutterBottom
-                      >
-                        Expected Delivery
-                      </Typography>
+                {address && customerDetail && (
+                  <Paper sx={{ p: 3 }}>
+                    <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
+                      <LocationOnIcon sx={{ mr: 2, color: "primary.main" }} />
+                      <Typography variant="h6">Shipping Information</Typography>
+                    </Box>
+                    <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
                       <Typography
                         variant="body1"
                         fontWeight="medium"
-                        color="secondary"
+                        gutterBottom
                       >
-                        {orderDetails.expectedDelivery}
+                        {customerDetail.first_name} {customerDetail.last_name}
                       </Typography>
-                    </Grid>
-                  </Grid>
-
-                  <Divider sx={{ my: 3 }} />
-
-                  {/* Order Summary */}
-                  <Typography variant="h6" gutterBottom>
-                    Order Summary
-                  </Typography>
-                  <Grid container spacing={2}>
-                    <Grid item xs={6}>
                       <Typography variant="body2" color="text.secondary">
-                        Subtotal
+                        {address.address_line1}, {address.address_line2}
+                        <br />
+                        {address.zip}
                       </Typography>
-                    </Grid>
-                    <Grid item xs={6} sx={{ textAlign: "right" }}>
-                      <Typography variant="body1">
-                        ${orderDetails.subtotal.toFixed(2)}
+                    </Paper>
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <LocalShippingIcon
+                        sx={{ mr: 1, color: "secondary.main" }}
+                      />
+                      <Typography variant="body2" color="secondary.main">
+                        {address.is_main_city
+                          ? "Shipping in 5 days"
+                          : "Shipping in 7 days"}
                       </Typography>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <Typography variant="body2" color="text.secondary">
-                        Shipping
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={6} sx={{ textAlign: "right" }}>
-                      <Typography variant="body1">
-                        ${orderDetails.shippingCost.toFixed(2)}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <Typography variant="body2" color="text.secondary">
-                        Tax
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={6} sx={{ textAlign: "right" }}>
-                      <Typography variant="body1">
-                        ${orderDetails.tax.toFixed(2)}
-                      </Typography>
-                    </Grid>
-                  </Grid>
-                  <Divider sx={{ my: 2 }} />
-                  <Grid container>
-                    <Grid item xs={6}>
-                      <Typography variant="h6">Total</Typography>
-                    </Grid>
-                    <Grid item xs={6} sx={{ textAlign: "right" }}>
-                      <Typography variant="h6" color="primary">
-                        ${orderDetails.total.toFixed(2)}
-                      </Typography>
-                    </Grid>
-                  </Grid>
-
-                  <Box
-                    sx={{
-                      mt: 3,
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 2,
-                    }}
-                  >
-                    <Button
-                      fullWidth
-                      variant="contained"
-                      color="primary"
-                      startIcon={<DownloadIcon />}
-                      size={isMobile ? "small" : "medium"}
-                    >
-                      Download Invoice
-                    </Button>
-                    <Button
-                      fullWidth
-                      variant="outlined"
-                      color="primary"
-                      startIcon={<PrintIcon />}
-                      size={isMobile ? "small" : "medium"}
-                    >
-                      Print Order
-                    </Button>
-                  </Box>
-
-                  <Box
-                    sx={{
-                      mt: 3,
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 1,
-                    }}
-                  >
-                    <EmailIcon color="primary" fontSize="small" />
-                    <Typography variant="body2" color="text.secondary">
-                      A confirmation email has been sent to your email address
-                    </Typography>
-                  </Box>
-                </Paper>
+                    </Box>
+                  </Paper>
+                )}
               </Grid>
+
+              {/* Right Column */}
+              {orderDetail && (
+                <Grid item xs={12} md={4}>
+                  {/* Order Details Card */}
+                  <Paper sx={{ p: 3, mb: 3, position: "sticky", top: 88 }}>
+                    <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
+                      <AccessTimeIcon sx={{ mr: 2, color: "primary.main" }} />
+                      <Typography variant="h6">Order Details</Typography>
+                    </Box>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12}>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          gutterBottom
+                        >
+                          Order Number
+                        </Typography>
+                        <Typography variant="body1" fontWeight="medium">
+                          {"ORD-C-2024-" + orderDetail.order_id}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          gutterBottom
+                        >
+                          Order Date
+                        </Typography>
+                        <Typography variant="body1" fontWeight="medium">
+                          {formatDate(orderDetail.order_date)}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          gutterBottom
+                        >
+                          Expected Delivery
+                        </Typography>
+                        <Typography
+                          variant="body1"
+                          fontWeight="medium"
+                          color="secondary"
+                        >
+                          {formatDate(orderDetail.shipping_date)}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+
+                    <Divider sx={{ my: 3 }} />
+
+                    {/* Order Summary */}
+                    <Typography variant="h6" gutterBottom>
+                      Order Summary
+                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={6}>
+                        <Typography variant="body2" color="text.secondary">
+                          Subtotal
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={6} sx={{ textAlign: "right" }}>
+                        <Typography variant="body1">
+                          ${orderDetail.subtotal}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography variant="body2" color="text.secondary">
+                          Shipping
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={6} sx={{ textAlign: "right" }}>
+                        <Typography variant="body1">
+                          ${orderDetail.shipping}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography variant="body2" color="text.secondary">
+                          Tax
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={6} sx={{ textAlign: "right" }}>
+                        <Typography variant="body1">
+                          ${orderDetail.tax}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                    <Divider sx={{ my: 2 }} />
+                    <Grid container>
+                      <Grid item xs={6}>
+                        <Typography variant="h6">Total</Typography>
+                      </Grid>
+                      <Grid item xs={6} sx={{ textAlign: "right" }}>
+                        <Typography variant="h6" color="primary">
+                          ${orderDetail.total_order_price}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+
+                    <Box
+                      sx={{
+                        mt: 3,
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 2,
+                      }}
+                    >
+                      {address && customerDetail && orderDetail && (
+                        <Button
+                          onClick={() =>
+                            PdfGenerator(orderDetail, address, customerDetail)
+                          }
+                          fullWidth
+                          variant="contained"
+                          color="primary"
+                          startIcon={<DownloadIcon />}
+                          size={isMobile ? "small" : "medium"}
+                        >
+                          Download Invoice
+                        </Button>
+                      )}
+
+                      <Button
+                        fullWidth
+                        variant="outlined"
+                        color="primary"
+                        startIcon={<PrintIcon />}
+                        size={isMobile ? "small" : "medium"}
+                      >
+                        Print Order
+                      </Button>
+                    </Box>
+
+                    <Box
+                      sx={{
+                        mt: 3,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
+                      }}
+                    >
+                      <EmailIcon color="primary" fontSize="small" />
+                      <Typography variant="body2" color="text.secondary">
+                        A confirmation email has been sent to your email address
+                      </Typography>
+                    </Box>
+                  </Paper>
+                </Grid>
+              )}
             </Grid>
           </Container>
         </Box>

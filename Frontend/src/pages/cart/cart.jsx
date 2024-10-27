@@ -31,10 +31,9 @@ import {
 import Header from "../../components/header";
 import Footer from "../../components/footer";
 import { motion } from "framer-motion";
-import changeQuantity from "../../services/changeQuantity"; // Fixed import path
-import calculateShipping from "../../services/shipping";
-
-import { calculateTotal, calculateTax } from "../../services/calculateTotal";
+import changeQuantity from "../../api/changeQuantity"; // Fixed import path
+import calculateShipping from "../../api/shipping";
+import { calculateTotal, calculateTax } from "../../api/calculateTotal";
 
 const Cart = () => {
   const [cartData, setCartData] = useState(null);
@@ -131,8 +130,6 @@ const Cart = () => {
         variant_id: item.variant_id,
         change: changeValue,
       };
-
-      const updatedCart = await changeQuantity(cartItem, operation);
     } catch (error) {
       // Rollback the optimistic update
 

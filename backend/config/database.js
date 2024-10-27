@@ -5,13 +5,13 @@ const { config } = require('dotenv');
 config();
 
 const pool = mysql.createPool({
-  host: process.env.DB_HOST,           // Updated to use environment variable
-  user: process.env.DB_USER,           // Updated to use environment variable
-  password: process.env.DB_PASSWORD,   // Updated to use environment variable
-  database: process.env.DB_NAME,       // Updated to use environment variable
+  host: process.env.DB_HOST, // Updated to use environment variable
+  user: process.env.DB_USER, // Updated to use environment variable
+  password: process.env.DB_PASSWORD, // Updated to use environment variable
+  database: process.env.DB_NAME, // Updated to use environment variable
   waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
+  connectionLimit: 20,
+  queueLimit: 0,
 });
 
 // Async function to test the connection

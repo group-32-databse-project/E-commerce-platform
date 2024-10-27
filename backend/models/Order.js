@@ -73,6 +73,9 @@ class Order {
     );
     return rows;
   }
+
+  //getOrderById
+  s;
   // Add more methods as needed
 }
 
