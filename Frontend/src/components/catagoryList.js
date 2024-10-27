@@ -333,12 +333,14 @@ const OurProduct = () => {
     const fetchProducts = async () => {
       try {
         console.log(categoryId);
-        const response = await fetch(`/api/products/category/${categoryId}`);
+        const response = await fetch(`/api/products/${categoryId}/category`);
+        
         if (!response.ok) {
           throw new Error("Failed to fetch products.");
         }
         const data = await response.json();
         setProducts(data);
+        console.log("products",data);
         setLoading(false);
       } catch (err) {
         setError(err.message || "An error occurred.");

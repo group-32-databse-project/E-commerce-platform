@@ -4,7 +4,10 @@ const productController = require('../controllers/productController');
 const categoryController = require('../controllers/categoryController');
 
 // GET /api/products
-router.get('/', productController.getAllProducts);
+router.get('/', productController.getProducts);
+
+// GET /api/products/:id/category
+router.get('/:id/category', productController.getProductsByCategory);
 
 // GET /api/products/:id
 router.get('/:id', productController.getProductById);
@@ -16,7 +19,8 @@ router.post('/', productController.createProduct);
 router.get("/:id/variations", productController.getVariationAndOptions);
 
 //get c
-router.get("/category/:categoryId", productController.getProductsByCategory);
+//router.get("/category/:categoryId", productController.getProductsByCategory);
+
 
 
 

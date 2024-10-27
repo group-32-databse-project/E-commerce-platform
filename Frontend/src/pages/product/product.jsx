@@ -177,6 +177,7 @@ const ProductPage = () => {
         }
         const data = await response.json();
         setProduct(data);
+       
         setVariants(data.variants || []);
         if (data.variants && data.variants.length > 0) {
           setSelectedVariant(data.variants[0]);
