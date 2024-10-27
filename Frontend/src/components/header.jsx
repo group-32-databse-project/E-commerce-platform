@@ -352,7 +352,7 @@ const Header = () => {
           <ListItem 
             button 
             key={item.name} 
-            onClick={() => navigate(`/product/${item.id}`)}
+            onClick={() => navigate(`${item.link}`)} // Navigate to the corresponding webpage
             sx={{ cursor: 'pointer' }} // Change cursor to pointer
           >
             <ListItemText primary={item.name} />
@@ -442,7 +442,7 @@ const Header = () => {
                         <Grid item xs={12} key={item.product_id}>
                          <Box
                         sx={{ padding: 1, borderBottom: '1px solid #e0e0e0', cursor: 'pointer' }}
-                        onClick={() => navigate(`/product/${item.product_name}`)} // Navigate to the corresponding webpage
+                        onClick={() => navigate(`/product/${item.product_id}`)} // Navigate to the corresponding webpage
                       >
                             {item.product_name}
                           </Box>
@@ -791,12 +791,12 @@ const Header = () => {
             {renderDropdown('Toys', toyset.map((toy) => ({
               name: toy.category_name,
               id:toy.category_id,
-              link: `/toys/${toy.category_id}`,
+              link: `/category/${toy.category_id}`,
             })), toysDropdownOpen, setToysDropdownOpen)}
             {renderDropdown('Electronics', elecset.map((elec) => ({
               name: elec.category_name,
               id:elec.category_id,
-              link: `/electronics/${elec.category_id}`,
+              link: `/category/${elec.category_id}`,
             })), electronicsDropdownOpen, setElectronicsDropdownOpen)}
           </Box>        
     
