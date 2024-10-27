@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export default async function saveAddress(formData) {
-  const customerId = localStorage.getItem("customer_id");
+  const customerId = localStorage.getItem("customerId");
 
   try {
     const response = await axios.post(

@@ -9,6 +9,17 @@ router.post("/register", customerController.registerCustomer);
 //post /api/customers/addAddress
 router.post("/addAddress", customerController.addAddress);
 
+
+//Get 
+
+
+router.get("/:customerId/address", customerController.getAddressesByCustomerId);
+
+
+//Get /api/customers/:customerId/orders
+router.get("/:customerId/orders", customerController.getOrdersByCustomerId);
+
+
 // GET /api/customers/:id
 router.get("/:id", customerController.getCustomerById);
 

@@ -2,9 +2,12 @@ const ShoppingCart = require('../models/ShoppingCart');
 const ShoppingCartItem = require('../models/ShoppingCartItem');
 
 exports.getCart = async (req, res) => {
+  console.log("come");
+  console.log(req.params);
   const { customerId } = req.params;
   try {
     const cart = await ShoppingCart.getCartByCustomerId(customerId);
+    console.log("cart", cart);
     console.log(cart.shopping_cart_id);
     if (cart) {
       const items = await ShoppingCartItem.getItemsByCartId(
@@ -16,8 +19,10 @@ exports.getCart = async (req, res) => {
       res.status(404).json({ message: "Cart not found" });
     }
   } catch (error) {
-    console.error('Error in getCart:', error);
-    res.status(500).json({ message: 'Error fetching cart', error: error.toString() });
+    console.error("Error in getCart:", error);
+    res
+      .status(500)
+      .json({ message: "Error fetching cart", error: error.toString() });
   }
 };
 

@@ -15,6 +15,7 @@ import NotFound from "./pages/notFound/NotFound.jsx";
 import ProductPage from "./pages/product/product.jsx";
 import Category from "./pages/category/catagory.js";
 import Loading from "./pages/loading/loading.js";
+import OrderConfirmation from "./pages/orderConfermation.js";
 function App() {
   return (
     <Router>
@@ -33,6 +34,7 @@ function App() {
         <Route path="/loading" element={<Loading />} />
         <Route path="/category/:categoryId" element={<Category />} />
         <Route path="*" element={<NotFound />} />
+        <Route path="/orderConfirmation" element={<OrderConfirmation />} />
       </Routes>
     </Router>
   );
