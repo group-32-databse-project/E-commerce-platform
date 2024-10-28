@@ -65,7 +65,7 @@ class Order {
        LEFT JOIN order_item ON shop_order.order_id = order_item.order_id 
        LEFT JOIN variant ON order_item.variant_id = variant.variant_id 
        LEFT JOIN product ON variant.product_id = product.product_id 
-       WHERE shop_order.user_id = ?`, 
+       WHERE shop_order.user_id = ?  and  order_item.order_item_id>0`, 
       [customerId]
     );
     console.log('rows:', rows);

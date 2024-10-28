@@ -21,7 +21,7 @@ const MyOrder = () => {
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-               id=1;
+              id=1;
                 const response = await axios.get(`/api/orders/${id}/customer`);
                 const data = response.data;
 
@@ -123,6 +123,7 @@ const MyOrder = () => {
                         border: 1px solid #ddd;
                         border-radius: 8px;
                         margin-bottom: 10px;
+                        margin-left: -20px;
                         padding: 10px;
                         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
                         display: flex;
@@ -151,7 +152,7 @@ const MyOrder = () => {
                 `}
             </style>
             <h2 className="orders-title">My Orders</h2>
-            {orders.order_id===null ? (
+            {orders.length===0 ? (
                 <p className="no-orders">You have no orders.</p>
             ) : (
                 <ul className="orders-list">
@@ -159,7 +160,10 @@ const MyOrder = () => {
                         <li key={index} className="order-item">
                             <div className="order-header">
                                
-                                <span className="order-date">Date: {new Date(order.order_date).toLocaleDateString()}</span>
+                                <span className="order-date">Ordered Date: {new Date(order.order_date).toLocaleDateString()}
+                                   
+                                </span>
+                                
                             </div>
                             <div className="order-details">
                                 {order.items && order.items.map((item, idx) => (
@@ -174,8 +178,12 @@ const MyOrder = () => {
                             </div>
                             <div className="order-total">
                                 Total: ${order.total_order_price}
+                                <br></br>
+                                status: {order.order_status}
                             </div>
+                            
                         </li>
+                       
                     ))}
                 </ul>
             )}
