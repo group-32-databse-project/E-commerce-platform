@@ -40,42 +40,64 @@ function Categories() {
         category_image: ''
     });
 
-    // Hardcoded parent categories
-    const parentCategories = [
-        { category_id: 1, category_name: "Toys" },
-        { category_id: 2, category_name: "Electronics" }
-    ];
-
     useEffect(() => {
         fetchCategories();
     }, []);
 
-    useEffect(() => {
-        const token = localStorage.getItem('adminToken');
-        console.log('🔑 Admin token exists:', !!token);
-    }, []);
-
     const fetchCategories = async () => {
         try {
-            setLoading(true);
-            const res = await axios.get('/api/admin/categories', {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-                }
-            });
-            setCategories(res.data);
+            console.log('Fetching categories...');
+            const response = await axios.get('http://localhost:5001/api/admin/categories');
+            console.log('Categories data:', response.data);
+            setCategories(response.data);
+            setLoading(false);
         } catch (err) {
-            const errorMsg = err.response?.data?.message || 'Failed to fetch categories';
-            setError(errorMsg);
-            toast.error(errorMsg);
+            console.error('Error fetching categories:', err);
+            toast.error('Failed to fetch categories');
+            setError('Failed to fetch categories');
+            setLoading(false);
+        }
+    };
+
+    const handleSubmit = async () => {
+        if (!validateForm()) return;
+
+        try {
+            setSubmitting(true);
+            console.log('Sending category data:', formData);
+
+            const response = await axios.post('/api/admin/categories', formData);
+            console.log('Category added:', response.data);
+            
+            toast.success('Category added successfully');
+            setOpenDialog(false);
+            resetForm();
+            fetchCategories();
+        } catch (err) {
+            console.error('Error adding category:', err);
+            toast.error(err.response?.data?.message || 'Failed to add category');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const handleDelete = async (id) => {
+        if (!window.confirm('Are you sure you want to delete this category?')) return;
+
+        try {
+            setLoading(true);
+            await axios.delete(`/api/admin/categories/${id}`);
+            toast.success('Category deleted successfully');
+            fetchCategories();
+        } catch (err) {
+            console.error('Error deleting category:', err);
+            toast.error('Failed to delete category');
         } finally {
             setLoading(false);
         }
     };
 
     const validateForm = () => {
-        console.log('Validating form');  // Validation log
-        
         if (!formData.category_name.trim()) {
             toast.error('Category name is required');
             return false;
@@ -87,55 +109,6 @@ function Categories() {
         return true;
     };
 
-    const handleSubmit = async () => {
-        console.log('Submit button clicked');  // First log
-        if (!validateForm()) return;
-
-        try {
-            setSubmitting(true);
-            console.log('Sending data:', formData);  // Second log
-
-            const response = await axios.post('/api/admin/categories', formData, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-                }
-            });
-
-            console.log('Response:', response.data);  // Third log
-            toast.success('Category added successfully');
-            setOpenDialog(false);
-            resetForm();
-            fetchCategories();
-        } catch (err) {
-            console.log('Error:', err);  // Error log
-            const errorMessage = err.response?.data?.message || 'Failed to add category';
-            toast.error(errorMessage);
-            setError(errorMessage);
-        } finally {
-            setSubmitting(false);
-        }
-    };
-
-    const handleDelete = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this category?')) return;
-
-        try {
-            setLoading(true);
-            await axios.delete(`/api/admin/categories/${id}`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-                }
-            });
-            toast.success('Category deleted successfully');
-            fetchCategories();
-        } catch (err) {
-            const errorMsg = err.response?.data?.message || 'Failed to delete category';
-            toast.error(errorMsg);
-        } finally {
-            setLoading(false);
-        }
-    };
-
     const resetForm = () => {
         setFormData({
             category_name: '',
@@ -145,7 +118,7 @@ function Categories() {
     };
 
     const getParentCategoryName = (parentId) => {
-        const parent = parentCategories.find(cat => cat.category_id === parentId);
+        const parent = categories.find(cat => cat.category_id === parentId);
         return parent ? parent.category_name : 'None';
     };
 
@@ -179,7 +152,7 @@ function Categories() {
                                     <CardMedia
                                         component="img"
                                         height="140"
-                                        image={category.category_image}
+                                        image={`/uploads/${category.category_image}`}
                                         alt={category.category_name}
                                         sx={{ objectFit: 'cover' }}
                                     />
@@ -191,7 +164,7 @@ function Categories() {
                                             Parent: {getParentCategoryName(category.parent_category_id)}
                                         </Typography>
                                         <Typography variant="body2" color="text.secondary">
-                                            Image: {category.category_image}
+                                            ID: {category.category_id}
                                         </Typography>
                                     </CardContent>
                                     <CardActions sx={{ justifyContent: 'flex-end' }}>
@@ -237,24 +210,26 @@ function Categories() {
                                 disabled={submitting}
                             >
                                 <MenuItem value="">None</MenuItem>
-                                {parentCategories.map((cat) => (
-                                    <MenuItem 
-                                        key={cat.category_id} 
-                                        value={cat.category_id}
-                                    >
-                                        {cat.category_name} (ID: {cat.category_id})
-                                    </MenuItem>
-                                ))}
+                                {categories
+                                    .filter(cat => !cat.parent_category_id) // Only show parent categories
+                                    .map((cat) => (
+                                        <MenuItem 
+                                            key={cat.category_id} 
+                                            value={cat.category_id}
+                                        >
+                                            {cat.category_name} (ID: {cat.category_id})
+                                        </MenuItem>
+                                    ))}
                             </Select>
                         </FormControl>
                         <TextField
                             fullWidth
-                            label="Image Name (e.g., image.jpg)"
+                            label="Image Name"
                             value={formData.category_image}
                             onChange={(e) => setFormData({...formData, category_image: e.target.value})}
                             disabled={submitting}
                             required
-                            helperText="Enter the image filename (e.g., toys.jpg)"
+                            helperText="Enter the image filename (e.g., category.jpg)"
                         />
                     </Box>
                 </DialogContent>
