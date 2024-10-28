@@ -17,6 +17,7 @@ const authRoutes = require('./routes/authRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const notificationRoutes = require('./routes/notificationRoutes'); // Import Notification Routes
 const filterRoutes = require('./routes/filterRoutes'); 
+const bannerRoutes = require('./routes/bannerRoutes');
 
 
 
@@ -38,6 +39,7 @@ app.use('/api', authRoutes);
 app.use('/api/notifications', notificationRoutes); // Register Notification Routes
 app.use('/api/category', categoryRoutes); // Optional: Review if duplicate
 app.use('/api/filters', filterRoutes);
+app.use('/api/banner', bannerRoutes);
 
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
