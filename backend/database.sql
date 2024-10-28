@@ -292,6 +292,8 @@ BEGIN
 END$$
 
 
+
+
 DELIMITER ;
 
 CREATE OR REPLACE VIEW customer_order_report AS

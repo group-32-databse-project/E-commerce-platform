@@ -29,3 +29,14 @@ Content-Type: application/json
 ### GET
 GET http://localhost:5001/api/orders/1/customer
 Content-Type: application/json
+
+
+
+
+### POST
+POST http://localhost:5001/api/customers/2/phonenumber
+Content-Type: application/json
+
+{
+  "phone": "0711234509"
+}

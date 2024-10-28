@@ -32,6 +32,7 @@ const CustomerDeatailForm = () => {
       .then(data => {
         setCustomerData(data);
         console.log('Profile data:', customerData);
+       
       })
       .catch(error => {
         console.error('Error fetching profile data:', error);
@@ -40,27 +41,35 @@ const CustomerDeatailForm = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    console.log('name:',name);
+    console.log('value:',value);
     setCustomerData(prevState => ({
       ...prevState,
+      
       [name]: value,
     }));
+    customerData.phone_number = value;
+    console.log('phone hi:',customerData.phone_number);
   };
 
   const handleSave = () => {
     // Send data to backend
-    fetch('/api/profile', {
+    console.log('all:',customerData);
+    console.log('phone:',customerData.phone_number);
+    fetch(`/api/customers/${id}/phonenumber`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+      'Content-Type': 'application/json',
       },
-      body: JSON.stringify(customerData),
+      
+      body: JSON.stringify({ phone: customerData.phone_number}), // Use JSON.stringify to convert the object to a JSON string
     })
       .then(response => response.json())
       .then(data => {
-        console.log('Profile updated successfully:', data);
+      console.log('Profile updated successfully:', data);
       })
       .catch(error => {
-        console.error('Error updating profile:', error);
+      console.error('Error updating profile:', error);
       });
   };
 
@@ -90,7 +99,7 @@ const CustomerDeatailForm = () => {
             type="email"
             name="email"
             value={customerData.email_address}
-            onChange={handleInputChange}
+           readOnly
           />
         </FormRow>
         <FormRow>
@@ -98,7 +107,7 @@ const CustomerDeatailForm = () => {
           <Input
             type="text"
             name="phone"
-            value={customerData.phone}
+            value={customerData.phone_number}
             onChange={handleInputChange}
           />
         </FormRow>
