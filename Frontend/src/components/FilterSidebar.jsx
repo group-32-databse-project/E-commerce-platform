@@ -170,11 +170,11 @@ const FilterSidebar = ({ onFilterChange }) => {
 
   // Update parent component when filters change
   useEffect(() => {
-    console.log("Selected Filters:", {
-      categories: selectedCategories,
-      subcategories: selectedSubcategories,
-      priceRange,
-    });
+    // console.log("Selected Filters:", {
+    //   categories: selectedCategories,
+    //   subcategories: selectedSubcategories,
+    //   priceRange,
+    // });
     onFilterChange({
       categories: selectedCategories,
       subcategories: selectedSubcategories,

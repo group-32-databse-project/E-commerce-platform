@@ -358,10 +358,10 @@ const OurProduct = ({ filters }) => {
           ? "/api/products" // No filters applied, fetch all products
           : `/api/filters/products?${queryParams.toString()}`;
 
-      console.log("Fetching Products from:", apiEndpoint);
+      // console.log("Fetching Products from:", apiEndpoint);
 
       const response = await axios.get(apiEndpoint);
-      console.log("Fetched Products:", response.data);
+      // console.log("Fetched Products:", response.data);
       setProducts(response.data);
     } catch (err) {
       console.error("Error fetching products:", err);

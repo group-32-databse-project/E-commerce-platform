@@ -17,7 +17,7 @@ const HomePage = () => {
 
   // Memoize handleFilterChange to maintain stable identity
   const handleFilterChange = useCallback((newFilters) => {
-    console.log("Received New Filters:", newFilters);
+    // console.log("Received New Filters:", newFilters);
     setFilters(newFilters);
   }, []);
 
@@ -43,7 +43,7 @@ const HomePage = () => {
             </section>
 
             {/* New Arrivals */}
-            <Newarrival />
+            
           </main>
         </div>
       </div>
