@@ -21,7 +21,7 @@ const MyOrder = () => {
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-              id=1;
+             // id=1;
                 const response = await axios.get(`/api/orders/${id}/customer`);
                 const data = response.data;
 
