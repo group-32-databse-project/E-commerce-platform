@@ -19,7 +19,7 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import FavoriteIcon from "@mui/icons-material/Favorite";
+// import FavoriteIcon from "@mui/icons-material/Favorite";
 import StarIcon from "@mui/icons-material/Star";
 import StarHalfIcon from "@mui/icons-material/StarHalf";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
@@ -29,6 +29,8 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import "../assets/styles/allcategory.css";
 import { keyframes } from "@mui/system";
 import { useNavigate } from "react-router-dom";
+import { addToWishlist, removeFromWishlist, getWishlist } from "../services/wishlist";
+import { Favorite, FavoriteBorder } from "@mui/icons-material";
 
 // Styled Components
 
@@ -326,6 +328,7 @@ const OurProduct = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const navigate = useNavigate();
+  const [wishlist, setWishlist] = useState([]);
 
   // Fetch products from API
   useEffect(() => {
@@ -345,6 +348,34 @@ const OurProduct = () => {
     };
     fetchProducts();
   }, []);
+
+  useEffect(() => {
+    const fetchWishlist = async () => {
+      try {
+        const wishlistData = await getWishlist();
+        setWishlist(wishlistData || []);
+      } catch (error) {
+        console.error("Error fetching wishlist:", error);
+      }
+    };
+
+    fetchWishlist();
+  }, []);
+
+  const handleWishlistToggle = async (productId) => {
+    const isInWishlist = wishlist.some(item => item.product_id === productId);
+    try {
+      if (isInWishlist) {
+        await removeFromWishlist(productId);
+        setWishlist(prev => prev.filter(item => item.product_id !== productId));
+      } else {
+        await addToWishlist(productId);
+        setWishlist(prev => [...prev, { product_id: productId }]);
+      }
+    } catch (error) {
+      console.error("Error toggling wishlist:", error);
+    }
+  };
 
   // Handle Add to Cart
   const onAddToCart = (variantId) => {
@@ -439,9 +470,9 @@ const OurProduct = () => {
               <WishlistButton
                 aria-label="add to wishlist"
                 color="secondary"
-                onClick={() => onAddToWishlist(product.product_id)}
+                onClick={() => handleWishlistToggle(product.product_id)}
               >
-                <FavoriteIcon />
+                {wishlist.some(item => item.product_id === product.product_id) ? <Favorite /> : <FavoriteBorder />}
               </WishlistButton>
 
               <QuickViewButton

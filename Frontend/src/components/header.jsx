@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   AppBar,
   Toolbar,
@@ -42,6 +42,7 @@ import { Link } from "react-router-dom";
 import logo from "../assets/images/logo.svg"; // Ensure the path is correct
 import { formatDistanceToNow } from "date-fns"; // Install via npm if not already
 import { useNavigate } from "react-router-dom";
+import { getWishlist } from '../services/wishlist';
 
 
 
@@ -186,6 +187,7 @@ const Header = () => {
       read: true,
     },
   ]);
+  const [wishlistCount, setWishlistCount] = useState(0);
 
   // State for Login Dialog
   
@@ -388,6 +390,24 @@ const Header = () => {
       }, [searchQuery]);
     
       console.log("serchresult",searchResults);
+
+      // Notification Icon count could be based on unread notifications
+      const unreadNotifications = notifications.filter((notif) => !notif.read).length;
+
+      useEffect(() => {
+        const fetchWishlistCount = async () => {
+          try {
+            const wishlist = await getWishlist();
+            setWishlistCount(wishlist.length);
+          } catch (error) {
+            console.error('Error fetching wishlist count:', error);
+          }
+        };
+
+        fetchWishlistCount();
+
+        // Optionally, set up polling or websocket for real-time updates
+      }, []);
 
       return (
         <AppBar
@@ -659,16 +679,6 @@ const Header = () => {
                   )}
     
                   {/* Other Icons */}
-                  <Tooltip title="Favorites">
-                    <IconButton
-                      color="inherit"
-                      component={Link}
-                      to="/favorites"
-                      sx={{ ml: 1 }}
-                    >
-                      <FavoriteIcon sx={{ color: "#333333" }} />
-                    </IconButton>
-                  </Tooltip>
                   <Tooltip title="Cart">
                     <IconButton
                       color="inherit"
@@ -677,6 +687,18 @@ const Header = () => {
                       sx={{ ml: 1 }}
                     >
                       <ShoppingCartIcon sx={{ color: "#333333" }} />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Wishlist">
+                    <IconButton
+                      color="inherit"
+                      component={Link}
+                      to="/wishlist"
+                      sx={{ ml: 1 }}
+                    >
+                      <Badge badgeContent={wishlistCount} color="secondary">
+                        <FavoriteIcon sx={{ color: "#333333" }} />
+                      </Badge>
                     </IconButton>
                   </Tooltip>
                 </Box>
@@ -836,7 +858,7 @@ const Header = () => {
                   </>
                 ) : (
                   <>
-                    <ListItem button>
+                    <ListItem button component={Link} to="/signin" onClick={toggleDrawer(false)}>
                       <ListItemIcon>
                         <PersonIcon />
                       </ListItemIcon>
@@ -863,12 +885,6 @@ const Header = () => {
                   <Badge badgeContent={notifications.length} color="primary" sx={{ ml: 1 }}>
                     {/* Optional: Add a dot or number */}
                   </Badge>
-                </ListItem>
-                <ListItem button component={Link} to="/favorites" onClick={toggleDrawer(false)}>
-                  <ListItemIcon>
-                    <FavoriteIcon />
-                  </ListItemIcon>
-                  <ListItemText primary="Favorites" />
                 </ListItem>
                 <ListItem button component={Link} to="/cart" onClick={toggleDrawer(false)}>
                   <ListItemIcon>
