@@ -3,6 +3,8 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const pool = require('../config/database');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 // Configure multer for file upload
 const storage = multer.diskStorage({
@@ -196,6 +198,54 @@ router.delete('/products/:id', async (req, res) => {
     } catch (error) {
         console.error('Error deleting product:', error);
         res.status(500).json({ message: 'Error deleting product' });
+    }
+});
+
+// Admin Login
+router.post('/auth/login', async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        console.log('Login attempt for username:', username);
+
+        // Validate input
+        if (!username || !password) {
+            return res.status(400).json({ message: 'Username and password are required' });
+        }
+
+        // Get admin from database
+        const [admins] = await pool.query(
+            'SELECT * FROM admin WHERE username = ?',
+            [username]
+        );
+
+        if (admins.length === 0) {
+            return res.status(401).json({ message: 'Invalid credentials' });
+        }
+
+        const admin = admins[0];
+
+        // Check password
+        const validPassword = await bcrypt.compare(password, admin.password);
+        if (!validPassword) {
+            return res.status(401).json({ message: 'Invalid credentials' });
+        }
+
+        // Create simple token (you can enhance this later)
+        const token = 'admin-token-' + Date.now();
+
+        res.json({
+            message: 'Login successful',
+            token,
+            admin: {
+                admin_id: admin.admin_id,
+                username: admin.username,
+                email: admin.email
+            }
+        });
+
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(500).json({ message: 'Error logging in' });
     }
 });
 

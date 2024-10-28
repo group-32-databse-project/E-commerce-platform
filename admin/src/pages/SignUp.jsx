@@ -1,23 +1,18 @@
 import React, { useState } from "react";
-import { useNavigate, Link as RouterLink } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Button,
-  Checkbox,
   CssBaseline,
-  FormControlLabel,
-  Divider,
   FormControl,
-  Link,
   TextField,
   Typography,
   Stack,
   Card as MuiCard,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { Google as GoogleIcon, Facebook as FacebookIcon } from "@mui/icons-material";
-import { useAuth } from "../context/AuthContext";
 import axios from "axios";
+import { toast } from 'react-toastify';
 
 // Styled Components
 const CardStyled = styled(MuiCard)(({ theme }) => ({
@@ -54,56 +49,46 @@ const SignUpContainer = styled(Stack)(({ theme }) => ({
 
 const SignUp = () => {
   const navigate = useNavigate();
-  const auth = useAuth();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    password: "",
+  });
+  const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
   const handleSignUp = async (e) => {
     e.preventDefault();
     let validationErrors = {};
 
-    if (!name.trim()) validationErrors.name = "Name is required";
-    if (!email.trim()) {
+    if (!formData.username.trim()) {
+      validationErrors.username = "Username is required";
+    }
+    if (!formData.email.trim()) {
       validationErrors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       validationErrors.email = "Email is invalid";
     }
-    if (!password.trim()) validationErrors.password = "Password is required";
-    else if (password.length < 6)
-      validationErrors.password = "Password must be at least 6 characters";
+    if (!formData.password.trim()) {
+      validationErrors.password = "Password is required";
+    }
 
     setErrors(validationErrors);
 
     if (Object.keys(validationErrors).length > 0) return;
 
     try {
-      // Replace with your actual sign-up API endpoint
-      const res = await axios.post("/api/customers/register", {
-        name,
-        email,
-        password,
-      });
-
-      // Assuming the response contains token, name, and customerId
-      const { token, name: userName, customerId } = res.data;
-
-      auth.signin(token, userName, customerId);
-      navigate("/home");
+      setLoading(true);
+      const response = await axios.post('http://localhost:5001/api/admin/auth/register', formData);
+      
+      toast.success('Registration successful! Please login.');
+      navigate('/signin');
     } catch (err) {
-      console.error(err);
-      // Handle error (e.g., display error message)
-      alert("Registration failed. Please try again.");
+      console.error('Registration error:', err);
+      toast.error(err.response?.data?.message || 'Registration failed');
+    } finally {
+      setLoading(false);
     }
-  };
-
-  const handleBypassSignUp = () => {
-    // Implement bypass sign-up functionality if needed
-    // For example, navigate to home with default user
-    auth.signin("bypass-token", "Bypass User", "bypass-id");
-    navigate("/home");
   };
 
   return (
@@ -111,17 +96,17 @@ const SignUp = () => {
       <CssBaseline />
       <CardStyled>
         <Typography component="h1" variant="h5" align="center">
-          Sign Up
+          Admin Registration
         </Typography>
         <Box component="form" onSubmit={handleSignUp} sx={{ mt: 1 }}>
           <FormControl fullWidth margin="normal">
             <TextField
-              label="Name"
+              label="Username"
               variant="outlined"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              error={Boolean(errors.name)}
-              helperText={errors.name}
+              value={formData.username}
+              onChange={(e) => setFormData({...formData, username: e.target.value})}
+              error={Boolean(errors.username)}
+              helperText={errors.username}
               required
             />
           </FormControl>
@@ -130,8 +115,8 @@ const SignUp = () => {
               label="Email Address"
               variant="outlined"
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={formData.email}
+              onChange={(e) => setFormData({...formData, email: e.target.value})}
               error={Boolean(errors.email)}
               helperText={errors.email}
               required
@@ -142,55 +127,21 @@ const SignUp = () => {
               label="Password"
               variant="outlined"
               type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={formData.password}
+              onChange={(e) => setFormData({...formData, password: e.target.value})}
               error={Boolean(errors.password)}
               helperText={errors.password}
               required
             />
           </FormControl>
-          <FormControlLabel
-            control={<Checkbox value="terms" color="primary" required />}
-            label="I agree to the Terms and Conditions"
-          />
-          <Button type="submit" fullWidth variant="contained" sx={{ mt: 2 }}>
-            Sign Up
-          </Button>
-          <Typography sx={{ textAlign: "center", mt: 2 }}>
-            Already have an account?{" "}
-            <Link component={RouterLink} to="/signin" variant="body2">
-              Sign in
-            </Link>
-          </Typography>
-        </Box>
-        <Divider sx={{ my: 3 }}>or</Divider>
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          <Button
-            fullWidth
-            variant="outlined"
-            onClick={() => alert("Sign up with Google")}
-            startIcon={<GoogleIcon />}
-          >
-            Sign up with Google
-          </Button>
-          <Button
-            fullWidth
-            variant="outlined"
-            onClick={() => alert("Sign up with Facebook")}
-            startIcon={<FacebookIcon />}
-          >
-            Sign up with Facebook
-          </Button>
-          {/* Bypass Sign-Up Button */}
-          <Button
-            type="button"
-            fullWidth
-            variant="outlined"
-            color="secondary"
-            onClick={handleBypassSignUp}
+          <Button 
+            type="submit" 
+            fullWidth 
+            variant="contained"
+            disabled={loading}
             sx={{ mt: 2 }}
           >
-            Bypass Sign-Up
+            {loading ? 'Signing up...' : 'Sign Up'}
           </Button>
         </Box>
       </CardStyled>
