@@ -365,6 +365,85 @@ export default function PaymentForm() {
     }
   };
 
+  // Handler for form submission
+  const handleSubmit = async () => {
+    // Basic validation
+    if (!cardName.trim()) {
+      setSnackbar({
+        open: true,
+        message: "Card name is required.",
+        severity: "error",
+      });
+      return;
+    }
+
+    if (!cardNumber || cardNumber.replace(/\s/g, "").length !== 16) {
+      setSnackbar({
+        open: true,
+        message: "A valid 16-digit card number is required.",
+        severity: "error",
+      });
+      return;
+    }
+
+    if (!expirationDate || !/^\d{2}\/\d{2}$/.test(expirationDate)) {
+      setSnackbar({
+        open: true,
+        message: "A valid expiration date (MM/YY) is required.",
+        severity: "error",
+      });
+      return;
+    }
+
+    if (!cvv || cvv.length !== 3) {
+      setSnackbar({
+        open: true,
+        message: "A valid 3-digit CVV is required.",
+        severity: "error",
+      });
+      return;
+    }
+
+    setIsSaving(true); // Start loading
+
+    try {
+      // TODO: Replace with actual payment processing logic
+      const paymentData = {
+        card_owner: cardName.trim(),
+        card_number: cardNumber.replace(/\s/g, ""),
+        expiration_date: expirationDate.replace(/\s/g, ""),
+        last_four_digits: cardNumber.replace(/\s/g, "").slice(-4),
+      };
+
+      console.log("Submitting payment data:", paymentData);
+
+      // Example: Simulate API call
+      await saveCreditCard(paymentData);
+
+      setSnackbar({
+        open: true,
+        message: "Payment submitted successfully!",
+        severity: "success",
+      });
+
+      // Optionally, reset the form
+      setCardNumber("");
+      setCvv("");
+      setExpirationDate("");
+      setCardName("");
+      setSaveCard(false);
+    } catch (error) {
+      console.error("Error submitting payment:", error);
+      setSnackbar({
+        open: true,
+        message: `Error submitting payment: ${error.message}`,
+        severity: "error",
+      });
+    } finally {
+      setIsSaving(false); // Stop loading
+    }
+  };
+
   return (
     <Stack spacing={{ xs: 3, sm: 6 }} useFlexGap>
       <FormControl component="fieldset" fullWidth>
@@ -544,7 +623,17 @@ export default function PaymentForm() {
             label="Remember credit card details for next time"
           />
 
-       
+          {/* Submit Button */}
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleSubmit}
+            disabled={isSaving}
+            startIcon={isSaving && <CircularProgress size={20} />}
+            sx={{ alignSelf: "flex-end", marginTop: 2 }}
+          >
+            {isSaving ? "Submitting..." : "Submit Payment"}
+          </Button>
         </Box>
       )}
       {paymentType === "bankTransfer" && (

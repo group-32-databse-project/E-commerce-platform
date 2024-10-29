@@ -9,7 +9,7 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { useState, useEffect } from "react";
 import getAddress from "../api/getAddress";
-
+import getCustomerDetail from "../api/custermerDetail";
 const addresses = ["1 MUI Drive", "Reactville", "Anytown", "99999", "USA"];
 const payments = [
   { name: "Card type:", detail: "Visa" },
@@ -19,7 +19,16 @@ const payments = [
 ];
 
 export default function Review() {
+  const [customer, setCustomer] = useState(null);
   const [address, setAddress] = useState(null);
+  useEffect(() => {
+    const fetchCustomer = async () => {
+      const customer = await getCustomerDetail();
+      setCustomer(customer);
+    };
+    fetchCustomer();
+  }, []);
+
   useEffect(() => {
     const fetchAddress = async () => {
       const address = await getAddress();
@@ -27,6 +36,7 @@ export default function Review() {
     };
     fetchAddress();
   }, []);
+
   return (
     <Stack spacing={2}>
       <Divider />
@@ -36,12 +46,15 @@ export default function Review() {
         spacing={2}
         sx={{ my: 2 }}
       >
-        {address && (
+        {customer && address && (
           <div>
             <Typography variant="subtitle2" gutterBottom>
               Shipment details
             </Typography>
-            <Typography gutterBottom>John Smith</Typography>
+            <Divider />
+            <Typography gutterBottom>
+              {customer.first_name} {customer.last_name}
+            </Typography>
             <Typography gutterBottom sx={{ color: "text.secondary" }}>
               {address.address_line1}, {address.address_line2}, {address.city},
               {address.postal_code}
