@@ -1,6 +1,6 @@
 const express = require("express");
 const customerController = require("../controllers/customerController.js");
-const PhoneNumber = require("../controllers/phoneNumberController.js");
+
 
 const router = express.Router();
 
@@ -26,7 +26,8 @@ router.get("/:id/addresses", customerController.getAddressesByCustomerId);
 router.get("/:id/payment", customerController.getPaymentDeatails);
 
 // POST /api/customers/:id/phonenumber
-router.post("/:id/phonenumber", PhoneNumber.savePhoneNumber);
+//router.post("/:id/update", PhoneNumber.savePhoneNumber);
+router.post("/:id/update", customerController.updateprofile);
 
 // Add more routes as needed (update, delete, etc.)
 

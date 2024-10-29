@@ -31,7 +31,7 @@ const CustomerDeatailForm = () => {
       .then(response => response.json())
       .then(data => {
         setCustomerData(data);
-        console.log('Profile data:', customerData);
+        console.log('customer Profile data:', customerData);
        
       })
       .catch(error => {
@@ -48,7 +48,7 @@ const CustomerDeatailForm = () => {
       
       [name]: value,
     }));
-    customerData.phone_number = value;
+    customerData.name = value;
     console.log('phone hi:',customerData.phone_number);
   };
 
@@ -56,13 +56,13 @@ const CustomerDeatailForm = () => {
     // Send data to backend
     console.log('all:',customerData);
     console.log('phone:',customerData.phone_number);
-    fetch(`/api/customers/${id}/phonenumber`, {
+    fetch(`/api/customers/${id}/update`, {
       method: 'POST',
       headers: {
       'Content-Type': 'application/json',
       },
       
-      body: JSON.stringify({ phone: customerData.phone_number}), // Use JSON.stringify to convert the object to a JSON string
+      body: JSON.stringify({ customerData}), // Use JSON.stringify to convert the object to a JSON string
     })
       .then(response => response.json())
       .then(data => {
@@ -81,14 +81,14 @@ const CustomerDeatailForm = () => {
           <Label>First Name</Label>
           <Input
             type="text"
-            name="firstName"
+            name="first_name"
             value={customerData.first_name}
             onChange={handleInputChange}
           />
           <Label>Last Name</Label>
           <Input
             type="text"
-            name="lastName"
+            name="last_name"
             value={customerData.last_name}
             onChange={handleInputChange}
           />
@@ -97,16 +97,17 @@ const CustomerDeatailForm = () => {
           <Label>Email</Label>
           <Input
             type="email"
-            name="email"
+            name="email_address"
             value={customerData.email_address}
-           readOnly
+            onChange={handleInputChange}
+           
           />
         </FormRow>
         <FormRow>
           <Label>Phone</Label>
           <Input
             type="text"
-            name="phone"
+            name="phone_number"
             value={customerData.phone_number}
             onChange={handleInputChange}
           />

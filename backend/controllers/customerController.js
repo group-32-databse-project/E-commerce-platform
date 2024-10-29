@@ -1,4 +1,5 @@
 const Customer = require('../models/Customer');
+const PhoneNumber = require('../models/PhoneNumber');
 const Address = require('../models/Address');
 const ShoppingCart = require('../models/ShoppingCart');
 const CustomerAddress = require("../models/CustomerAddress");
@@ -58,7 +59,6 @@ exports.addAddress = async (req, res) => {
   }
 };
 
-
 exports.getCustomerById = async (req, res) => {
   try {
     const customer = await Customer.getCustomerById(req.params.id);
@@ -106,6 +106,28 @@ exports.getPaymentDeatails = async (req, res) => {
   } catch (error) {
     console.error('Error in getPaymentDetails:', error);
     res.status(500).json({ message: 'Error fetching payment details', error: error.toString() });
+  }
+};
+
+exports.updateprofile = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { phone_number, ...profileData } = req.body;
+   
+    const customer = await Customer.getCustomerById(id);
+    if (customer) {
+      const updatedCustomer = await Customer.updateCustomer(id, profileData.customerData);
+      if (profileData.customerData.phone_number) {
+        await PhoneNumber.save(profileData.customerData.phone_number, id);
+      }
+      res.json(updatedCustomer);
+      console.log('Customer updated:', updatedCustomer);
+    } else {
+      res.status(404).json({ message: 'Customer not found' });
+    }
+  } catch (error) {
+    console.error('Error in updateCustomer:', error);
+    res.status(500).json({ message: 'Error updating customer', error: error.toString() });
   }
 };
 
