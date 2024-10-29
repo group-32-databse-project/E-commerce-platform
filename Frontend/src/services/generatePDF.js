@@ -79,24 +79,34 @@ function PdfGenerator(orderDetail, address, customerDetail) {
         }
         doc.text(item.name, 25, y);
         doc.text(item.quantity.toString(), 120, y);
-        doc.text(`$${item.price.toFixed(2)}`, 150, y);
-        doc.text(`$${(item.quantity * item.price).toFixed(2)}`, 180, y);
+        doc.text(`$${item.price}`, 150, y);
+        doc.text(`$${item.quantity * item.price}`, 180, y);
         y += 10;
       });
 
     // Order Summary
     const summaryY = y + 10;
     doc.line(20, summaryY, pageWidth - 20, summaryY);
+    // Debug logging
+    console.log("Subtotal:", orderDetail.subtotal, typeof orderDetail.subtotal);
+
+    // Safer number formatting with fallback to 0
+    const formatPrice = (value) => {
+      if (value === null || value === undefined) return "0.00";
+      const num = parseFloat(value);
+      return isNaN(num) ? "0.00" : num.toFixed(2);
+    };
+
     doc.text("Subtotal:", 130, summaryY + 10);
-    doc.text(`$${orderDetail.subtotal.toFixed(2)}`, 180, summaryY + 10);
+    doc.text(`$${formatPrice(orderDetail.subtotal)}`, 180, summaryY + 10);
     doc.text("Shipping:", 130, summaryY + 20);
-    doc.text(`$${orderDetail.shipping.toFixed(2)}`, 180, summaryY + 20);
+    doc.text(`$${formatPrice(orderDetail.shipping)}`, 180, summaryY + 20);
     doc.text("Tax:", 130, summaryY + 30);
-    doc.text(`$${orderDetail.tax.toFixed(2)}`, 180, summaryY + 30);
+    doc.text(`$${formatPrice(orderDetail.tax)}`, 180, summaryY + 30);
     doc.setFont("helvetica", "bold");
     doc.text("Total:", 130, summaryY + 40);
     doc.text(
-      `$${orderDetail.total_order_price.toFixed(2)}`,
+      `$${formatPrice(orderDetail.total_order_price)}`,
       180,
       summaryY + 40
     );

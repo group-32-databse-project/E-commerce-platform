@@ -26,10 +26,11 @@ import InfoMobile from "../../components/InfoMobile";
 import TemplateFrame from "./TemplateFrame";
 import { LogoIcon } from "../sign/CustomIcons";
 import getCheckoutTheme from "../../theme/getCheckoutTheme";
-import axios from "axios";
-import AddressValidationErrorDialog from "../../components/AddressValidationErrorDialog";
-import OrderConfirmation from "../orderConfermation";
 
+import AddressValidationErrorDialog from "../../components/AddressValidationErrorDialog";
+
+import { makeOrder } from "../../api/makeOrder";
+import { useNavigate } from "react-router-dom";
 const steps = ["Shipping Address", "Payment Details", "Review Your Order"];
 
 const renderStepContent = (activeStep) => {
@@ -51,6 +52,7 @@ const Checkout = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [openErrorDialog, setOpenErrorDialog] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const navigate = useNavigate();
 
   const checkoutTheme = createTheme(getCheckoutTheme(mode));
   const defaultTheme = createTheme({ palette: { mode } });
@@ -78,6 +80,10 @@ const Checkout = () => {
   };
 
   const handleNext = () => {
+    if (activeStep === steps.length - 1) {
+      makeOrder();
+      navigate("/orderConfirmation");
+    }
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
 
@@ -112,7 +118,6 @@ const Checkout = () => {
       <ThemeProvider theme={showCustomTheme ? checkoutTheme : defaultTheme}>
         <CssBaseline enableColorScheme />
         <Grid container sx={{ height: { xs: "100%", sm: "100dvh" } }}>
-          {activeStep === steps.length && <OrderConfirmation />}
           {/* Sidebar */}
           {activeStep !== steps.length && (
             <Grid
