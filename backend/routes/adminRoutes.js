@@ -201,6 +201,27 @@ router.delete('/products/:id', async (req, res) => {
     }
 });
 
+router.get('/sales_report', async (req, res) => {
+    try {
+        const [salesReport] = await pool.query(
+            'CALL getReport(?, ?, ?, ?, ?, ?, ?)',
+            [
+                req.body.order_time,
+                req.body.payment_method,
+                req.body.delivery_method,
+                req.body.total_order_price_min,
+                req.body.total_order_price_max,
+                req.body.order_status,
+                req.body.quantity
+            ]
+        );
+        res.json(salesReport[0]); // Stored procedure returns result set in first element
+    } catch (error) {
+        console.error('Error fetching sales report:', error);
+        res.status(500).json({ message: 'Error fetching sales report' });
+    }
+});
+
 // Admin Login
 router.post('/auth/login', async (req, res) => {
     try {
