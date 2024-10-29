@@ -17,6 +17,7 @@ const authRoutes = require('./routes/authRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const paymentRoutes = require("./routes/paymentRoutes");
 const testRoutes = require('./routes/testRoutes');
+const wishlistRoutes = require('./routes/wishlistRoutes');
 const notificationRoutes = require('./routes/notificationRoutes'); // Import Notification Routes
 
 // Initialize express
@@ -36,6 +37,7 @@ app.use('/api/search', searchRoutes);
 app.use('/api', authRoutes);
 app.use('/api/notifications', notificationRoutes); // Register Notification Routes
 app.use('/api/category', categoryRoutes); // Optional: Review if duplicate
+app.use('/api/wishlist', wishlistRoutes);
 
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
