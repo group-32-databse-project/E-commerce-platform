@@ -134,12 +134,12 @@ function Products() {
 
     const handleDeleteProduct = async (productId) => {
         if (!window.confirm('Are you sure you want to delete this product?')) return;
-
+    
         try {
             setLoading(true);
             await axios.delete(`/api/admin/products/${productId}`);
             toast.success('Product deleted successfully');
-            await fetchProducts();
+            await fetchProducts(); // Refresh the products list after deletion
         } catch (err) {
             const errorMsg = err.response?.data?.message || 'Failed to delete product';
             console.error('Error deleting product:', err);
@@ -148,6 +148,8 @@ function Products() {
             setLoading(false);
         }
     };
+    
+    
 
     const resetForm = () => {
         setNewProduct({
