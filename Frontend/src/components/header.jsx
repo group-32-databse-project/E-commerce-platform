@@ -42,8 +42,8 @@ import { Link } from "react-router-dom";
 import logo from "../assets/images/logo.svg"; // Ensure the path is correct
 import { formatDistanceToNow } from "date-fns"; // Install via npm if not already
 import { useNavigate } from "react-router-dom";
-
-
+import { fetchNotifications  } from "../services/notificationService";
+import { useAuth } from "../context/AuthContext";
 
 
 
@@ -162,30 +162,10 @@ const Header = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [toyset, setToyset] = useState([]);
   const [elecset, setElecset] = useState([]);
-  const [catlist, setCatlist] = useState([]); 
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      type: "order",
-      message: "Your order #1234 has been shipped.",
-      time: new Date(),
-      read: false,
-    },
-    {
-      id: 2,
-      type: "message",
-      message: "New message from Support.",
-      time: new Date(),
-      read: false,
-    },
-    {
-      id: 3,
-      type: "promotion",
-      message: "Your wishlist item is on sale!",
-      time: new Date(),
-      read: true,
-    },
-  ]);
+  const [catlist, setCatlist] = useState([]);
+  const { authToken } = useAuth();
+  
+  const [notifications, setNotifications] = useState([]);
 
   // State for Login Dialog
   
@@ -218,7 +198,32 @@ const Header = () => {
       });
     }
   }, []);
-  
+
+
+  useEffect(() => {
+    console.log("authToken");
+    const getNotifications = async () => {
+      try {
+        const data = await fetchNotifications();
+        console.log("data",data);
+  setNotifications(data);
+      } catch (error) {
+        console.log("error",error);
+        console.error("Error fetching notifications:", error);
+      }
+    };
+    console.log("end");
+  getNotifications();
+
+    // Polling interval (e.g., every 30 seconds)
+    const interval = setInterval(() => {
+      if (authToken) {
+        getNotifications();
+      }
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(interval);
+  }, []);
   const handleLogout = () => {
     localStorage.removeItem('token');
     setIsLoggedIn(false);
@@ -517,49 +522,52 @@ const Header = () => {
                     <Divider />
                     <Box sx={{ maxHeight: 400, overflowY: "auto" }}>
                       {notifications.length > 0 ? (
-                        notifications.map((notif) => (
-                          <MenuItem
-                            key={notif.id}
-                            onClick={() => {
-                              handleNotificationClose();
-                              if (!notif.read) handleMarkAsRead(notif.id);
-                            }}
-                            sx={{
-                              backgroundColor: notif.read
-                                ? "inherit"
-                                : alpha(theme.palette.primary.light, 0.1),
-                              alignItems: "flex-start",
-                            }}
-                          >
-                            <Avatar
+                        notifications.map((notif) => {
+                          console.log("Notification Time:", notif.created_at); // 追加
+                          return (
+                            <MenuItem
+                              key={notif.id}
+                              onClick={() => {
+                                handleNotificationClose();
+                                if (!notif.read) handleMarkAsRead(notif.id);
+                              }}
                               sx={{
-                                mr: 2,
-                                bgcolor: getNotificationColor(notif.type),
-                                width: 40,
-                                height: 40,
+                                backgroundColor: notif.read
+                                  ? "inherit"
+                                  : alpha(theme.palette.primary.light, 0.1),
+                                alignItems: "flex-start",
                               }}
                             >
-                              {getNotificationIcon(notif.type)}
-                            </Avatar>
-                            <Box sx={{ flexGrow: 1 }}>
-                              <Typography variant="body2" color="text.primary">
-                                {notif.message}
-                              </Typography>
-                              <Typography variant="caption" color="text.secondary">
-                                {formatDistanceToNow(notif.time, { addSuffix: true })}
-                              </Typography>
-                            </Box>
-                            <IconButton
-                              size="small"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteNotification(notif.id);
-                              }}
-                            >
-                              <MoreVertIcon fontSize="small" />
-                            </IconButton>
-                          </MenuItem>
-                        ))
+                              <Avatar
+                                sx={{
+                                  mr: 2,
+                                  bgcolor: getNotificationColor(notif.type),
+                                  width: 40,
+                                  height: 40,
+                                }}
+                              >
+                                {getNotificationIcon(notif.type)}
+                              </Avatar>
+                              <Box sx={{ flexGrow: 1 }}>
+                                <Typography variant="body2" color="text.primary">
+                                  {notif.message}
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                  {notif.created_at ? formatDistanceToNow(new Date(notif.created_at), { addSuffix: true }) : 'Unknown time'}
+                                </Typography>
+                              </Box>
+                              <IconButton
+                                size="small"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteNotification(notif.id);
+                                }}
+                              >
+                                <MoreVertIcon fontSize="small" />
+                              </IconButton>
+                            </MenuItem>
+                          );
+                        })
                       ) : (
                         <MenuItem onClick={handleNotificationClose}>
                           <Typography variant="body2" color="text.secondary">
