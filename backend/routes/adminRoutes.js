@@ -39,45 +39,59 @@ router.post('/categories', async (req, res) => {
             category_image
         ]);
 
-        res.status(201).json({
-            category_id: result.insertId,
-            category_name,
-            parent_category_id,
-            category_image
+        return res.json({
+            "status": 200,
+            "category_id": result.insertId,
+            "category_name": category_name,
+            "parent_category_id": parent_category_id,
+            "category_image": category_image
         });
     } catch (error) {
         console.error('Error adding category:', error);
-        res.status(500).json({ message: 'Error adding category' });
+        return res.json({
+            "status": 500,
+            "message": 'Error adding category',
+            "error": error.sqlMessage
+        });
     }
 });
 
 router.get('/categories', async (req, res) => {
     try {
         const [categories] = await pool.query('SELECT * FROM category ORDER BY category_name');
-        res.json(categories);
+        return res.json(categories);
     } catch (error) {
         console.error('Error fetching categories:', error);
-        res.status(500).json({ message: 'Error fetching categories' });
+        return res.json({
+            "status": 500,
+            "message": 'Error fetching categories',
+            "error": error.sqlMessage
+        });
     }
 });
 
 router.delete('/categories/:id', async (req, res) => {
     try {
         await pool.query('DELETE FROM category WHERE category_id = ?', [req.params.id]);
-        res.json({ message: 'Category deleted successfully' });
+        return res.json({
+            "status": 200,
+            "message": 'Category deleted successfully'
+        });
     } catch (error) {
         console.error('Error deleting category:', error);
-        res.status(500).json({ message: 'Error deleting category' });
+        return res.json({
+            "status": 500,
+            "message": 'Error deleting category',
+            "error": error.sqlMessage
+        });
     }
 });
 
 // Product Routes
 // Add product
 router.post('/products', async (req, res) => {
-    console.log('Received product data:', req.body);
     try {
         const { 
-            product_id,
             category_id, 
             product_name, 
             description, 
@@ -87,25 +101,27 @@ router.post('/products', async (req, res) => {
         } = req.body;
 
         // Validate required fields
-        if (!product_id || !category_id || !product_name) {
-            return res.status(400).json({ 
-                message: 'Product ID, category ID, and product name are required' 
+        if (!category_id || !product_name) {
+            return res.json({ 
+                "status": 400,
+                "message": 'Category ID and product name are required' 
             });
         }
+        console.log('Product data:', req.body);
 
-        // Check if category exists
-        const [categoryCheck] = await pool.query(
-            'SELECT category_id FROM category WHERE category_id = ?', 
-            [category_id]
-        );
+        // // Check if category exists
+        // const [categoryCheck] = await pool.query(
+        //     'SELECT category_id FROM category WHERE category_id = ?', 
+        //     [category_id]
+        // );
 
-        if (categoryCheck.length === 0) {
-            return res.status(400).json({ message: 'Invalid category ID' });
-        }
-
+        // console.log('Category check:', categoryCheck);
+        // if (categoryCheck.length === 0) {
+        //     return res.status(400).json({ message: 'Invalid category ID' });
+        // }
         const query = `
+
             INSERT INTO product (
-                product_id, 
                 category_id, 
                 product_name, 
                 description, 
@@ -113,11 +129,10 @@ router.post('/products', async (req, res) => {
                 weight,
                 rating
             ) 
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?)
         `;
 
         const [result] = await pool.query(query, [
-            product_id,
             category_id,
             product_name,
             description || null,
@@ -126,10 +141,11 @@ router.post('/products', async (req, res) => {
             rating || 0.0
         ]);
 
-        res.status(201).json({
-            message: 'Product added successfully',
-            product: {
-                product_id,
+        console.log('Product added successfully:', result);
+        return res.json({
+            "status": 200,
+            "message": 'Product added successfully',
+            "product": {
                 category_id,
                 product_name,
                 description,
@@ -140,9 +156,10 @@ router.post('/products', async (req, res) => {
         });
     } catch (error) {
         console.error('Error adding product:', error);
-        res.status(500).json({ 
-            message: 'Error adding product',
-            error: error.message 
+        return res.json({ 
+            "status": 500,
+            "message": 'Error adding product',
+            "error": error.sqlMessage 
         });
     }
 });
@@ -156,10 +173,10 @@ router.get('/products', async (req, res) => {
             JOIN category c ON p.category_id = c.category_id 
             ORDER BY p.product_name
         `);
-        res.json(products);
+        return res.json(products);
     } catch (error) {
         console.error('Error fetching products:', error);
-        res.status(500).json({ message: 'Error fetching products' });
+        return res.status(500).json({ message: error.sqlMessage });
     }
 });
 
@@ -175,10 +192,10 @@ router.get('/products/:id', async (req, res) => {
             return res.status(404).json({ message: 'Product not found' });
         }
         
-        res.json(products[0]);
+        return res.json(products[0]);
     } catch (error) {
         console.error('Error fetching product:', error);
-        res.status(500).json({ message: 'Error fetching product' });
+        return res.status(500).json({ message: 'Error fetching product' });
     }
 });
 
@@ -194,31 +211,41 @@ router.delete('/products/:id', async (req, res) => {
             return res.status(404).json({ message: 'Product not found' });
         }
 
-        res.json({ message: 'Product deleted successfully' });
+        return res.json({ message: 'Product deleted successfully' });
     } catch (error) {
         console.error('Error deleting product:', error);
-        res.status(500).json({ message: 'Error deleting product' });
+        return res.status(500).json({ message: 'Error deleting product' });
     }
 });
 
-router.get('/sales_report', async (req, res) => {
+router.post('/sales_report', async (req, res) => {
+    console.log('Received sales report data:', req.body);
     try {
         const [salesReport] = await pool.query(
             'CALL getReport(?, ?, ?, ?, ?, ?, ?)',
             [
-                req.body.order_time,
-                req.body.payment_method,
-                req.body.delivery_method,
-                req.body.total_order_price_min,
-                req.body.total_order_price_max,
-                req.body.order_status,
-                req.body.quantity
+                req.body.order_time || "Monthly",
+                req.body.payment_method === 'All' ? null : req.body.payment_method || null,
+                req.body.delivery_method === 'All' ? null : req.body.delivery_method || null,
+                req.body.total_order_price_min || null,
+                req.body.total_order_price_max || null,
+                req.body.order_status === 'All' ? null : req.body.order_status || null,
+                req.body.quantity || null
             ]
         );
-        res.json(salesReport[0]); // Stored procedure returns result set in first element
+        console.log('Sales report fetched successfully:', salesReport);
+        return res.json({
+            "status": 200,
+            "message": 'Sales report fetched successfully',
+            "data": salesReport[0]
+        }); // Stored procedure returns result set in first element
     } catch (error) {
         console.error('Error fetching sales report:', error);
-        res.status(500).json({ message: 'Error fetching sales report' });
+        return res.json({
+            "status": 500,
+            "message": 'Error fetching sales report',
+            "error": error.sqlMessage
+        });
     }
 });
 
@@ -254,7 +281,7 @@ router.post('/auth/login', async (req, res) => {
         // Create simple token (you can enhance this later)
         const token = 'admin-token-' + Date.now();
 
-        res.json({
+        return res.json({
             message: 'Login successful',
             token,
             admin: {
@@ -266,7 +293,7 @@ router.post('/auth/login', async (req, res) => {
 
     } catch (error) {
         console.error('Login error:', error);
-        res.status(500).json({ message: 'Error logging in' });
+        return res.status(500).json({ message: 'Error logging in' });
     }
 });
 

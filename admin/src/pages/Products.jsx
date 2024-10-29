@@ -23,9 +23,11 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import { toast } from 'react-toastify';
+import Dropdown from '../components/ui/Dropdown';
 
 function Products() {
     const [products, setProducts] = useState([]);
+    const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
@@ -39,6 +41,7 @@ function Products() {
 
     useEffect(() => {
         fetchProducts();
+        fetchCategories();
     }, []);
 
     const fetchProducts = async () => {
@@ -54,16 +57,30 @@ function Products() {
         }
     };
 
+    const fetchCategories = async () => {
+        try {
+            const response = await axios.get('http://localhost:5001/api/admin/categories');
+            setCategories(response.data);
+        } catch (err) {
+            console.error('Error fetching categories:', err);
+            toast.error('Failed to fetch categories');
+        }
+    };
+
     const handleSubmit = async () => {
         if (!validateForm()) return;
 
         try {
             setSubmitting(true);
             const response = await axios.post('http://localhost:5001/api/admin/products', formData);
-            toast.success('Product added successfully');
-            setOpenDialog(false);
-            resetForm();
-            fetchProducts();
+            if (response.data.status === 200) {  
+                alert("Product added successfully");
+                setOpenDialog(false);
+                resetForm();
+                fetchProducts();
+            } else {
+                alert(response.data.error);
+            }
         } catch (err) {
             console.error('Error adding product:', err);
             toast.error(err.response?.data?.message || 'Failed to add product');
@@ -101,6 +118,14 @@ function Products() {
             toast.error('Price is required');
             return false;
         }
+        if (!formData.weight.trim()) {
+            toast.error('Weight is required');
+            return false;
+        }
+        if (!formData.rating.trim()) {
+            toast.error('Rating is required');
+            return false;
+        }
         return true;
     };
 
@@ -109,7 +134,9 @@ function Products() {
             product_name: '',
             category_id: '',
             product_image: '',
-            price: ''
+            price: '',
+            weight: '',
+            rating: ''
         });
     };
 
@@ -152,9 +179,6 @@ function Products() {
                                             {product.product_name}
                                         </Typography>
                                         <Typography variant="body2" color="text.secondary">
-                                            Price: ${product.price}
-                                        </Typography>
-                                        <Typography variant="body2" color="text.secondary">
                                             Category ID: {product.category_id}
                                         </Typography>
                                     </CardContent>
@@ -192,13 +216,17 @@ function Products() {
                             disabled={submitting}
                             required
                         />
-                        <TextField
-                            fullWidth
-                            label="Category ID"
+                        <Dropdown
+                            label="Category"
+                            options={categories.map((cat) => ({
+                                label: cat.category_name,
+                                value: cat.category_id
+                            }))}
                             value={formData.category_id}
                             onChange={(e) => setFormData({...formData, category_id: e.target.value})}
-                            disabled={submitting}
+                            placeholder="Select a category"
                             required
+                            sx={{ minWidth: 200 }}
                         />
                         <TextField
                             fullWidth
@@ -217,6 +245,24 @@ function Products() {
                             disabled={submitting}
                             required
                             helperText="Enter the product price"
+                        />
+                        <TextField
+                            fullWidth
+                            label="Weight"
+                            value={formData.weight}
+                            onChange={(e) => setFormData({...formData, weight: e.target.value})}
+                            disabled={submitting}
+                            required
+                            helperText="Enter the product weight"
+                        />
+                        <TextField
+                            fullWidth
+                            label="Rating"
+                            value={formData.rating}
+                            onChange={(e) => setFormData({...formData, rating: e.target.value})}
+                            disabled={submitting}
+                            required
+                            helperText="Enter the product rating"
                         />
                     </Box>
                 </DialogContent>

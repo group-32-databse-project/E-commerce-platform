@@ -67,12 +67,14 @@ function Categories() {
             console.log('Sending category data:', formData);
 
             const response = await axios.post('http://localhost:5001/api/admin/categories', formData);
-            console.log('Category added:', response.data);
-            
-            toast.success('Category added successfully');
-            setOpenDialog(false);
-            resetForm();
-            fetchCategories();
+            if (response.data.status === 200) {
+                alert('Category added successfully');
+                setOpenDialog(false);
+                resetForm();
+                fetchCategories();
+            } else {
+                alert(response.data.error);
+            }
         } catch (err) {
             console.error('Error adding category:', err);
             toast.error(err.response?.data?.message || 'Failed to add category');
