@@ -176,7 +176,7 @@ CREATE TABLE `shop_order` (
 
 
 CREATE TABLE `order_item` (
-  `order_item_id` int,
+  `order_item_id` int auto_increment,
   `order_id` int,
   `variant_id` int,
   `quantity` int,
@@ -308,7 +308,7 @@ BEGIN
   END IF;
 END$$
 
-
+DELIMITER $$
 
 DROP TRIGGER IF EXISTS handle_order_creation$$
 
@@ -328,6 +328,7 @@ BEGIN
     -- Only proceed if we found a cart
     IF cart_id IS NOT NULL THEN
         -- Insert order items from the shopping cart
+        
         INSERT INTO order_item (order_id, variant_id, quantity, price)
         SELECT NEW.order_id, sci.variant_id, sci.quantity, v.total_price
         FROM shopping_cart_item sci
@@ -345,6 +346,7 @@ BEGIN
     END IF;
 END$$
 
+DELIMITER ;
 
 
 DELIMITER ;

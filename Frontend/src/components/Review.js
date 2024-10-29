@@ -1,32 +1,33 @@
 import * as React from 'react';
 
 import Divider from '@mui/material/Divider';
-import Grid from '@mui/material/Grid';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemText from '@mui/material/ListItemText';
+import Grid from "@mui/material/Grid";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { useState, useEffect } from "react";
 import getAddress from "../api/getAddress";
 import getCustomerDetail from "../api/custermerDetail";
-const addresses = ["1 MUI Drive", "Reactville", "Anytown", "99999", "USA"];
-const payments = [
-  { name: "Card type:", detail: "Visa" },
-  { name: "Card holder:", detail: "Mr. John Smith" },
-  { name: "Card number:", detail: "xxxx-xxxx-xxxx-1234" },
-  { name: "Expiry date:", detail: "04/2024" },
-];
+import getPayment from "../api/getPayment";
 
 export default function Review() {
   const [customer, setCustomer] = useState(null);
   const [address, setAddress] = useState(null);
+  const [payment, setPayment] = useState(null);
+
   useEffect(() => {
     const fetchCustomer = async () => {
       const customer = await getCustomerDetail();
       setCustomer(customer);
     };
     fetchCustomer();
+  }, []);
+
+  useEffect(() => {
+    const fetchPayment = async () => {
+      const payment = await getPayment();
+      setPayment(payment);
+    };
+    fetchPayment();
   }, []);
 
   useEffect(() => {
@@ -64,13 +65,13 @@ export default function Review() {
             </Typography>
           </div>
         )}
-        <div>
-          <Typography variant="subtitle2" gutterBottom>
-            Payment details
-          </Typography>
-          <Grid container>
-            {payments.map((payment) => (
-              <React.Fragment key={payment.name}>
+        {payment && (
+          <div>
+            <Typography variant="subtitle2" gutterBottom>
+              Payment details
+            </Typography>
+            <Grid container>
+              <React.Fragment key={payment.card_type}>
                 <Stack
                   direction="row"
                   spacing={1}
@@ -78,14 +79,60 @@ export default function Review() {
                   sx={{ width: "100%", mb: 1 }}
                 >
                   <Typography variant="body1" sx={{ color: "text.secondary" }}>
-                    {payment.name}
+                    Card type:
                   </Typography>
-                  <Typography variant="body2">{payment.detail}</Typography>
+                  <Typography variant="body2">{payment.card_type}</Typography>
                 </Stack>
               </React.Fragment>
-            ))}
-          </Grid>
-        </div>
+
+              <React.Fragment key={payment.card_holder}>
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  useFlexGap
+                  sx={{ width: "100%", mb: 1 }}
+                >
+                  <Typography variant="body1" sx={{ color: "text.secondary" }}>
+                    Card holder:
+                  </Typography>
+                  <Typography variant="body2">{payment.card_owner}</Typography>
+                </Stack>
+              </React.Fragment>
+
+              <React.Fragment key={payment.card_number}>
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  useFlexGap
+                  sx={{ width: "100%", mb: 1 }}
+                >
+                  <Typography variant="body1" sx={{ color: "text.secondary" }}>
+                    Card number:
+                  </Typography>
+                  <Typography variant="body2">
+                    {payment.last_four_digits}
+                  </Typography>
+                </Stack>
+              </React.Fragment>
+
+              <React.Fragment key={payment.expiration_date}>
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  useFlexGap
+                  sx={{ width: "100%", mb: 1 }}
+                >
+                  <Typography variant="body1" sx={{ color: "text.secondary" }}>
+                    Expiry date:
+                  </Typography>
+                  <Typography variant="body2">
+                    {payment.expiration_date}
+                  </Typography>
+                </Stack>
+              </React.Fragment>
+            </Grid>
+          </div>
+        )}
       </Stack>
     </Stack>
   );

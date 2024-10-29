@@ -25,3 +25,16 @@ exports.saveCard = async (req, res) => {
       .json({ message: "Error saving card", error: error.toString() });
   }
 };
+
+exports.getCardsByCustomerId = async (req, res) => {
+  try {
+    const customerId = req.params.id;
+    const cards = await Card.getCardByCustomerId(customerId);
+    res.status(200).json(cards);
+  } catch (error) {
+    console.error("Error in getCardsByCustomerId:", error);
+    res
+      .status(500)
+      .json({ message: "Error fetching cards", error: error.toString() });
+  }
+};

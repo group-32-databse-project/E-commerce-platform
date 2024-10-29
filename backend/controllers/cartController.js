@@ -7,8 +7,7 @@ exports.getCart = async (req, res) => {
   const { customerId } = req.params;
   try {
     const cart = await ShoppingCart.getCartByCustomerId(customerId);
-    console.log("cart", cart);
-    console.log(cart.shopping_cart_id);
+
     if (cart) {
       const items = await ShoppingCartItem.getItemsByCartId(
         cart.shopping_cart_id
@@ -27,7 +26,6 @@ exports.getCart = async (req, res) => {
 };
 
 exports.changeQuantity = async (req, res) => {
-  console.log("come");
   const { customerId } = req.params;
   const { variant_id, change } = req.body;
   try {

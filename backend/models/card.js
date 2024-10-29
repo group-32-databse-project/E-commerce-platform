@@ -21,6 +21,19 @@ class Card {
       throw error;
     }
   }
+
+  static async getCardByCustomerId(customerId) {
+    try {
+      const [rows] = await db.query(
+        "SELECT * FROM cards WHERE customer_id = ?",
+        [customerId]
+      );
+      return rows[0];
+    } catch (error) {
+      console.error("Error in getCardByCustomerId:", error);
+      throw error;
+    }
+  }
 }
 
 module.exports = Card;

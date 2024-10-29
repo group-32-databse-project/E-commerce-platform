@@ -9,4 +9,8 @@ router.get("/", paymentController.getAllPaymentMethods);
 router.post("/card/save", paymentController.saveCard);
 // Add more routes as needed
 
+
+//api/payments/card/${customerId}
+router.get("/card/:id", paymentController.getCardsByCustomerId);
+
 module.exports = router;

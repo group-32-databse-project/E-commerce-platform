@@ -38,6 +38,8 @@ import { saveCreditCard } from "../services/saveCreditCard";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
+import FileUpload from "./FileUpload";
+
 
 // Alert component for Snackbar
 const AlertSnackbar = React.forwardRef(function Alert(props, ref) {
@@ -637,41 +639,47 @@ export default function PaymentForm() {
         </Box>
       )}
       {paymentType === "bankTransfer" && (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          <Alert severity="warning" icon={<WarningRoundedIcon />}>
-            Your order will be processed once we receive the funds.
-          </Alert>
-          <Typography variant="subtitle1" sx={{ fontWeight: "medium" }}>
-            Bank account
-          </Typography>
-          <Typography variant="body1" gutterBottom>
-            Please transfer the payment to the bank account details shown below.
-          </Typography>
-          <Box sx={{ display: "flex", gap: 1 }}>
-            <Typography variant="body1" sx={{ color: "text.secondary" }}>
-              Bank:
+        <>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <Alert severity="warning" icon={<WarningRoundedIcon />}>
+              Your order will be processed once we receive the funds.
+            </Alert>
+            <Typography variant="subtitle1" sx={{ fontWeight: "medium" }}>
+              Bank account
             </Typography>
-            <Typography variant="body1" sx={{ fontWeight: "medium" }}>
-              Mastercredit
+            <Typography variant="body1" gutterBottom>
+              Please transfer the payment to the bank account details shown
+              below.
             </Typography>
+            <Box sx={{ display: "flex", gap: 1 }}>
+              <Typography variant="body1" sx={{ color: "text.secondary" }}>
+                Bank:
+              </Typography>
+              <Typography variant="body1" sx={{ fontWeight: "medium" }}>
+                Mastercredit
+              </Typography>
+            </Box>
+            <Box sx={{ display: "flex", gap: 1 }}>
+              <Typography variant="body1" sx={{ color: "text.secondary" }}>
+                Account number:
+              </Typography>
+              <Typography variant="body1" sx={{ fontWeight: "medium" }}>
+                123456789
+              </Typography>
+            </Box>
+            <Box sx={{ display: "flex", gap: 1 }}>
+              <Typography variant="body1" sx={{ color: "text.secondary" }}>
+                Routing number:
+              </Typography>
+              <Typography variant="body1" sx={{ fontWeight: "medium" }}>
+                987654321
+              </Typography>
+            </Box>
           </Box>
-          <Box sx={{ display: "flex", gap: 1 }}>
-            <Typography variant="body1" sx={{ color: "text.secondary" }}>
-              Account number:
-            </Typography>
-            <Typography variant="body1" sx={{ fontWeight: "medium" }}>
-              123456789
-            </Typography>
+          <Box>
+            <FileUpload />
           </Box>
-          <Box sx={{ display: "flex", gap: 1 }}>
-            <Typography variant="body1" sx={{ color: "text.secondary" }}>
-              Routing number:
-            </Typography>
-            <Typography variant="body1" sx={{ fontWeight: "medium" }}>
-              987654321
-            </Typography>
-          </Box>
-        </Box>
+        </>
       )}
 
       {/* Consolidated Section for Additional Payment Methods */}

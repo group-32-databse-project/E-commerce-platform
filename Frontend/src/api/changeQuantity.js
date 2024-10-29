@@ -1,43 +1,19 @@
 import axios from "axios";
 
-const changeQuantity = async (cartItem, operation) => {
+const changeQuantity = async (itemId, change) => {
   try {
     const customerId = localStorage.getItem("customerId");
     if (!customerId) {
       throw new Error("Customer ID not found in localStorage");
     }
 
-    console.log(
-      `Sending request to ${operation} item quantity in cart:`,
-      cartItem
-    );
-    console.log("Customer ID:", customerId);
-
-    const url = `/api/cart/${customerId}/changequantity`;
-    console.log("Request URL:", url);
-
     const response = await axios.patch(
-      url,
-      { ...cartItem, operation },
-      {
-        timeout: 10000, // 10 seconds timeout
-        headers: {
-          "Content-Type": "application/json",
-          // Add any other headers your API might require
-        },
-      }
+      `/api/cart/${customerId}/changequantity`,
+      { variant_id: itemId, change: change }
     );
-
-    console.log("Response from server:", response);
-
-    if (response.status === 200) {
-      console.log(`Item quantity ${operation}ed successfully`);
-      return response.data; // Return updated cart data
-    } else {
-      throw new Error(`Unexpected response status: ${response.status}`);
-    }
+    return response.data;
   } catch (error) {
-    console.error(`Error ${operation}ing item quantity:`, error);
+    console.error(`Error item quantity:`, error);
     if (error.response) {
       // The request was made and the server responded with a status code
       // that falls out of the range of 2xx

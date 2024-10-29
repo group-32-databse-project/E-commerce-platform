@@ -107,7 +107,7 @@ const Cart = () => {
 
   const handleQuantityChange = async (item, operation, index) => {
     const changeValue = operation === "increment" ? 1 : -1;
-    item.quantity += changeValue;
+
     setIsSavedItemsLoading(isSavedItemsLoading + 1);
     // Prevent quantity from dropping below 1
     if (changeValue === -1 && item.quantity === 1) {
@@ -118,6 +118,8 @@ const Cart = () => {
       });
       return;
     }
+    await changeQuantity(item.variant_id, changeValue);
+    item.quantity += changeValue;
 
     // Set loading state for this item
     setLoadingStates((prev) => ({
