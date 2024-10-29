@@ -79,10 +79,11 @@ const SignIn = () => {
     if (Object.keys(validationErrors).length > 0) return;
 
     try {
+      console.log("Signing in with email:", email, "and password:", password);
       // Replace with your actual sign-in API endpoint
-      const res = await axios.post("/api/customers/login", {
-        email,
-        password,
+      const res = await axios.post("http://localhost:5001/api/admin/login", {
+        "username": email,
+        "password" : password,
       });
 
       // Assuming the response contains token, name, and customerId

@@ -79,7 +79,7 @@ const SignUp = () => {
 
     try {
       setLoading(true);
-      const response = await axios.post('http://localhost:5001/api/admin/auth/register', formData);
+      const response = await axios.post('http://localhost:5001/api/admin/signup', formData);
       
       toast.success('Registration successful! Please login.');
       navigate('/signin');

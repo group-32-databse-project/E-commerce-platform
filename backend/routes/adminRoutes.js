@@ -249,8 +249,9 @@ router.post('/sales_report', async (req, res) => {
     }
 });
 
+
 // Admin Login
-router.post('/auth/login', async (req, res) => {
+router.post('/login', async (req, res) => {
     try {
         const { username, password } = req.body;
         console.log('Login attempt for username:', username);
@@ -262,7 +263,7 @@ router.post('/auth/login', async (req, res) => {
 
         // Get admin from database
         const [admins] = await pool.query(
-            'SELECT * FROM admin WHERE username = ?',
+            'SELECT * FROM admin WHERE email = ?',
             [username]
         );
 
@@ -272,9 +273,9 @@ router.post('/auth/login', async (req, res) => {
 
         const admin = admins[0];
 
-        // Check password
-        const validPassword = await bcrypt.compare(password, admin.password);
-        if (!validPassword) {
+        // Compare password with hashed password in database
+        const isValidPassword = await bcrypt.compare(password, admin.password);
+        if (!isValidPassword) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
@@ -294,6 +295,56 @@ router.post('/auth/login', async (req, res) => {
     } catch (error) {
         console.error('Login error:', error);
         return res.status(500).json({ message: 'Error logging in' });
+    }
+});
+
+// Admin Signup
+router.post('/signup', async (req, res) => {
+    try {
+        const { username, email, password } = req.body;
+        console.log('Signup attempt for username:', username);
+
+        // Validate input
+        if (!username || !email || !password) {
+            return res.status(400).json({ message: 'Username, email and password are required' });
+        }
+
+        // Check if email already exists
+        const [existingAdmins] = await pool.query(
+            'SELECT * FROM admin WHERE email = ?',
+            [email]
+        );
+
+        if (existingAdmins.length > 0) {
+            return res.status(400).json({ message: 'Email already registered' });
+        }
+
+        // Hash password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        // Insert new admin with hashed password
+        const [result] = await pool.query(
+            'INSERT INTO admin (username, email, password) VALUES (?, ?, ?)',
+            [username, email, hashedPassword]
+        );
+
+        // Create token for new admin
+        const token = 'admin-token-' + Date.now();
+
+        return res.json({
+            message: 'Signup successful',
+            token,
+            admin: {
+                admin_id: result.insertId,
+                username,
+                email
+            }
+        });
+
+    } catch (error) {
+        console.error('Signup error:', error);
+        return res.status(500).json({ message: 'Error creating account' });
     }
 });
 
