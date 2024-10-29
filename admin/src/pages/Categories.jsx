@@ -66,7 +66,7 @@ function Categories() {
             setSubmitting(true);
             console.log('Sending category data:', formData);
 
-            const response = await axios.post('/api/admin/categories', formData);
+            const response = await axios.post('http://localhost:5001/api/admin/categories', formData);
             console.log('Category added:', response.data);
             
             toast.success('Category added successfully');
@@ -86,7 +86,7 @@ function Categories() {
 
         try {
             setLoading(true);
-            await axios.delete(`/api/admin/categories/${id}`);
+            await axios.delete(`http://localhost:5001/api/admin/categories/${id}`);
             toast.success('Category deleted successfully');
             fetchCategories();
         } catch (err) {
