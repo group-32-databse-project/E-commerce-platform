@@ -6,6 +6,8 @@ import "@fontsource/poppins"; // Import Poppins font
 import Box from "@mui/material/Box";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
+import IconButton from "@mui/material/IconButton"; // Import IconButton
+import ArrowBackIcon from "@mui/icons-material/ArrowBack"; // Import ArrowBackIcon
 import getCheckoutTheme from "../../theme/getCheckoutTheme";
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
@@ -34,6 +36,11 @@ function TemplateFrame({ mode, children }) {
     },
   });
 
+  const handleBack = () => {
+    // Define your back button functionality here
+    window.history.back();
+  };
+
   return (
     <ThemeProvider theme={checkoutTheme}>
       <Box
@@ -55,6 +62,14 @@ function TemplateFrame({ mode, children }) {
               p: "8px 12px",
             }}
           >
+            <IconButton
+              edge="start"
+              color="inherit"
+              aria-label="back"
+              onClick={handleBack}
+            >
+              <ArrowBackIcon />
+            </IconButton>
             {/* You can add Toolbar content here if needed */}
           </Toolbar>
         </StyledAppBar>
