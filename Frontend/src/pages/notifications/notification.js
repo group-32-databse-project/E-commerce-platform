@@ -23,15 +23,18 @@ import { fetchNotifications, markAsRead } from "../../services/notificationServi
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
+
+
 const NotificationPage = () => {
   const [notifications, setNotifications] = useState([]);
-  const { authToken, user } = useAuth();
+  const { authToken } = useAuth();
+
   const navigate = useNavigate();
 
   useEffect(() => {
     const getNotifications = async () => {
       try {
-        const data = await fetchNotifications(authToken);
+        const data = await fetchNotifications();
         setNotifications(data);
       } catch (error) {
         console.error("Error fetching notifications:", error);

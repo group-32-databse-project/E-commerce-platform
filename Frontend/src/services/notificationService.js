@@ -8,8 +8,9 @@ const API_URL = "http://localhost:5001/api/notifications"; // Replace with your 
  * @param {string} token - The JWT token for authentication.
  * @returns {Promise<Array>} - List of notifications.
  */
-export const fetchNotifications = async (token) => {
+export const fetchNotifications = async () => {
   try {
+    const token = localStorage.getItem('token');
     const response = await axios.get(API_URL, {
       headers: {
         Authorization: `Bearer ${token}`,
