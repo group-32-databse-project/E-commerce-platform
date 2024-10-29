@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState , useEffect} from 'react';
 import axios from 'axios';
 import {
   Box,
@@ -15,6 +15,7 @@ import {
   CircularProgress,
   Alert,
 } from '@mui/material';
+import { BarChart } from '../components/ui/chart';
 
 function SalesReport() {
   const [filters, setFilters] = useState({
@@ -34,8 +35,6 @@ function SalesReport() {
       setLoading(true);
       const response = await axios.post('http://localhost:5001/api/admin/sales_report', filters);
       setRevenueData(response.data);
-      alert('Sales report fetched successfully');
-      alert(response.data);
     } catch (err) {
       console.error('Error fetching sales report:', err);
       alert('Failed to fetch sales report');
@@ -46,7 +45,7 @@ function SalesReport() {
 
   const handleReset = () => {
     setFilters({
-      order_time: '',
+      order_time: 'Monthly',
       payment_method: 'All',
       delivery_method: 'All',
       total_order_price_min: '',
@@ -55,22 +54,47 @@ function SalesReport() {
       quantity: '',
     });
     setRevenueData([]);
+    handleFetchReport();
   };
-
   useEffect(() => {
-    // Optionally fetch initial data
+    handleFetchReport();
   }, []);
+
+  const chartConfigs = [
+    {
+      title: 'Average Total Price',
+      valueKey: 'avg_total_price',
+      color: '#4a90e2',
+      prefix: '$'
+    },
+    {
+      title: 'Average Subtotal',
+      valueKey: 'avg_subtotal',
+      color: '#82ca9d',
+      prefix: '$'
+    },
+    {
+      title: 'Average Shipping',
+      valueKey: 'avg_shipping',
+      color: '#ffc658',
+      prefix: '$'
+    },
+    {
+      title: 'Average Tax',
+      valueKey: 'avg_tax',
+      color: '#ff7f50',
+      prefix: '$'
+    },
+    {
+      title: 'Average Quantity',
+      valueKey: 'avg_quantity',
+      color: '#8884d8'
+    }
+  ];
 
   return (
     <Box sx={{ p: 3 }}>
-      <Paper
-        elevation={3}
-        sx={{
-          p: 4,
-          borderRadius: 2,
-          backgroundColor: "#ffffff",
-        }}
-      >
+      <Paper elevation={3} sx={{ p: 4, borderRadius: 2, backgroundColor: "#ffffff" }}>
         <Typography variant="h4" gutterBottom color="#1f2a40">
           Sales Report
         </Typography>
@@ -237,7 +261,13 @@ function SalesReport() {
                       Month
                     </TableCell>
                     <TableCell sx={{ fontWeight: 'bold', color: "#1f2a40" }}>
+                      Min Total Price
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', color: "#1f2a40" }}>
                       Average Total Price
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', color: "#1f2a40" }}>
+                      Max Total Price
                     </TableCell>
                     <TableCell sx={{ fontWeight: 'bold', color: "#1f2a40" }}>
                       Average Subtotal
@@ -257,7 +287,9 @@ function SalesReport() {
                   {revenueData.data.map((r) => (
                     <TableRow key={r.report_month}>
                       <TableCell>{r.report_month}</TableCell>
+                      <TableCell>${parseFloat(r.min_total_price).toFixed(2)}</TableCell>
                       <TableCell>${parseFloat(r.avg_total_price).toFixed(2)}</TableCell>
+                      <TableCell>${parseFloat(r.max_total_price).toFixed(2)}</TableCell>
                       <TableCell>${parseFloat(r.avg_subtotal).toFixed(2)}</TableCell>
                       <TableCell>${parseFloat(r.avg_shipping).toFixed(2)}</TableCell>
                       <TableCell>${parseFloat(r.avg_tax).toFixed(2)}</TableCell>
@@ -266,317 +298,22 @@ function SalesReport() {
                   ))}
                 </TableBody>
               </Table>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                {/* Average Total Price Chart */}
-                <Box
-                  sx={{
-                    width: '100%',
-                    height: '300px',
-                    marginTop: 2,
-                    backgroundColor: '#f8f9fa',
-                    padding: 2,
-                    borderRadius: 2,
-                    display: 'flex',
-                    alignItems: 'flex-end',
-                    justifyContent: 'space-around',
-                    gap: 2,
-                  }}
-                >
-                  <Typography variant="h6" sx={{ position: 'absolute', ml: 2, mt: -4 }}>Average Total Price</Typography>
-                  {revenueData.data.map((r, index) => {
-                    const maxTotal = Math.max(
-                      ...revenueData.data.map((item) => parseFloat(item.avg_total_price))
-                    );
-                    const height = (parseFloat(r.avg_total_price) / maxTotal) * 100 * 2;
-                    return (
-                      <Box
-                        key={index}
-                        sx={{
-                          flex: '1',
-                          maxWidth: '100px',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'flex-end',
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            width: '60%',
-                            height: `${height}px`,
-                            backgroundColor: '#4a90e2',
-                            borderRadius: '8px 8px 0 0',
-                            minHeight: '20px',
-                          }}
-                        />
-                        <Box
-                          sx={{
-                            mt: 1,
-                            textAlign: 'center',
-                            fontSize: '12px',
-                            wordWrap: 'break-word',
-                          }}
-                        >
-                          <Typography sx={{ fontWeight: 'bold', color: "#1f2a40" }}>
-                            {r.report_month}
-                          </Typography>
-                          <Typography color="#555555">
-                            ${parseFloat(r.avg_total_price).toFixed(2)}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    );
-                  })}
-                </Box>
+            </Box>
 
-                {/* Average Subtotal Chart */}
-                <Box
-                  sx={{
-                    width: '100%',
-                    height: '300px',
-                    backgroundColor: '#f8f9fa',
-                    padding: 2,
-                    borderRadius: 2,
-                    display: 'flex',
-                    alignItems: 'flex-end',
-                    justifyContent: 'space-around',
-                    gap: 2,
-                  }}
-                >
-                  <Typography variant="h6" sx={{ position: 'absolute', ml: 2, mt: -4 }}>Average Subtotal</Typography>
-                  {revenueData.data.map((r, index) => {
-                    const maxSubtotal = Math.max(
-                      ...revenueData.data.map((item) => parseFloat(item.avg_subtotal))
-                    );
-                    const height = (parseFloat(r.avg_subtotal) / maxSubtotal) * 100 * 2;
-                    return (
-                      <Box
-                        key={index}
-                        sx={{
-                          flex: '1',
-                          maxWidth: '100px',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'flex-end',
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            width: '60%',
-                            height: `${height}px`,
-                            backgroundColor: '#82ca9d',
-                            borderRadius: '8px 8px 0 0',
-                            minHeight: '20px',
-                          }}
-                        />
-                        <Box
-                          sx={{
-                            mt: 1,
-                            textAlign: 'center',
-                            fontSize: '12px',
-                            wordWrap: 'break-word',
-                          }}
-                        >
-                          <Typography sx={{ fontWeight: 'bold', color: "#1f2a40" }}>
-                            {r.report_month}
-                          </Typography>
-                          <Typography color="#555555">
-                            ${parseFloat(r.avg_subtotal).toFixed(2)}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    );
-                  })}
-                </Box>
-
-                {/* Average Shipping Chart */}
-                <Box
-                  sx={{
-                    width: '100%',
-                    height: '300px',
-                    backgroundColor: '#f8f9fa',
-                    padding: 2,
-                    borderRadius: 2,
-                    display: 'flex',
-                    alignItems: 'flex-end',
-                    justifyContent: 'space-around',
-                    gap: 2,
-                  }}
-                >
-                  <Typography variant="h6" sx={{ position: 'absolute', ml: 2, mt: -4 }}>Average Shipping</Typography>
-                  {revenueData.data.map((r, index) => {
-                    const maxShipping = Math.max(
-                      ...revenueData.data.map((item) => parseFloat(item.avg_shipping))
-                    );
-                    const height = (parseFloat(r.avg_shipping) / maxShipping) * 100 * 2;
-                    return (
-                      <Box
-                        key={index}
-                        sx={{
-                          flex: '1',
-                          maxWidth: '100px',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'flex-end',
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            width: '60%',
-                            height: `${height}px`,
-                            backgroundColor: '#ffc658',
-                            borderRadius: '8px 8px 0 0',
-                            minHeight: '20px',
-                          }}
-                        />
-                        <Box
-                          sx={{
-                            mt: 1,
-                            textAlign: 'center',
-                            fontSize: '12px',
-                            wordWrap: 'break-word',
-                          }}
-                        >
-                          <Typography sx={{ fontWeight: 'bold', color: "#1f2a40" }}>
-                            {r.report_month}
-                          </Typography>
-                          <Typography color="#555555">
-                            ${parseFloat(r.avg_shipping).toFixed(2)}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    );
-                  })}
-                </Box>
-
-                {/* Average Tax Chart */}
-                <Box
-                  sx={{
-                    width: '100%',
-                    height: '300px',
-                    backgroundColor: '#f8f9fa',
-                    padding: 2,
-                    borderRadius: 2,
-                    display: 'flex',
-                    alignItems: 'flex-end',
-                    justifyContent: 'space-around',
-                    gap: 2,
-                  }}
-                >
-                  <Typography variant="h6" sx={{ position: 'absolute', ml: 2, mt: -4 }}>Average Tax</Typography>
-                  {revenueData.data.map((r, index) => {
-                    const maxTax = Math.max(
-                      ...revenueData.data.map((item) => parseFloat(item.avg_tax))
-                    );
-                    const height = (parseFloat(r.avg_tax) / maxTax) * 100 * 2;
-                    return (
-                      <Box
-                        key={index}
-                        sx={{
-                          flex: '1',
-                          maxWidth: '100px',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'flex-end',
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            width: '60%',
-                            height: `${height}px`,
-                            backgroundColor: '#ff7f50',
-                            borderRadius: '8px 8px 0 0',
-                            minHeight: '20px',
-                          }}
-                        />
-                        <Box
-                          sx={{
-                            mt: 1,
-                            textAlign: 'center',
-                            fontSize: '12px',
-                            wordWrap: 'break-word',
-                          }}
-                        >
-                          <Typography sx={{ fontWeight: 'bold', color: "#1f2a40" }}>
-                            {r.report_month}
-                          </Typography>
-                          <Typography color="#555555">
-                            ${parseFloat(r.avg_tax).toFixed(2)}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    );
-                  })}
-                </Box>
-
-                {/* Average Quantity Chart */}
-                <Box
-                  sx={{
-                    width: '100%',
-                    height: '300px',
-                    backgroundColor: '#f8f9fa',
-                    padding: 2,
-                    borderRadius: 2,
-                    display: 'flex',
-                    alignItems: 'flex-end',
-                    justifyContent: 'space-around',
-                    gap: 2,
-                  }}
-                >
-                  <Typography variant="h6" sx={{ position: 'absolute', ml: 2, mt: -4 }}>Average Quantity</Typography>
-                  {revenueData.data.map((r, index) => {
-                    const maxQuantity = Math.max(
-                      ...revenueData.data.map((item) => parseFloat(item.avg_quantity))
-                    );
-                    const height = (parseFloat(r.avg_quantity) / maxQuantity) * 100 * 2;
-                    return (
-                      <Box
-                        key={index}
-                        sx={{
-                          flex: '1',
-                          maxWidth: '100px',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'flex-end',
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            width: '60%',
-                            height: `${height}px`,
-                            backgroundColor: '#8884d8',
-                            borderRadius: '8px 8px 0 0',
-                            minHeight: '20px',
-                          }}
-                        />
-                        <Box
-                          sx={{
-                            mt: 1,
-                            textAlign: 'center',
-                            fontSize: '12px',
-                            wordWrap: 'break-word',
-                          }}
-                        >
-                          <Typography sx={{ fontWeight: 'bold', color: "#1f2a40" }}>
-                            {r.report_month}
-                          </Typography>
-                          <Typography color="#555555">
-                            {parseFloat(r.avg_quantity).toFixed(2)}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    );
-                  })}
-                </Box>
-              </Box>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4, mt: 4 }}>
+              {chartConfigs.map((config, index) => (
+                <BarChart
+                  key={index}
+                  data={revenueData.data}
+                  {...config}
+                />
+              ))}
             </Box>
           </>
         ) : (
-          <Alert severity="info">No revenue data available. Please apply filters to retrieve data.</Alert>
+          <Alert severity="info">
+            No revenue data available. Please apply filters to retrieve data.
+          </Alert>
         )}
       </Paper>
     </Box>
