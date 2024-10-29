@@ -93,7 +93,7 @@ const Checkout = () => {
 
   const handleTryAgain = () => {
     setOpenErrorDialog(false);
-    // You can add any additional logic here before retrying
+    // Add any additional logic here before retrying
     handleNext();
   };
 
