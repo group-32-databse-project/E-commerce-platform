@@ -15,13 +15,13 @@ import NotFound from "./pages/notFound/NotFound.jsx";
 import ProductPage from "./pages/product/product.jsx";
 import Category from "./pages/category/catagory.js";
 import Loading from "./pages/loading/loading.js";
-import OrderConfirmation from "./pages/orderConfermation.js";
+import OrderConfirmation from "./pages/orderConfirmation/OrderConfirmation";
+
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/product/:productId" element={<ProductPage />} />
         <Route path="/api/cart" element={<Card />} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/signin" element={<SignIn />} />
@@ -32,9 +32,14 @@ function App() {
         <Route path="/notifications" element={<Notification />} />
         <Route path="/help" element={<Help />} />
         <Route path="/loading" element={<Loading />} />
+        <Route path="/product/:productId" element={<ProductPage />} />
+
         <Route path="/category/:categoryId" element={<Category />} />
         <Route path="*" element={<NotFound />} />
-        <Route path="/orderConfirmation" element={<OrderConfirmation />} />
+        <Route
+          path="/orderConfirmation/:orderId"
+          element={<OrderConfirmation />}
+        />
       </Routes>
     </Router>
   );

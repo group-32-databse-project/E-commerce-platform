@@ -55,6 +55,18 @@ exports.getOrderById = async (req, res) => {
     res.status(500).json({ message: 'Error fetching order' });
   }
 };
+exports.getOrdersById = async (req, res) => {
+  try {
+    const orders = await Order.getOrderById(req.params.id);
+
+    res.json(orders);
+  } catch (error) {
+    console.error("Error in getOrdersByCustomerId:", error);
+    res
+      .status(500)
+      .json({ message: "Error fetching orders", error: error.toString() });
+  }
+};  
 
 
 

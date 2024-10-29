@@ -28,7 +28,6 @@ class Order {
         order_status,
       ]
     );
-    console.log(result);
     return result.insertId; // Return the ID of the newly created order
   }
 

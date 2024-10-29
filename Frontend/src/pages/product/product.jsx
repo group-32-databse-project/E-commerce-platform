@@ -19,6 +19,7 @@ import {
   createTheme,
   styled,
   Container,
+  CircularProgress,
 } from "@mui/material";
 import {
   FavoriteBorder,
@@ -175,6 +176,7 @@ const ProductPage = () => {
           throw new Error("Failed to fetch product");
         }
         const data = await response.json();
+        console.log("Product data:", data); // Debug log to see the data structure
         setProduct(data);
         setVariants(data.variants || []);
         if (data.variants && data.variants.length > 0) {
@@ -198,7 +200,21 @@ const ProductPage = () => {
     }
   }, [selectedVariant, quantity]);
 
-  if (loading) return <Typography>Loading...</Typography>;
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   if (error) return <Typography color="error">{error}</Typography>;
   if (!product) return <Typography>Product not found</Typography>;
 

@@ -6,11 +6,8 @@ const orderItemController = require("../controllers/orderItemController.js");
 // POST /api/orders
 router.post("/", orderController.createOrder);
 
-// GET /api/orders/:id
-router.get("/:id", orderController.getOrderById);
-
-
-
+//get /api/orders/:id
+router.get("/:id", orderController.getOrdersById);
 
 ///api/orders/${orderId}/items
 router.get("/:orderId/items", orderItemController.getItemsByOrderId);

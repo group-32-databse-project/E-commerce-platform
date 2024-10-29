@@ -29,13 +29,12 @@ import {
   ArrowBack as ArrowBackIcon,
   ShoppingCart as ShoppingCartIcon,
 } from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
-import getAddress from "../api/getAddress";
-import { getOrder } from "../api/getOrder";
-import getCustomerDetail from "../api/custermerDetail";
-import getOrderDetail from "../api/orderDetail";
-import PdfGenerator from "../services/generatePDF";
-import { getOrderItem } from "../api/getorderItem";
+import { useNavigate, useParams } from "react-router-dom";
+import getAddress from "../../api/getAddress";
+import getCustomerDetail from "../../api/custermerDetail";
+import getOrderDetail from "../../api/orderDetail";
+import PdfGenerator from "../../services/generatePDF";
+import { getOrderItem } from "../../api/getorderItem";
 
 const theme = createTheme({
   palette: {
@@ -117,10 +116,10 @@ const OrderConfirmation = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const navigate = useNavigate();
   const [address, setAddress] = useState(null);
-  const [order, setOrder] = useState(null);
+
   const [customerDetail, setCustomerDetail] = useState(null);
   const [orderDetail, setOrderDetail] = useState(null);
-
+  const { orderId } = useParams();
   // Updated useEffect to handle async function correctly
   useEffect(() => {
     const fetchAddress = async () => {
@@ -136,18 +135,6 @@ const OrderConfirmation = () => {
   }, []);
 
   useEffect(() => {
-    const fetchOrder = async () => {
-      try {
-        const fetchedOrder = await getOrder();
-        setOrder(fetchedOrder);
-      } catch (error) {
-        console.error("Failed to fetch order:", error);
-      }
-    };
-    fetchOrder();
-  }, []);
-
-  useEffect(() => {
     const fetchCustomerDetail = async () => {
       try {
         const fetchedCustomerDetail = await getCustomerDetail();
@@ -158,12 +145,12 @@ const OrderConfirmation = () => {
     };
     fetchCustomerDetail();
   }, []);
-  console.log("order", order);
 
   useEffect(() => {
     const fetchOrderDetail = async () => {
       try {
-        const fetchedOrderDetail = await getOrderDetail();
+        const fetchedOrderDetail = await getOrderDetail(orderId);
+        console.log("fetchedOrderDetail", fetchedOrderDetail);
         setOrderDetail(fetchedOrderDetail);
       } catch (error) {
         console.error("Failed to fetch order detail:", error);

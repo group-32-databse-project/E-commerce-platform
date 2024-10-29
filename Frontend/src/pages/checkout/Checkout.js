@@ -26,7 +26,7 @@ import InfoMobile from "../../components/InfoMobile";
 import TemplateFrame from "./TemplateFrame";
 import { LogoIcon } from "../sign/CustomIcons";
 import getCheckoutTheme from "../../theme/getCheckoutTheme";
-
+import getAddress from "../../api/getAddress";
 import AddressValidationErrorDialog from "../../components/AddressValidationErrorDialog";
 
 import { makeOrder } from "../../api/makeOrder";
@@ -50,6 +50,8 @@ const Checkout = () => {
   const [mode, setMode] = useState("light");
   const [showCustomTheme, setShowCustomTheme] = useState(true);
   const [activeStep, setActiveStep] = useState(0);
+  const [address, setAddress] = useState(null);
+
   const [openErrorDialog, setOpenErrorDialog] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
@@ -79,10 +81,24 @@ const Checkout = () => {
     setShowCustomTheme((prev) => !prev);
   };
 
-  const handleNext = () => {
-    if (activeStep === steps.length - 1) {
-      makeOrder();
-      navigate("/orderConfirmation");
+  const handleNext = async () => {
+    if (activeStep === 0) {
+      const address = await getAddress();
+      setAddress(address);
+      console.log("address", address);
+      if (address) {
+        setActiveStep((prevActiveStep) => prevActiveStep + 1);
+      } else {
+        setErrorMessage("Please enter a valid address");
+        setOpenErrorDialog(true);
+      }
+    } else if (activeStep === 1) {
+      // const payment = await getPayment();
+      // console.log("payment", payment);
+    } else if (activeStep === steps.length - 1) {
+      const orderId = await makeOrder();
+
+      navigate(`/orderConfirmation/${orderId}`);
     }
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
