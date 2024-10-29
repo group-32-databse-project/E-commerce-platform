@@ -80,4 +80,12 @@ exports.getProductsByCategory = async (req, res) => {
   }
 };
 
-// Add more controller methods as needed (update, delete, etc.)
+exports.getRecentArrivals = async (req, res) => {
+  try {
+    const recentVariants = await Variant.getRecentVariants(3);
+    res.json(recentVariants);
+  } catch (error) {
+    console.error('Error in getRecentArrivals:', error);
+    res.status(500).json({ message: 'Error fetching recent arrivals' });
+  }
+};

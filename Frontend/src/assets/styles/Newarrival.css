@@ -1,0 +1,15 @@
+.new-arrivals-section {
+    /* Optional: You can further adjust padding if needed */
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+  
+  .hover-effect {
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  
+  .hover-effect:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  }
+

@@ -3,6 +3,8 @@ const router = express.Router();
 const productController = require('../controllers/productController');
 const categoryController = require('../controllers/categoryController');
 
+router.get('/new-arrivals', productController.getRecentArrivals);
+
 // GET /api/products
 router.get('/', productController.getAllProducts);
 

@@ -44,7 +44,7 @@ const HomePage = () => {
             </section>
 
             {/* New Arrivals */}
-            
+            <Newarrival />
           </main>
         </div>
       </div>
