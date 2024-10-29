@@ -328,61 +328,65 @@ const OurProduct = ({ filters }) => {
   const [carouselIndex, setCarouselIndex] = useState(0);
   const navigate = useNavigate();
 
- // Fetch products based on filters
- useEffect(() => {
-  const fetchProducts = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const { categories, subcategories, priceRange } = filters;
-      const queryParams = new URLSearchParams();
+  // Fetch products based on filters
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const { categories, subcategories, priceRange } = filters;
+        const queryParams = new URLSearchParams();
 
-      if (categories.length > 0) {
-        queryParams.append("categories", categories.join(","));
+        if (categories.length > 0) {
+          queryParams.append("categories", categories.join(","));
+        }
+
+        if (subcategories.length > 0) {
+          queryParams.append("subcategories", subcategories.join(","));
+        }
+
+        if (priceRange[0] !== 0) {
+          queryParams.append("minPrice", priceRange[0]);
+        }
+
+        if (priceRange[1] !== 1500) {
+          queryParams.append("maxPrice", priceRange[1]);
+        }
+
+        const apiEndpoint =
+          queryParams.toString() === ""
+            ? "/api/products" // No filters applied, fetch all products
+            : `/api/filters/products?${queryParams.toString()}`;
+
+        // console.log("Fetching Products from:", apiEndpoint);
+
+        const response = await axios.get(apiEndpoint);
+        // console.log("Fetched Products:", response.data);
+        setProducts(response.data);
+      } catch (err) {
+        console.error("Error fetching products:", err);
+        setError("Failed to load products.");
+      } finally {
+        setLoading(false);
       }
+    };
 
-      if (subcategories.length > 0) {
-        queryParams.append("subcategories", subcategories.join(","));
-      }
+    fetchProducts();
+  }, [filters]);
 
-      if (priceRange[0] !== 0) {
-        queryParams.append("minPrice", priceRange[0]);
-      }
-
-      if (priceRange[1] !== 1500) {
-        queryParams.append("maxPrice", priceRange[1]);
-      }
-
-      const apiEndpoint =
-        queryParams.toString() === ""
-          ? "/api/products" // No filters applied, fetch all products
-          : `/api/filters/products?${queryParams.toString()}`;
-
-      // console.log("Fetching Products from:", apiEndpoint);
-
-      const response = await axios.get(apiEndpoint);
-      // console.log("Fetched Products:", response.data);
-      setProducts(response.data);
-    } catch (err) {
-      console.error("Error fetching products:", err);
-      setError("Failed to load products.");
-    } finally {
-      setLoading(false);
-    }
+  // Handle Add to Wishlist
+  const onAddToWishlist = (variant_id, event) => {
+    event.stopPropagation(); // Prevent card navigation
+    console.log(`Added product ${variant_id} to wishlist`);
   };
 
-  fetchProducts();
-}, [filters]);
-
-
   // Handle Add to Cart
-  const onAddToCart = (variantId) => {
+  const onAddToCart = (variantId, event) => {
+    event.stopPropagation(); // Prevent card navigation
     // Implement cart addition logic here
     console.log(`Added variant ${variantId} to cart.`);
     setOpenSnackbar(true);
   };
-
-  // Handle Buy Now
 
   // Snackbar Close Handler
   const handleCloseSnackbar = (event, reason) => {
@@ -407,7 +411,8 @@ const OurProduct = ({ filters }) => {
   };
 
   // Modal Handlers
-  const handleOpenModal = (product) => {
+  const handleOpenModal = (product, event) => {
+    event.stopPropagation(); // Prevent card navigation
     setSelectedProduct(product);
     setOpenModal(true);
     setCarouselIndex(0);
@@ -435,8 +440,6 @@ const OurProduct = ({ filters }) => {
     }
   };
 
-  // Add this function to handle navigation
-
   if (loading) {
     return (
       <ProductsSection>
@@ -455,161 +458,132 @@ const OurProduct = ({ filters }) => {
         </Typography>
       ) : (
         <>
-      <Grid container spacing={4} justifyContent="center">
-        {currentProducts.map((product) => (
-          <Grid
-            item
-            key={product.product_id}
-            xs={12}
-            sm={6}
-            md={4} // 3 cards per row on medium and larger screens
-            display="flex"
-            justifyContent="center"
-          >
-            <StyledCard>
-              {/* Wishlist and Quick View Buttons */}
-              <WishlistButton
-                aria-label="add to wishlist"
-                color="secondary"
-                onClick={() => onAddToWishlist(product.product_id)}
+          <Grid container spacing={4} justifyContent="center">
+            {currentProducts.map((product) => (
+              <Grid
+                item
+                key={product.product_id}
+                xs={12}
+                sm={6}
+                md={4} // 3 cards per row on medium and larger screens
+                display="flex"
+                justifyContent="center"
               >
-                <FavoriteIcon />
-              </WishlistButton>
-
-              <QuickViewButton
-                aria-label="quick view"
-                color="primary"
-                onClick={() => handleOpenModal(product)}
-              >
-                <VisibilityIcon />
-              </QuickViewButton>
-
-              {/* Product Image with Badge */}
-              <Badge
-                badgeContent={
-                  product.isFeatured
-                    ? "Featured"
-                    : product.isNew
-                    ? "New"
-                    : product.isBestSeller
-                    ? "Best Seller"
-                    : product.isOnSale
-                    ? `${product.discountPercentage}% Off`
-                    : null
-                }
-                color={
-                  product.isFeatured
-                    ? "secondary"
-                    : product.isNew
-                    ? "success"
-                    : product.isBestSeller
-                    ? "warning"
-                    : "error"
-                }
-                invisible={
-                  !product.isFeatured &&
-                  !product.isNew &&
-                  !product.isBestSeller &&
-                  !product.isOnSale
-                }
-                anchorOrigin={{
-                  vertical: "top",
-                  horizontal: "left",
-                }}
-                sx={{
-                  zIndex: 2, // Ensure Badge is below buttons but above image
-                  "& .MuiBadge-badge": {
-                    borderRadius: "8px",
-                    padding: "4px 8px",
-                    fontSize: "0.7rem",
-                    fontWeight: 600,
-                  },
-                }}
-              >
-                <Tooltip title={product.product_name} arrow>
-                  <Media
-                    component="img"
-                    image={product.product_image}
-                    alt={product.product_name}
-                    loading="lazy" // Lazy load images
-                  />
-                </Tooltip>
-              </Badge>
-
-              {/* Product Details */}
-              <Content>
-                <Typography gutterBottom variant="h6" component="div">
-                  {product.product_name}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {product.description.length > 60
-                    ? `${product.description.slice(0, 60)}...`
-                    : product.description}
-                </Typography>
-                <Price>
-                  $
-                  {product.variants && product.variants.length > 0
-                    ? product.variants[0].total_price
-                    : "N/A"}
-                  {product.isOnSale &&
-                    product.variants &&
-                    product.variants.length > 0 && (
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        component="span"
-                        style={{
-                          textDecoration: "line-through",
-                          marginLeft: "8px",
-                        }}
-                      >
-                        ${product.variants[0].total_price}
-                      </Typography>
-                    )}
-                </Price>
-                <Typography variant="body2" color="text.secondary">
-                  Weight: {product.weight}
-                </Typography>
-                <Rating value={product.rating} count={product.ratingCount} />
-              </Content>
-
-              {/* Action Buttons */}
-              <Actions>
-                <StyledButton
-                  color="primary"
-                  onClick={() => {
-                    alert(product.product_id);
-                  }}
-                  fullWidth
+                <StyledCard
+                  onClick={() => navigate(`/product/${product.product_id}`)}
                 >
-                  <ButtonContent>
-                    <IconWrapper>
-                      <ShoppingCartIcon />
-                    </IconWrapper>
-                    Add to Cart
-                  </ButtonContent>
-                </StyledButton>
-                <StyledButton
-                  color="success"
-                  onClick={() => {
-                    localStorage.setItem("product_id", product.product_id);
-                    navigate(`/product/${product.product_id}`);
-                  }}
-                  fullWidth
-                >
-                  <ButtonContent>
-                    <IconWrapper>
-                      <StarIcon />
-                    </IconWrapper>
-                    Buy Now
-                  </ButtonContent>
-                </StyledButton>
-              </Actions>
-            </StyledCard>
+                  {/* Wishlist and Quick View Buttons */}
+                  <WishlistButton
+                    aria-label="add to wishlist"
+                    color="secondary"
+                    onClick={(event) => onAddToWishlist(product.product_id, event)}
+                  >
+                    <FavoriteIcon />
+                  </WishlistButton>
+
+                  <QuickViewButton
+                    aria-label="quick view"
+                    color="primary"
+                    onClick={(event) => handleOpenModal(product, event)}
+                  >
+                    <VisibilityIcon />
+                  </QuickViewButton>
+
+                  {/* Product Image with Badge */}
+                  <Badge
+                    badgeContent={
+                      product.isFeatured
+                        ? "Featured"
+                        : product.isNew
+                        ? "New"
+                        : product.isBestSeller
+                        ? "Best Seller"
+                        : product.isOnSale
+                        ? `${product.discountPercentage}% Off`
+                        : null
+                    }
+                    color={
+                      product.isFeatured
+                        ? "secondary"
+                        : product.isNew
+                        ? "success"
+                        : product.isBestSeller
+                        ? "warning"
+                        : "error"
+                    }
+                    invisible={
+                      !product.isFeatured &&
+                      !product.isNew &&
+                      !product.isBestSeller &&
+                      !product.isOnSale
+                    }
+                    anchorOrigin={{
+                      vertical: "top",
+                      horizontal: "left",
+                    }}
+                    sx={{
+                      zIndex: 2, // Ensure Badge is below buttons but above image
+                      "& .MuiBadge-badge": {
+                        borderRadius: "8px",
+                        padding: "4px 8px",
+                        fontSize: "0.7rem",
+                        fontWeight: 600,
+                      },
+                    }}
+                  >
+                    <Tooltip title={product.product_name} arrow>
+                      <Media
+                        component="img"
+                        image={product.product_image}
+                        alt={product.product_name}
+                        loading="lazy" // Lazy load images
+                      />
+                    </Tooltip>
+                  </Badge>
+
+                  {/* Product Details */}
+                  <Content>
+                    <Typography gutterBottom variant="h6" component="div">
+                      {product.product_name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {product.description.length > 60
+                        ? `${product.description.slice(0, 60)}...`
+                        : product.description}
+                    </Typography>
+                    <Price>
+                      $
+                      {product.variants && product.variants.length > 0
+                        ? product.variants[0].total_price
+                        : "N/A"}
+                      {product.isOnSale &&
+                        product.variants &&
+                        product.variants.length > 0 && (
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            component="span"
+                            style={{
+                              textDecoration: "line-through",
+                              marginLeft: "8px",
+                            }}
+                          >
+                            ${product.variants[0].total_price}
+                          </Typography>
+                        )}
+                    </Price>
+                    <Typography variant="body2" color="text.secondary">
+                      Weight: {product.weight}
+                    </Typography>
+                    <Rating value={product.rating} count={product.ratingCount} />
+                  </Content>
+
+                  {/* Action Buttons Removed */}
+                </StyledCard>
+              </Grid>
+            ))}
           </Grid>
-        ))}
-      </Grid>
-      </>
+        </>
       )}
       {/* Pagination Controls */}
       <Grid
@@ -767,8 +741,8 @@ const OurProduct = ({ filters }) => {
             >
               <StyledButton
                 color="primary"
-                onClick={() => {
-                  onAddToCart(selectedProduct.x);
+                onClick={(event) => {
+                  onAddToCart(selectedProduct.x, event);
                   handleCloseModal();
                 }}
                 fullWidth
