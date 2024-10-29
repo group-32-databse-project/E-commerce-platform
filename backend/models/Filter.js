@@ -26,7 +26,8 @@ class Filter {
   static async getFilteredProducts({ categoryIds = [], subcategoryIds = [], priceRange }) {
     try {
       let query = `
-        SELECT DISTINCT p.*, c.category_name
+        SELECT p.product_id, p.product_name, p.description, p.product_image, p.weight, c.category_name,
+               v.variant_id, v.total_price
         FROM product p
         JOIN category c ON p.category_id = c.category_id
         JOIN variant v ON p.product_id = v.product_id
@@ -59,7 +60,32 @@ class Filter {
         }
       }
 
-      const [products] = await db.query(query, params);
+      const [rows] = await db.query(query, params);
+
+      // Map products and aggregate variants
+      const productsMap = {};
+      rows.forEach(row => {
+        const productId = row.product_id;
+        if (!productsMap[productId]) {
+          productsMap[productId] = {
+            product_id: row.product_id,
+            product_name: row.product_name,
+            description: row.description,
+            weight: row.weight,
+            product_image: row.product_image,
+            category_name: row.category_name,
+            variants: [],
+            // Add other product fields if necessary
+          };
+        }
+        productsMap[productId].variants.push({
+          variant_id: row.variant_id,
+          total_price: row.total_price
+          // Add other variant fields if necessary
+        });
+      });
+
+      const products = Object.values(productsMap);
       return products;
     } catch (error) {
       throw error;
