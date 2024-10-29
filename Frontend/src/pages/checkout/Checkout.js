@@ -93,6 +93,8 @@ const Checkout = () => {
         setOpenErrorDialog(true);
       }
     } else if (activeStep === 1) {
+      setActiveStep((prevActiveStep) => prevActiveStep + 1);
+
       // const payment = await getPayment();
       // console.log("payment", payment);
     } else if (activeStep === steps.length - 1) {
@@ -100,7 +102,6 @@ const Checkout = () => {
 
       navigate(`/orderConfirmation/${orderId}`);
     }
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
 
   const handleCloseErrorDialog = () => {
