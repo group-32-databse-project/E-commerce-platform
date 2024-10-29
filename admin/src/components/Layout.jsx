@@ -3,7 +3,7 @@ import { Outlet } from "react-router-dom";
 import { Box } from "@mui/material";
 import Sidebar from "./Sidebar";
 
-const drawerWidth = 240;
+const drawerWidth = 24;
 
 export default function Layout() {
   return (

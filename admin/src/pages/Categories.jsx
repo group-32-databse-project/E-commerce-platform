@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import defaultImage from '../asserts/images/default-image.png';
 import { 
     Box, 
     TextField, 
@@ -154,9 +155,15 @@ function Categories() {
                                     <CardMedia
                                         component="img"
                                         height="140"
-                                        image={`/uploads/${category.category_image}`}
+                                        image={category.category_image 
+                                            ? `/uploads/${category.category_image}` 
+                                            : defaultImage
+                                        }
                                         alt={category.category_name}
                                         sx={{ objectFit: 'cover' }}
+                                        onError={(e) => {
+                                            e.target.src = defaultImage;
+                                        }}
                                     />
                                     <CardContent>
                                         <Typography variant="h6" component="div">

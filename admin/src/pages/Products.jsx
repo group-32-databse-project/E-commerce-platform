@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import defaultImage from '../asserts/images/default-image.jpg';
 import { 
     Box, 
     TextField, 
@@ -169,10 +170,16 @@ function Products() {
                                 <Card elevation={2}>
                                     <CardMedia
                                         component="img"
-                                        height="140"
-                                        image={`/uploads/${product.product_image}`}
+                                        height="140"                                    
+                                        image={product.product_image 
+                                            ? `/uploads/${product.product_image}` 
+                                            : defaultImage
+                                        }
                                         alt={product.product_name}
                                         sx={{ objectFit: 'cover' }}
+                                        onError={(e) => {
+                                            e.target.src = defaultImage;
+                                        }}
                                     />
                                     <CardContent>
                                         <Typography variant="h6" component="div">
