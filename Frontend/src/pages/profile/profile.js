@@ -7,13 +7,41 @@ import CustomerDeatailForm from '../../components/customerDeatailform';
 import PaymentForm from '../../components/PaymentForm';
 import AddressForm from '../../components/AddressForm';
 import MyOrders from '../../components/Myorders';
+import { jwtDecode } from 'jwt-decode'; // Use named import
 
 const Profile = () => {
   const [selectedMenuItem, setSelectedMenuItem] = useState('Personal Information');
+  const [customerName, setCustomerName] = useState();
 
   const handleMenuItemClick = (menuItem) => {
     setSelectedMenuItem(menuItem);
   };
+  const token = localStorage.getItem('token');
+  let id = null;
+
+  if (token) {
+    try {
+      const decodedToken = jwtDecode(token); // Use named import
+      id = decodedToken.customerId; // Assuming the token contains an 'id' field
+     console.log('Decoded id:', id);
+    } catch (error) {
+      console.error('Error decoding token:', error);
+    }
+  }
+
+  useEffect(() => {
+    // Fetch data from backend
+    fetch(`/api/customers/${id}`)
+      .then(response => response.json())
+      .then(data => {
+        setCustomerName(data.first_name+" "+data.last_name);
+        console.log('Profile data:', customerName);
+      })
+      .catch(error => {
+        console.error('Error fetching profile data:', error);
+      });
+  }, [id]);
+
 
   const renderContent = () => {
     switch (selectedMenuItem) {
@@ -37,7 +65,7 @@ const Profile = () => {
         <Sidebar>
           <ProfileContainer>
             <FaUserCircle size={70} />
-            <Name>John Doe</Name>
+            <Name>{customerName}</Name>
             <Balance>38.00$</Balance>
           </ProfileContainer>
           <Menu>

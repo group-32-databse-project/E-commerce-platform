@@ -1,345 +1,216 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import {
-  Button,
-  Typography,
-  Box,
-  Container,
-  Grid,
-  Link,
-  IconButton,
-  useMediaQuery,
-} from "@mui/material";
-import { styled, alpha, useTheme } from "@mui/material/styles";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import PauseIcon from "@mui/icons-material/Pause";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import { useSwipeable } from "react-swipeable";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { styled, alpha } from "@mui/material/styles";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Grid from "@mui/material/Grid";
+import Link from "@mui/material/Link";
+import CircularProgress from "@mui/material/CircularProgress";
+import Alert from "@mui/material/Alert";
 
-
-// Importing specific background images
-import ban1 from "../../assets/images/ban1.jpg";
-import ban2 from "../../assets/images/ban2.jpg";
-import ban3 from "../../assets/images/ban3.jpg";
-
-// **Importing Local Images for Categories**
-import tvImage from "../../assets/images/tv.jpg";
-import carImage from "../../assets/images/car.jpg";
-import bikeImage from "../../assets/images/bike.jpg";
+// Import banner images from the correct path
+import toyBanner from "../../assets/images/toy_banner.jpeg";
+import electronicsBanner from "../../assets/images/electronics_banner.jpeg";
 
 // Styled Components
 const BannerContainer = styled(Box)(({ theme }) => ({
-  color: "white",
-  padding: theme.spacing(4),
   position: "relative",
-  borderRadius: theme.shape.borderRadius,
+  width: "100%",
+  height: "500px", // Increased height for better image visibility
+  marginBottom: theme.spacing(6),
   overflow: "hidden",
-  height: "500px",
-  display: "flex",
-  alignItems: "center",
-  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+  borderRadius: theme.shape.borderRadius,
   [theme.breakpoints.down("sm")]: {
-    height: "450px",
-    padding: theme.spacing(4),
+    height: "350px",
   },
 }));
 
-const BackgroundImage = styled(Box)(({ theme, image }) => ({
+const BannerSection = styled(Box, {
+  shouldForwardProp: (prop) => prop !== "bgImage" && prop !== "isActive",
+})(({ theme, bgImage, isActive }) => ({
   position: "absolute",
   top: 0,
   left: 0,
-  right: 0,
-  bottom: 0,
-  backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${image})`,
+  width: "100%",
+  height: "100%",
+  borderRadius: theme.shape.borderRadius,
+  backgroundImage: `url(${bgImage})`,
   backgroundSize: "cover",
   backgroundPosition: "center",
-  transition: "opacity 0.5s ease-in-out",
-  opacity: 0,
-  zIndex: 0,
-  borderRadius: theme.shape.borderRadius,
-  "&.active": {
-    opacity: 1,
-  },
+  display: "flex",
+  alignItems: "center",
+  color: "white",
+  boxShadow: isActive ? "0 6px 10px rgba(0, 0, 0, 0.25)" : "none",
+  opacity: isActive ? 1 : 0,
+  transition: "opacity 1s ease-in-out",
+  pointerEvents: isActive ? "auto" : "none",
+}));
+
+const Overlay = styled(Box)(({ theme }) => ({
+  position: "absolute",
+  top: 0,
+  left: 0,
+  width: "100%",
+  height: "100%",
+  backgroundColor: alpha("#000", 0.3), // Slightly lighter overlay
 }));
 
 const ContentWrapper = styled(Box)(({ theme }) => ({
   position: "relative",
   zIndex: 1,
   width: "100%",
-  transition: "transform 0.5s ease-in-out",
+  padding: theme.spacing(3),
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "flex-start",
   [theme.breakpoints.down("sm")]: {
+    alignItems: "center",
     textAlign: "center",
   },
 }));
 
-const CategoryBox = styled(Box)(({ theme }) => ({
-  backgroundColor: alpha(theme.palette.background.paper, 0.8),
+const ProductsGrid = styled(Grid)(({ theme }) => ({
+  marginTop: theme.spacing(3),
+}));
+
+const ProductCard = styled(Box)(({ theme }) => ({
+  backgroundColor: alpha(theme.palette.background.paper, 0.85),
   borderRadius: theme.shape.borderRadius,
   padding: theme.spacing(2),
   textAlign: "center",
   transition: "transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out",
   "&:hover": {
-    transform: "scale(1.05)",
-    boxShadow: theme.shadows[4],
-  },
-  [theme.breakpoints.down("sm")]: {
-    padding: theme.spacing(1),
+    transform: "scale(1.06)",
+    boxShadow: theme.shadows[6],
   },
 }));
 
-const ControlButton = styled(IconButton)(({ theme }) => ({
-  color: "white",
-  backgroundColor: alpha(theme.palette.common.black, 0.5),
-  "&:hover": {
-    backgroundColor: alpha(theme.palette.common.black, 0.7),
-  },
-  transition: "background-color 0.3s ease-in-out",
+const ProductImage = styled("img")(({ theme }) => ({
+  width: "100%",
+  height: "180px", // Reduced height for better layout
+  objectFit: "cover",
+  marginBottom: theme.spacing(1),
+  borderRadius: theme.shape.borderRadius,
+  boxShadow: theme.shadows[3],
 }));
 
-const PaginationDots = styled(Box)(({ theme }) => ({
-  position: "absolute",
-  bottom: theme.spacing(2),
-  left: "50%",
-  transform: "translateX(-50%)",
-  display: "flex",
-  gap: theme.spacing(1),
-}));
-
-const Dot = styled(Box)(({ theme, active }) => ({
-  width: 12,
-  height: 12,
-  borderRadius: "50%",
-  backgroundColor: active
-    ? theme.palette.primary.main
-    : alpha(theme.palette.common.white, 0.5),
-  cursor: "pointer",
-  transition: "background-color 0.3s ease-in-out",
-}));
-
-// CategoryIcon styled component
-const CategoryIcon = styled(Box)(({ theme }) => ({
-  position: "absolute",
-  top: 10,
-  right: 10,
-  backgroundColor: alpha(theme.palette.primary.main, 0.8),
-  borderRadius: "50%",
-  padding: theme.spacing(1),
-  transition: "transform 0.3s ease, opacity 0.3s ease",
-  opacity: 0,
-  transform: "scale(1)",
-}));
-
-// Banner Component
 const Banner = () => {
-  const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const [toysProducts, setToysProducts] = useState([]);
+  const [electronicsProducts, setElectronicsProducts] = useState([]);
+  const [isLoadingToys, setIsLoadingToys] = useState(true);
+  const [isLoadingElectronics, setIsLoadingElectronics] = useState(true);
+  const [errorToys, setErrorToys] = useState(null);
+  const [errorElectronics, setErrorElectronics] = useState(null);
 
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(true);
-  const slideInterval = useRef(null);
-
-  const slides = [
+  // Array of banners for rotation
+  const banners = [
     {
-      image: ban1,
-      title: "Keep your vehicle in top form",
-      subtitle: "Find maintenance parts for a smoother ride.",
+      id: 1,
+      bgImage: toyBanner,
+      title: "Explore our Toy Collection",
+      products: toysProducts,
+      isLoading: isLoadingToys,
+      error: errorToys,
+      fetchFunction: async () => {
+        try {
+          const response = await axios.get("/api/banner/toys");
+          if (response.data && response.data.success) {
+            setToysProducts(response.data.products);
+          } else {
+            setErrorToys(response.data.message || "Failed to fetch toys products.");
+          }
+        } catch (error) {
+          setErrorToys(error.message || "Error fetching toys products.");
+        } finally {
+          setIsLoadingToys(false);
+        }
+      },
     },
     {
-      image: ban2,
-      title: "Rev up your ride",
-      subtitle: "Discover premium motorcycle parts and accessories.",
-    },
-    {
-      image: ban3,
-      title: "Conquer any terrain",
-      subtitle: "Equip your ATV with the best parts and gear.",
+      id: 2,
+      bgImage: electronicsBanner,
+      title: "Electronics for Every Need",
+      products: electronicsProducts,
+      isLoading: isLoadingElectronics,
+      error: errorElectronics,
+      fetchFunction: async () => {
+        try {
+          const response = await axios.get("/api/banner/electronics");
+          if (response.data && response.data.success) {
+            setElectronicsProducts(response.data.products);
+          } else {
+            setErrorElectronics(response.data.message || "Failed to fetch electronics products.");
+          }
+        } catch (error) {
+          setErrorElectronics(error.message || "Error fetching electronics products.");
+        } finally {
+          setIsLoadingElectronics(false);
+        }
+      },
     },
   ];
 
-  // **Updated Categories with Local Images**
-  const categories = [
-    {
-      name: "Car and Truck Parts",
-      image: carImage,
-    },
-    {
-      name: "Motorcycle Parts",
-      image: bikeImage,
-    },
-    {
-      name: "TV Parts",
-      image: tvImage,
-    },
-  ];
-
-  // Memoize handleNextSlide to prevent unnecessary re-creations
-  const handleNextSlide = useCallback(() => {
-    setCurrentSlide((prev) => (prev + 1) % slides.length);
-  }, [slides.length]);
-
-  // Auto Slide Effect
   useEffect(() => {
-    if (isPlaying) {
-      slideInterval.current = setInterval(() => {
-        handleNextSlide();
-      }, 5000);
-    }
-    return () => clearInterval(slideInterval.current);
-  }, [isPlaying, handleNextSlide]);
+    // Fetch products for both banners
+    banners.forEach((banner) => {
+      banner.fetchFunction();
+    });
+  }, []);
 
-  // Swipe Handlers
-  const handlers = useSwipeable({
-    onSwipedLeft: () => handleNextSlide(),
-    onSwipedRight: () => handlePrevSlide(),
-    preventDefaultTouchmoveEvent: true,
-    trackMouse: true,
-  });
+  // State for current active banner
+  const [currentBanner, setCurrentBanner] = useState(0);
 
-  // Slide Handlers
-  const handlePrevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
-  };
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentBanner((prevBanner) => (prevBanner + 1) % banners.length);
+    }, 7500); // Switch every 5 seconds
 
-  const togglePlayPause = () => {
-    setIsPlaying((prev) => !prev);
-  };
-
-  // Pause on hover handlers
-  const handleMouseEnter = () => {
-    setIsPlaying(false);
-  };
-
-  const handleMouseLeave = () => {
-    setIsPlaying(true);
-  };
+    return () => clearInterval(interval);
+  }, [banners.length]);
 
   return (
-    <BannerContainer {...handlers} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-      {slides.map((slide, index) => (
-        <BackgroundImage
-          key={index}
-          image={slide.image}
-          className={currentSlide === index ? "active" : ""}
-          role="img"
-          aria-label={`Slide ${index + 1}`}
-          loading="lazy"
-        />
-      ))}
-      <Container maxWidth="lg">
-        <ContentWrapper
-          sx={{
-            transform: isPlaying ? "translateY(0)" : "translateY(-10px)",
-          }}
+    <BannerContainer>
+      {banners.map((banner, index) => (
+        <BannerSection
+          key={banner.id}
+          bgImage={banner.bgImage}
+          isActive={index === currentBanner}
         >
-          <Typography
-            variant={isSmallScreen ? "h4" : "h2"}
-            component="h1"
-            gutterBottom
-            fontWeight="bold"
-          >
-            {slides[currentSlide].title}
-          </Typography>
-          <Typography variant={isSmallScreen ? "h6" : "h5"} paragraph>
-            {slides[currentSlide].subtitle}
-          </Typography>
-          <Button
-            variant="contained"
-            size="large"
-            endIcon={<ArrowForwardIcon />}
-            sx={{
-              mt: 2,
-              mb: isSmallScreen ? 4 : 6,
-              backgroundColor: "#0071dc",
-              "&:hover": { backgroundColor: "#071dc" },
-            }}
-          >
-            Shop Now
-          </Button>
+          <Overlay />
+          <ContentWrapper>
+            <Typography variant="h3" component="h2" gutterBottom fontWeight="bold">
+              {banner.title}
+            </Typography>
 
-          <Grid container spacing={isSmallScreen ? 2 : 4}>
-            {categories.map((category, index) => (
-              <Grid item xs={12} sm={4} key={index}>
-                <CategoryBox>
-                  <Box
-                    component="img"
-                    src={category.image}
-                    alt={category.name}
-                    loading="lazy"
-                    sx={{
-                      width: "100%",
-                      height: 100, // Fixed height for uniformity
-                      objectFit: "cover", // Ensures the image covers the area, cropping if necessary
-                      mb: 2,
-                      borderRadius: theme.shape.borderRadius, // Consistent rounded corners
-                      transition: "transform 0.3s ease-in-out",
-                      "&:hover": {
-                        transform: "scale(1.05)",
-                      },
-                    }}
-                  />
-                  <CategoryIcon className="CategoryIcon">
-                    <ArrowForwardIcon fontSize="small" />
-                  </CategoryIcon>
-                  <Link href="#" color="inherit" underline="hover">
-                    <Typography variant="subtitle1" color="text.primary">
-                      {category.name}{" "}
-                      <ArrowForwardIcon
-                        fontSize="small"
-                        sx={{ verticalAlign: "middle" }}
-                      />
-                    </Typography>
-                  </Link>
-                </CategoryBox>
-              </Grid>
-            ))}
-          </Grid>
-        </ContentWrapper>
-      </Container>
-
-      {/* Pagination Dots */}
-      <PaginationDots>
-        {slides.map((_, index) => (
-          <Dot
-            key={index}
-            active={index === currentSlide}
-            onClick={() => setCurrentSlide(index)}
-            aria-label={`Go to slide ${index + 1}`}
-            role="button"
-            tabIndex={0}
-            onKeyPress={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                setCurrentSlide(index);
-              }
-            }}
-          />
-        ))}
-      </PaginationDots>
-
-      {/* Control Buttons */}
-      <Box
-        sx={{
-          position: "absolute",
-          bottom: isSmallScreen ? 60 : 16,
-          right: 16,
-          display: "flex",
-          gap: 1,
-        }}
-      >
-        <ControlButton onClick={handlePrevSlide} aria-label="Previous Slide">
-          <ChevronLeftIcon fontSize="small" />
-        </ControlButton>
-        <ControlButton onClick={handleNextSlide} aria-label="Next Slide">
-          <ChevronRightIcon fontSize="small" />
-        </ControlButton>
-        <ControlButton onClick={togglePlayPause} aria-label="Play/Pause Slide">
-          {isPlaying ? (
-            <PauseIcon fontSize="small" />
-          ) : (
-            <PlayArrowIcon fontSize="small" />
-          )}
-        </ControlButton>
-      </Box>
+            {banner.isLoading ? (
+              <Box display="flex" justifyContent="center" mt={2}>
+                <CircularProgress color="inherit" />
+              </Box>
+            ) : banner.error ? (
+              <Alert severity="error">{banner.error}</Alert>
+            ) : (
+              <ProductsGrid container spacing={3}>
+                {banner.products.map((product) => (
+                  <Grid item xs={12} sm={4} key={product.product_id}>
+                    <ProductCard>
+                      <Link href={`/product/${product.product_id}`} color="inherit" underline="none">
+                        <ProductImage
+                          src={product.product_image}
+                          alt={product.product_name}
+                          loading="lazy"
+                        />
+                        <Typography variant="h6" color="text.primary">
+                          {product.product_name}
+                        </Typography>
+                      </Link>
+                    </ProductCard>
+                  </Grid>
+                ))}
+              </ProductsGrid>
+            )}
+          </ContentWrapper>
+        </BannerSection>
+      ))}
     </BannerContainer>
   );
 };

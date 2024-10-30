@@ -1,68 +1,40 @@
-import React, { useState } from "react";
-import "bootstrap/dist/css/bootstrap.min.css";
-import bikeImg from "../../assets/images/bike.jpg";
-import carImg from "../../assets/images/car.jpg";
-import tvImg from "../../assets/images/tv.jpg";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import "../../assets/styles/Newarrival.css"; // Import custom CSS
 
 const NewArrival = () => {
-  const [cart, setCart] = useState([]);
+  const [products, setProducts] = useState([]);
 
-  // Function to add item to the cart
-  const addToCart = (item) => {
-    setCart([...cart, item]);
-  };
+  // Fetch recent arrivals from backend
+  useEffect(() => {
+    const fetchRecentArrivals = async () => {
+      try {
+        const response = await axios.get("/api/products/new-arrivals");
+        setProducts(response.data);
+      } catch (error) {
+        console.error("Error fetching recent arrivals:", error);
+      }
+    };
 
-  // Function to display number of items in cart
-  const displayCartCount = () => {
-    return cart.length;
-  };
-
-  // Product data for each card
-  const products = [
-    { id: 1, title: "Sporty Bike", price: "$899.99", image: bikeImg },
-    { id: 2, title: "Luxury Car", price: "$45,000", image: carImg },
-    { id: 3, title: "50 inch Ultra HD TV", price: "$1200", image: tvImg },
-  ];
+    fetchRecentArrivals();
+  }, []);
 
   return (
-    <section className="new-arrivals-section mb-4">
-      <h4 className="text-center my-4">New Arrivals</h4>
-
-      {/* Display Cart Count */}
-      <div className="text-center mb-4">
-        <span className="badge bg-success p-2">
-          Cart Items: {displayCartCount()}
-        </span>
-      </div>
-
-      <div className="row justify-content-center">
+    <div className="new-arrivals-container">
+      <h2 className="new-arrivals-title">New Arrivals</h2>
+      <div className="new-arrivals-grid">
         {products.map((product) => (
-          <div key={product.id} className="col-md-4 d-flex align-items-stretch">
-            <div className="card shadow-sm mb-4" style={{ width: "18rem" }}>
-              <img
-                src={product.image}
-                className="card-img-top"
-                alt={product.title}
-                style={{ height: "200px", objectFit: "cover" }}
-              />
-              <div className="card-body">
-                <h5 className="card-title">{product.title}</h5>
-                <p className="card-text">{product.price}</p>
-                <div className="d-flex justify-content-between">
-                  <button
-                    className="btn btn-primary"
-                    onClick={() => addToCart(product)}
-                  >
-                    Add to Cart
-                  </button>
-                  <button className="btn btn-secondary">View Details</button>
-                </div>
-              </div>
-            </div>
+          <div key={product.variant_id} className="new-arrival-card">
+            <img
+              src={product.variant_image}
+              alt={product.product_name}
+              className="new-arrival-image"
+            />
+            <h3 className="new-arrival-name">{product.product_name}</h3>
           </div>
         ))}
       </div>
-    </section>
+    </div>
   );
 };
 

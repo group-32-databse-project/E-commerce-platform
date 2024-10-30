@@ -79,4 +79,22 @@ exports.getOrdersById = async (req, res) => {
 
 
 
+exports.getOrdersByCustomerId = async (req, res) => {
+    try {
+        const customerId = req.params.id;
+        console.log('Fetching orders for customerId:', customerId);
+        console.log('Fetching orders for customerId:', customerId);
+        const orders = await Order.getOrdersByCustomerId(customerId);
+        if (orders.length > 0) {
+            res.json(orders);
+        } else {
+            res.status(404).json({ message: 'Order not found' });
+        }
+    } catch (error) {
+    
+        console.error('Error in getOrdersByCustomerId:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
 // Add more controller methods as needed
