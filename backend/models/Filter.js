@@ -1,93 +1,96 @@
 const db = require('../config/database');
 
 class Filter {
-  // Retrieve all categories with their subcategories
+  
+  /**
+   * Retrieve all categories with their subcategories using stored procedure.
+   * @returns {Promise<Array>} - An array of categories with their subcategories.
+   */
   static async getCategoriesWithSubcategories() {
     try {
-      // Get top-level categories
-      const [categories] = await db.query('SELECT * FROM category WHERE parent_category_id IS NULL');
+      const [rows] = await db.query('CALL get_categories_with_subcategories()');
 
-      // For each category, get its subcategories
-      const categoriesWithSub = await Promise.all(categories.map(async (category) => {
-        const [subcategories] = await db.query('SELECT * FROM category WHERE parent_category_id = ?', [category.category_id]);
-        return {
-          ...category,
-          subcategories,
-        };
-      }));
+      // Process the result to group subcategories under their respective categories
+      const categoriesMap = {};
 
-      return categoriesWithSub;
+      rows[0].forEach(row => {
+        const { category_id, category_name, subcategory_id, subcategory_name } = row;
+        
+        if (!categoriesMap[category_id]) {
+          categoriesMap[category_id] = {
+            category_id,
+            category_name,
+            subcategories: []
+          };
+        }
+
+        if (subcategory_id) {
+          categoriesMap[category_id].subcategories.push({
+            category_id: subcategory_id,
+            category_name: subcategory_name
+          });
+        }
+      });
+
+      return Object.values(categoriesMap);
     } catch (error) {
+      console.error('Error retrieving categories with subcategories:', error);
       throw error;
     }
   }
 
-  // Retrieve products based on selected categories, subcategories, and price range
+  /**
+   * Retrieve products based on selected categories, subcategories, and price range using stored procedure.
+   * @param {Object} params - Filter parameters.
+   * @param {Array} params.categoryIds - Array of category IDs.
+   * @param {Array} params.subcategoryIds - Array of subcategory IDs.
+   * @param {Object} params.priceRange - Price range with 'min' and 'max'.
+   * @returns {Promise<Array>} - An array of filtered products.
+   */
   static async getFilteredProducts({ categoryIds = [], subcategoryIds = [], priceRange }) {
     try {
-      let query = `
-        SELECT p.product_id, p.product_name, p.description, p.product_image, p.weight, c.category_name,
-               v.variant_id, v.total_price
-        FROM product p
-        JOIN category c ON p.category_id = c.category_id
-        JOIN variant v ON p.product_id = v.product_id
-        WHERE 1=1
-      `;
-      const params = [];
+      // Convert arrays to comma-separated strings for SQL IN clause
+      const categoryIdsStr = categoryIds.join(',');
+      const subcategoryIdsStr = subcategoryIds.join(',');
 
-      // Combine categoryIds and subcategoryIds with OR logic
-      if (categoryIds.length > 0 && subcategoryIds.length > 0) {
-        query += ` AND (p.category_id IN (${categoryIds.map(() => '?').join(',')}) OR p.category_id IN (${subcategoryIds.map(() => '?').join(',')}))`;
-        params.push(...categoryIds, ...subcategoryIds);
-      } else if (categoryIds.length > 0) {
-        query += ` AND p.category_id IN (${categoryIds.map(() => '?').join(',')})`;
-        params.push(...categoryIds);
-      } else if (subcategoryIds.length > 0) {
-        query += ` AND p.category_id IN (${subcategoryIds.map(() => '?').join(',')})`;
-        params.push(...subcategoryIds);
-      }
+      const minPrice = priceRange?.min;
+      const maxPrice = priceRange?.max;
 
-      // Filter by price range based on variant's total_price
-      if (priceRange) {
-        const { min, max } = priceRange;
-        if (min !== undefined) {
-          query += ' AND v.total_price >= ?';
-          params.push(min);
-        }
-        if (max !== undefined) {
-          query += ' AND v.total_price <= ?';
-          params.push(max);
-        }
-      }
+      const [rows] = await db.query('CALL get_filtered_products(?, ?, ?, ?)', [
+        categoryIdsStr,
+        subcategoryIdsStr,
+        minPrice,
+        maxPrice
+      ]);
 
-      const [rows] = await db.query(query, params);
-
-      // Map products and aggregate variants
+      // Process the result to map variants to products
       const productsMap = {};
-      rows.forEach(row => {
-        const productId = row.product_id;
-        if (!productsMap[productId]) {
-          productsMap[productId] = {
-            product_id: row.product_id,
-            product_name: row.product_name,
-            description: row.description,
-            weight: row.weight,
-            product_image: row.product_image,
-            category_name: row.category_name,
-            variants: [],
-            // Add other product fields if necessary
+
+      rows[0].forEach(row => {
+        const { product_id, product_name, description, product_image, weight, category_name, variant_id, total_price } = row;
+
+        if (!productsMap[product_id]) {
+          productsMap[product_id] = {
+            product_id,
+            product_name,
+            description,
+            product_image,
+            weight,
+            category_name,
+            variants: []
           };
         }
-        productsMap[productId].variants.push({
-          variant_id: row.variant_id,
-          total_price: row.total_price
-          // Add other variant fields if necessary
+
+        productsMap[product_id].variants.push({
+          variant_id,
+          total_price
         });
       });
 
       const products = Object.values(productsMap);
       return products;
     } catch (error) {
+      console.error('Error retrieving filtered products:', error);
       throw error;
     }
   }
