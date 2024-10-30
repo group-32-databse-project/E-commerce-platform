@@ -6,7 +6,7 @@ const categoryController = require('../controllers/categoryController');
 router.get('/new-arrivals', productController.getRecentArrivals);
 
 // GET /api/products
-router.get('/', productController.getProducts);
+router.get('/', productController.getAllProducts);
 
 // GET /api/products/:id/category
 router.get('/:id/category', productController.getProductsByCategory);
@@ -19,11 +19,5 @@ router.post('/', productController.createProduct);
 
 //get variations and options
 router.get("/:id/variations", productController.getVariationAndOptions);
-
-
-
-
-
-
 
 module.exports = router;

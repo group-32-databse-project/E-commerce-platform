@@ -4,13 +4,20 @@ const Category = require("../models/Category");
 const Variation = require("../models/variation");
 const VariationOptions = require("../models/variationOptions");
 
-exports.getProducts = async (req, res) => {
+exports.getAllProducts = async (req, res) => {
   try {
-    const products = await Product.getProducts();
+    const products = await Product.getAllProducts();
+    for (const product of products) {
+      product.variants = await Variant.getVariantsByProductId(
+        product.product_id
+      );
+    }
     res.json(products);
   } catch (error) {
-    console.error("Error in getProducts:", error);
-    res.status(500).json({ message: "Error fetching products" });
+    console.error("Error in getAllProducts:", error);
+    res
+      .status(500)
+      .json({ message: "Error fetching products", error: error.toString() });
   }
 };
 

@@ -1,15 +1,11 @@
 const db = require('../config/database');
 
 class Product {
-  static async getProducts() {
-    try {
-      const [rows] = await db.query('SELECT * FROM product');
-      return rows;
-    } catch (error) {
-      console.error('Error in getProducts:', error);
-      throw error;
-    }
+  static async getAllProducts() {
+    const [rows] = await db.query("SELECT * FROM product");
+    return rows;
   }
+  
   static async getProductsByCategory(categoryId) {
     try {
       console.log('Fetching products for category ID:', categoryId);
