@@ -70,6 +70,24 @@ class Category {
     }
   }
 
+  static async getElecs() {
+    return await this.getCategoriesByParentId(2);
+  }
+
+  static async getToys() {
+    return await this.getCategoriesByParentId(1);
+  }
+
+  static async getToysAndElectronics() {
+    try {
+      const [rows] = await db.query('CALL get_categories_by_parent_id IN (?)', [[1, 2]]);
+      return rows[0];
+    } catch (error) {
+      console.error('Error in Category.getToysAndElectronics:', error);
+      throw error;
+    }
+  }
+
   // ... (Other methods like getElecs, getToys, getToysAndElectronics can be refactored similarly if needed)
 }
 
