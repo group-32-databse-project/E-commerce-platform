@@ -20,8 +20,7 @@ router.post('/', productController.createProduct);
 //get variations and options
 router.get("/:id/variations", productController.getVariationAndOptions);
 
-//get c
-//router.get("/category/:categoryId", productController.getProductsByCategory);
+
 
 
 
