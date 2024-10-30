@@ -38,7 +38,15 @@ class Customer {
     return rows[0];
 
   }
-
+  static async updateCustomer(id, customerData) {
+    console.log('customerData at back:', customerData);
+    const { first_name, last_name, email_address } = customerData;
+    const [result] = await db.query(
+      'UPDATE customer SET first_name = ?, last_name = ?, email_address = ?, updated_at = NOW() WHERE customer_id = ?',
+      [first_name, last_name, email_address,id]
+    );
+    return result.affectedRows;
+  }
   // Add more methods (update, delete, etc.)
 }
 

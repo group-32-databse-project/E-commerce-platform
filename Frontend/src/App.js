@@ -7,7 +7,7 @@ import HomePage from "./pages/Dashboard/home.jsx";
 import SignIn from "./pages/sign/sign-in/SignIn.jsx";
 import SignUp from "./pages/sign/sign-up/signup.jsx";
 import Cart from "./pages/cart/cart.jsx";
-import About from "./pages/about/about.jsx"
+import About from "./pages/about/about.jsx";
 import Contact from "./pages/contact/contact.jsx";
 import Notification from "./pages/notifications/notification.js";
 import Help from "./pages/help/help.js";
@@ -15,6 +15,9 @@ import NotFound from "./pages/notFound/NotFound.jsx";
 import ProductPage from "./pages/product/product.jsx";
 import Category from "./pages/category/catagory.js";
 import Loading from "./pages/loading/loading.js";
+import Wishlist from "./pages/Wishlist";
+import OurProduct from "./components/OurProduct";
+import PrivateRoute from "./components/PrivateRoute";
 import OrderConfirmation from "./pages/orderConfirmation/OrderConfirmation";
 
 function App() {

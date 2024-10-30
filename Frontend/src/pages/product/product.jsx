@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+
+import { useNavigate, useParams } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -35,7 +36,9 @@ import Footer from "../../components/footer";
 import addToCart from "../../api/addToCart";
 import { useParams } from "react-router-dom";
 import Variation from "./variation";
-//import changeQuantity from "../../services/changeQuantity";
+import { addToWishlist } from "../../services/wishlist";
+
+
 
 // Create a custom theme with standard measurements and professional style
 const theme = createTheme({
@@ -158,6 +161,7 @@ const StyledChip = styled(Chip)(({ theme }) => ({
 
 const ProductPage = () => {
   const navigate = useNavigate();
+  const { productId } = useParams(); // Destructure productId from route params
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
   const [product, setProduct] = useState(null);
@@ -166,18 +170,19 @@ const ProductPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [price, setPrice] = useState(null);
-  const productId = useParams();
+
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await fetch(`/api/products/${productId.productId}`);
+        const response = await fetch(`/api/products/${productId}`);
         if (!response.ok) {
           throw new Error("Failed to fetch product");
         }
         const data = await response.json();
         console.log("Product data:", data); // Debug log to see the data structure
         setProduct(data);
+       
         setVariants(data.variants || []);
         if (data.variants && data.variants.length > 0) {
           setSelectedVariant(data.variants[0]);
@@ -190,7 +195,7 @@ const ProductPage = () => {
     };
 
     fetchProduct();
-  }, []);
+  }, [productId]);
 
   useEffect(() => {
     if (selectedVariant) {
@@ -264,6 +269,21 @@ const ProductPage = () => {
 
   const handleQuantityChange = (newQuantity) => {
     setQuantity(Math.max(1, Math.min(100, newQuantity)));
+  };
+
+  // Updated handleAddToWishlist function
+  const handleAddToWishlist = async () => {
+    if (!productId) {
+      console.error('Product ID is undefined');
+      return;
+    }
+    try {
+      await addToWishlist(productId);
+      // Optionally, provide user feedback here (e.g., a success message)
+    } catch (error) {
+      // Handle error appropriately (e.g., display an error message to the user)
+      console.error('Failed to add to wishlist:', error);
+    }
   };
 
   return (
@@ -386,7 +406,7 @@ const ProductPage = () => {
                       (17,527)
                     </Typography>
                   </Box>
-                  <Variation productId={productId.productId} />
+                  <Variation productId={productId} />
 
                   <Divider sx={{ my: 4 }} />
                   <Typography
@@ -455,6 +475,7 @@ const ProductPage = () => {
                       color="primary"
                       size="large"
                       sx={{ height: 48 }}
+                      
                     >
                       Buy It Now
                     </Button>
@@ -472,10 +493,11 @@ const ProductPage = () => {
                     </Button>
                     <Button
                       variant="outlined"
+                      onClick={handleAddToWishlist} // Updated to use the corrected function
                       color="primary"
                       sx={{ height: 48 }}
                     >
-                      Add to Watchlist
+                      Add to Wishlist
                     </Button>
                   </Box>
                   <Paper

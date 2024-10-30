@@ -27,6 +27,14 @@ class Variant {
     return result.affectedRows;
   }
 
+  static async getRecentVariants(limit = 3) {
+    const [rows] = await db.query(
+      'SELECT v.*, p.product_name FROM variant v JOIN product p ON v.product_id = p.product_id ORDER BY Arrived_date DESC LIMIT ?',
+      [limit]
+    );
+    return rows;
+  }
+
   // Add more methods as needed
 }
 

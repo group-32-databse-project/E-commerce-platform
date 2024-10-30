@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   AppBar,
   Toolbar,
@@ -42,6 +42,9 @@ import { Link } from "react-router-dom";
 import logo from "../assets/images/logo.svg"; // Ensure the path is correct
 import { formatDistanceToNow } from "date-fns"; // Install via npm if not already
 import { useNavigate } from "react-router-dom";
+import { fetchNotifications  } from "../services/notificationService";
+import { useAuth } from "../context/AuthContext";
+import { getWishlist } from '../services/wishlist';
 
 
 
@@ -162,6 +165,11 @@ const Header = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [toyset, setToyset] = useState([]);
   const [elecset, setElecset] = useState([]);
+  
+  const { authToken } = useAuth();
+  
+ 
+  
   const [catlist, setCatlist] = useState([]); 
   const [notifications, setNotifications] = useState([
     {
@@ -186,6 +194,7 @@ const Header = () => {
       read: true,
     },
   ]);
+  const [wishlistCount, setWishlistCount] = useState(0);
 
   // State for Login Dialog
   
@@ -218,7 +227,32 @@ const Header = () => {
       });
     }
   }, []);
-  
+
+
+  useEffect(() => {
+    console.log("authToken");
+    const getNotifications = async () => {
+      try {
+        const data = await fetchNotifications();
+        console.log("data",data);
+  setNotifications(data);
+      } catch (error) {
+        console.log("error",error);
+        console.error("Error fetching notifications:", error);
+      }
+    };
+    console.log("end");
+  getNotifications();
+
+    // Polling interval (e.g., every 30 seconds)
+    const interval = setInterval(() => {
+      if (authToken) {
+        getNotifications();
+      }
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(interval);
+  }, []);
   const handleLogout = () => {
     localStorage.removeItem('token');
     setIsLoggedIn(false);
@@ -352,7 +386,7 @@ const Header = () => {
           <ListItem 
             button 
             key={item.name} 
-            onClick={() => navigate(`/product/${item.id}`)}
+            onClick={() => navigate(`${item.link}`)} // Navigate to the corresponding webpage
             sx={{ cursor: 'pointer' }} // Change cursor to pointer
           >
             <ListItemText primary={item.name} />
@@ -388,6 +422,24 @@ const Header = () => {
       }, [searchQuery]);
     
       console.log("serchresult",searchResults);
+
+      // Notification Icon count could be based on unread notifications
+      const unreadNotifications = notifications.filter((notif) => !notif.read).length;
+
+      useEffect(() => {
+        const fetchWishlistCount = async () => {
+          try {
+            const wishlist = await getWishlist();
+            setWishlistCount(wishlist.length);
+          } catch (error) {
+            console.error('Error fetching wishlist count:', error);
+          }
+        };
+
+        fetchWishlistCount();
+
+        // Optionally, set up polling or websocket for real-time updates
+      }, []);
 
       return (
         <AppBar
@@ -442,7 +494,7 @@ const Header = () => {
                         <Grid item xs={12} key={item.product_id}>
                          <Box
                         sx={{ padding: 1, borderBottom: '1px solid #e0e0e0', cursor: 'pointer' }}
-                        onClick={() => navigate(`/product/${item.product_name}`)} // Navigate to the corresponding webpage
+                        onClick={() => navigate(`/product/${item.product_id}`)} // Navigate to the corresponding webpage
                       >
                             {item.product_name}
                           </Box>
@@ -517,49 +569,52 @@ const Header = () => {
                     <Divider />
                     <Box sx={{ maxHeight: 400, overflowY: "auto" }}>
                       {notifications.length > 0 ? (
-                        notifications.map((notif) => (
-                          <MenuItem
-                            key={notif.id}
-                            onClick={() => {
-                              handleNotificationClose();
-                              if (!notif.read) handleMarkAsRead(notif.id);
-                            }}
-                            sx={{
-                              backgroundColor: notif.read
-                                ? "inherit"
-                                : alpha(theme.palette.primary.light, 0.1),
-                              alignItems: "flex-start",
-                            }}
-                          >
-                            <Avatar
+                        notifications.map((notif) => {
+                          console.log("Notification Time:", notif.created_at); // 追加
+                          return (
+                            <MenuItem
+                              key={notif.id}
+                              onClick={() => {
+                                handleNotificationClose();
+                                if (!notif.read) handleMarkAsRead(notif.id);
+                              }}
                               sx={{
-                                mr: 2,
-                                bgcolor: getNotificationColor(notif.type),
-                                width: 40,
-                                height: 40,
+                                backgroundColor: notif.read
+                                  ? "inherit"
+                                  : alpha(theme.palette.primary.light, 0.1),
+                                alignItems: "flex-start",
                               }}
                             >
-                              {getNotificationIcon(notif.type)}
-                            </Avatar>
-                            <Box sx={{ flexGrow: 1 }}>
-                              <Typography variant="body2" color="text.primary">
-                                {notif.message}
-                              </Typography>
-                              <Typography variant="caption" color="text.secondary">
-                                {formatDistanceToNow(notif.time, { addSuffix: true })}
-                              </Typography>
-                            </Box>
-                            <IconButton
-                              size="small"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteNotification(notif.id);
-                              }}
-                            >
-                              <MoreVertIcon fontSize="small" />
-                            </IconButton>
-                          </MenuItem>
-                        ))
+                              <Avatar
+                                sx={{
+                                  mr: 2,
+                                  bgcolor: getNotificationColor(notif.type),
+                                  width: 40,
+                                  height: 40,
+                                }}
+                              >
+                                {getNotificationIcon(notif.type)}
+                              </Avatar>
+                              <Box sx={{ flexGrow: 1 }}>
+                                <Typography variant="body2" color="text.primary">
+                                  {notif.message}
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                  {notif.created_at ? formatDistanceToNow(new Date(notif.created_at), { addSuffix: true }) : 'Unknown time'}
+                                </Typography>
+                              </Box>
+                              <IconButton
+                                size="small"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteNotification(notif.id);
+                                }}
+                              >
+                                <MoreVertIcon fontSize="small" />
+                              </IconButton>
+                            </MenuItem>
+                          );
+                        })
                       ) : (
                         <MenuItem onClick={handleNotificationClose}>
                           <Typography variant="body2" color="text.secondary">
@@ -659,16 +714,6 @@ const Header = () => {
                   )}
     
                   {/* Other Icons */}
-                  <Tooltip title="Favorites">
-                    <IconButton
-                      color="inherit"
-                      component={Link}
-                      to="/favorites"
-                      sx={{ ml: 1 }}
-                    >
-                      <FavoriteIcon sx={{ color: "#333333" }} />
-                    </IconButton>
-                  </Tooltip>
                   <Tooltip title="Cart">
                     <IconButton
                       color="inherit"
@@ -677,6 +722,18 @@ const Header = () => {
                       sx={{ ml: 1 }}
                     >
                       <ShoppingCartIcon sx={{ color: "#333333" }} />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Wishlist">
+                    <IconButton
+                      color="inherit"
+                      component={Link}
+                      to="/wishlist"
+                      sx={{ ml: 1 }}
+                    >
+                      <Badge badgeContent={wishlistCount} color="secondary">
+                        <FavoriteIcon sx={{ color: "#333333" }} />
+                      </Badge>
                     </IconButton>
                   </Tooltip>
                 </Box>
@@ -791,12 +848,12 @@ const Header = () => {
             {renderDropdown('Toys', toyset.map((toy) => ({
               name: toy.category_name,
               id:toy.category_id,
-              link: `/toys/${toy.category_id}`,
+              link: `/category/${toy.category_id}`,
             })), toysDropdownOpen, setToysDropdownOpen)}
             {renderDropdown('Electronics', elecset.map((elec) => ({
               name: elec.category_name,
               id:elec.category_id,
-              link: `/electronics/${elec.category_id}`,
+              link: `/category/${elec.category_id}`,
             })), electronicsDropdownOpen, setElectronicsDropdownOpen)}
           </Box>        
     
@@ -836,7 +893,7 @@ const Header = () => {
                   </>
                 ) : (
                   <>
-                    <ListItem button>
+                    <ListItem button component={Link} to="/signin" onClick={toggleDrawer(false)}>
                       <ListItemIcon>
                         <PersonIcon />
                       </ListItemIcon>
@@ -864,12 +921,6 @@ const Header = () => {
                     {/* Optional: Add a dot or number */}
                   </Badge>
                 </ListItem>
-                <ListItem button component={Link} to="/favorites" onClick={toggleDrawer(false)}>
-                  <ListItemIcon>
-                    <FavoriteIcon />
-                  </ListItemIcon>
-                  <ListItemText primary="Favorites" />
-                </ListItem>
                 <ListItem button component={Link} to="/cart" onClick={toggleDrawer(false)}>
                   <ListItemIcon>
                     <ShoppingCartIcon />
@@ -893,3 +944,4 @@ const Header = () => {
 };
 
 export default Header;
+

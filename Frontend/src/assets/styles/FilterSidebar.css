@@ -1,0 +1,7 @@
+.filter-sidebar {
+    position: -webkit-sticky; /* For Safari */
+    position: sticky;
+    top: 80px; /* Adjust based on your header's height */
+    height: calc(100vh - 80px); /* Adjust based on your header's height */
+    overflow-y: auto;
+  }

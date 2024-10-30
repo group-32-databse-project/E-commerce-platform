@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Accordion,
   AccordionSummary,
@@ -6,15 +6,17 @@ import {
   Checkbox,
   FormControlLabel,
   Slider,
-  TextField,
   Typography,
   Box,
   Paper,
   ThemeProvider,
   createTheme,
   styled,
+  CircularProgress,
+  TextField,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import axios from "axios";
 
 // Create a custom theme
 const theme = createTheme({
@@ -57,11 +59,63 @@ const StyledAccordionSummary = styled(AccordionSummary)(({ theme }) => ({
   },
 }));
 
-const StyledFormControlLabel = styled(FormControlLabel)(({ theme }) => ({
-  marginLeft: -11,
-  marginRight: 0,
-}));
+const CheckboxOption = ({ label, checked, onChange }) => (
+  <FormControlLabel
+    control={<Checkbox checked={checked} onChange={onChange} />}
+    label={label}
+  />
+);
 
+// Price Range Slider Component
+const PriceRangeSlider = ({ priceRange, setPriceRange }) => {
+  const handleChange = (event, newValue) => {
+    setPriceRange(newValue);
+  };
+
+  const handleInputChange = (event, index) => {
+    const value = Number(event.target.value);
+    setPriceRange((prev) => {
+      const newRange = [...prev];
+      newRange[index] = value;
+      return newRange;
+    });
+  };
+
+  return (
+    <Box>
+      <Slider
+        value={priceRange}
+        onChange={handleChange}
+        valueLabelDisplay="auto"
+        min={0}
+        max={1500}
+        step={50}
+      />
+      <Box display="flex" justifyContent="space-between" mt={2}>
+        <TextField
+          label="Min Price"
+          type="number"
+          value={priceRange[0]}
+          onChange={(e) => handleInputChange(e, 0)}
+          InputProps={{ inputProps: { min: 0, max: priceRange[1] } }}
+          size="small"
+          variant="outlined"
+        />
+        <TextField
+          label="Max Price"
+          type="number"
+          value={priceRange[1]}
+          onChange={(e) => handleInputChange(e, 1)}
+          InputProps={{ inputProps: { min: priceRange[0], max: 1500 } }}
+          size="small"
+          variant="outlined"
+        />
+      </Box>
+    </Box>
+  );
+};
+
+// Category Component for Nested Categories
 const Category = ({ name, children, defaultExpanded = false }) => (
   <StyledAccordion defaultExpanded={defaultExpanded}>
     <StyledAccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -73,62 +127,83 @@ const Category = ({ name, children, defaultExpanded = false }) => (
   </StyledAccordion>
 );
 
-const CheckboxOption = ({ label, count }) => (
-  <StyledFormControlLabel
-    control={<Checkbox size="small" color="primary" />}
-    label={
-      <Typography variant="body2">
-        {label} {count && <span style={{ color: "gray" }}>({count})</span>}
-      </Typography>
-    }
-  />
-);
-
-const PriceRangeSlider = () => {
+const FilterSidebar = ({ onFilterChange }) => {
+  const [categories, setCategories] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [selectedSubcategories, setSelectedSubcategories] = useState([]);
   const [priceRange, setPriceRange] = useState([0, 1500]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const handleSliderChange = (event, newValue) => {
-    setPriceRange(newValue);
+  // Fetch categories from backend
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get("/api/filters/categories");
+        setCategories(response.data);
+        setLoading(false);
+      } catch (err) {
+        setError("Failed to load categories.");
+        setLoading(false);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  // Handle Category Change
+  const handleCategoryChange = (categoryId) => (event) => {
+    const isChecked = event.target.checked;
+    setSelectedCategories((prev) =>
+      isChecked ? [...prev, categoryId] : prev.filter((id) => id !== categoryId)
+    );
   };
 
-  const handleInputChange = (index) => (event) => {
-    const newPriceRange = [...priceRange];
-    newPriceRange[index] =
-      event.target.value === "" ? 0 : Number(event.target.value);
-    setPriceRange(newPriceRange);
+  // Handle Subcategory Change
+  const handleSubcategoryChange = (subcategoryId) => (event) => {
+    const isChecked = event.target.checked;
+    setSelectedSubcategories((prev) =>
+      isChecked
+        ? [...prev, subcategoryId]
+        : prev.filter((id) => id !== subcategoryId)
+    );
   };
 
-  return (
-    <Box>
-      <Slider
-        value={priceRange}
-        onChange={handleSliderChange}
-        valueLabelDisplay="auto"
-        min={0}
-        max={1500}
-        step={10}
-      />
-      <Box display="flex" justifyContent="space-between" mt={2}>
-        <TextField
-          value={priceRange[0]}
-          onChange={handleInputChange(0)}
-          inputProps={{ min: 0, max: 1500, type: "number" }}
-          size="small"
-          label="Min"
-        />
-        <TextField
-          value={priceRange[1]}
-          onChange={handleInputChange(1)}
-          inputProps={{ min: 0, max: 1500, type: "number" }}
-          size="small"
-          label="Max"
-        />
-      </Box>
-    </Box>
-  );
-};
+  // Update parent component when filters change
+  useEffect(() => {
+    // console.log("Selected Filters:", {
+    //   categories: selectedCategories,
+    //   subcategories: selectedSubcategories,
+    //   priceRange,
+    // });
+    onFilterChange({
+      categories: selectedCategories,
+      subcategories: selectedSubcategories,
+      priceRange,
+    });
+  }, [selectedCategories, selectedSubcategories, priceRange, onFilterChange]);
 
-const FilterSidebar = () => {
+  if (loading) {
+    return (
+      <ThemeProvider theme={theme}>
+        <StyledPaper>
+          <Box display="flex" justifyContent="center" alignItems="center" height="100%">
+            <CircularProgress />
+          </Box>
+        </StyledPaper>
+      </ThemeProvider>
+    );
+  }
+
+  if (error) {
+    return (
+      <ThemeProvider theme={theme}>
+        <StyledPaper>
+          <Typography color="error">{error}</Typography>
+        </StyledPaper>
+      </ThemeProvider>
+    );
+  }
+
   return (
     <ThemeProvider theme={theme}>
       <StyledPaper>
@@ -136,69 +211,35 @@ const FilterSidebar = () => {
           Filters
         </Typography>
 
+        {/* Category Filter */}
         <Category name="Category" defaultExpanded>
-          <Category name="Cell Phones & Accessories">
-            <CheckboxOption label="Cell Phone Accessories" />
-            <CheckboxOption label="Cell Phone & Smartphone Parts" />
-            <CheckboxOption label="Cell Phones & Smartphones" />
-            <CheckboxOption label="Smart Watch Accessories" />
-            <CheckboxOption label="More" />
-          </Category>
-          <CheckboxOption label="Computers/Tablets & Networking" />
-          <CheckboxOption label="Home & Garden" />
-          <CheckboxOption label="Consumer Electronics" />
-          <CheckboxOption label="Sports Mem, Cards & Fan Shop" />
-          <CheckboxOption label="Clothing, Shoes & Accessories" />
-          <Typography
-            variant="body2"
-            color="primary"
-            sx={{ cursor: "pointer", mt: 1, fontWeight: "bold" }}
-          >
-            Show More
-          </Typography>
+          {categories.map((category) => (
+            <Box key={category.category_id} sx={{ pl: 2 }}>
+              {category.subcategories && category.subcategories.length > 0 ? (
+                <Category name={category.category_name}>
+                  {category.subcategories.map((subcategory) => (
+                    <CheckboxOption
+                      key={subcategory.category_id}
+                      label={subcategory.category_name}
+                      checked={selectedSubcategories.includes(subcategory.category_id)}
+                      onChange={handleSubcategoryChange(subcategory.category_id)}
+                    />
+                  ))}
+                </Category>
+              ) : (
+                <CheckboxOption
+                  label={category.category_name}
+                  checked={selectedCategories.includes(category.category_id)}
+                  onChange={handleCategoryChange(category.category_id)}
+                />
+              )}
+            </Box>
+          ))}
         </Category>
 
-        <Category name="Model">
-          <CheckboxOption label="Apple iPhone 13" count="1,414" />
-          <CheckboxOption label="Apple iPhone 14 Pro Max" count="2,742" />
-          <CheckboxOption label="Apple iPhone 13 Pro" count="721" />
-          <CheckboxOption label="Apple iPhone 13 Pro Max" count="1,303" />
-          <CheckboxOption label="Apple iPhone 11" count="1,706" />
-          <CheckboxOption label="Apple iPhone 16 Pro Max" count="1,215" />
-          <CheckboxOption label="Apple iPhone 13 mini" count="581" />
-          <CheckboxOption label="Apple iPhone 11 Pro Max" count="684" />
-          <Typography
-            variant="body2"
-            color="primary"
-            sx={{ cursor: "pointer", mt: 1, fontWeight: "bold" }}
-          >
-            see all
-          </Typography>
-        </Category>
-
+        {/* Price Range Filter */}
         <Category name="Price">
-          <PriceRangeSlider />
-          <CheckboxOption label="Under $290.00" />
-          <CheckboxOption label="$290.00 to $360.00" />
-          <CheckboxOption label="Over $360.00" />
-        </Category>
-
-        <Category name="Condition">
-          <CheckboxOption label="New" count="15,713" />
-          <CheckboxOption label="Open box" count="1,014" />
-          <CheckboxOption label="Certified - Refurbished" count="6" />
-          <CheckboxOption label="Excellent - Refurbished" count="446" />
-          <CheckboxOption label="Very Good - Refurbished" count="686" />
-          <CheckboxOption label="Good - Refurbished" count="529" />
-          <CheckboxOption label="Used" count="2,323" />
-          <CheckboxOption label="For parts or not working" count="121" />
-          <Typography
-            variant="body2"
-            color="primary"
-            sx={{ cursor: "pointer", mt: 1, fontWeight: "bold" }}
-          >
-            see all
-          </Typography>
+          <PriceRangeSlider priceRange={priceRange} setPriceRange={setPriceRange} />
         </Category>
       </StyledPaper>
     </ThemeProvider>
