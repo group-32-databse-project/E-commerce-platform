@@ -26,6 +26,12 @@ router.post("/:customerId/addAddress", customerController.addAddress);
 // POST /api/customers/login
 router.post("/login", customerController.loginCustomer);
 
+// GET /api/customers/:id/addresses
+router.get("/:id/addresses", customerController.getAddressesByCustomerId);
+
+// POST /api/customers/:id/payment
+router.get("/:id/payment", customerController.getPaymentDeatails);
+
 // Add more routes as needed (update, delete, etc.)
 
 module.exports = router;

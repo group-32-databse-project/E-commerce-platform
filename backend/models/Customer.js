@@ -10,7 +10,7 @@ class Customer {
   }
 
   static async getCustomerById(id) {
-    const [rows] = await db.query('SELECT * FROM customer WHERE customer_id = ?', [id]);
+    const [rows] = await db.query('SELECT * FROM customer left outer join customer_phone_number using (customer_id) WHERE customer_id = ?', [id]);
     return rows[0];
   }
 
@@ -30,6 +30,13 @@ class Customer {
       [email]
     );
     return rows[0];
+  }
+
+  static async getPaymentDetailsByCustomerId(id) {
+    const [rows] = await db.query('SELECT concat(first_name," ",last_name) as name ,cp.* FROM customer_payment_method cp left outer join customer c using(customer_id) WHERE cp.customer_id = ?', [id]);
+    console.log('rows:', rows);
+    return rows[0];
+
   }
 
   // Add more methods (update, delete, etc.)

@@ -1,7 +1,7 @@
 import "./assets/styles/App.css";
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import Card from "./pages/cards.jsx";
+
 import CheckoutPage from "./pages/checkout/Checkout.js";
 import HomePage from "./pages/Dashboard/home.jsx";
 import SignIn from "./pages/sign/sign-in/SignIn.jsx";
@@ -13,6 +13,7 @@ import Notification from "./pages/notifications/notification.js";
 import Help from "./pages/help/help.js";
 import NotFound from "./pages/notFound/NotFound.jsx";
 import ProductPage from "./pages/product/product.jsx";
+import Profile from "./pages/profile/profile.js";
 import Category from "./pages/category/catagory.js";
 import Loading from "./pages/loading/loading.js";
 import OrderConfirmation from "./pages/orderConfirmation/OrderConfirmation";
@@ -26,7 +27,7 @@ function App() {
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
-        <Route path="/cart" element={<Cart />} />
+        <Route path="/api/cart" element={<Cart />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/notifications" element={<Notification />} />
@@ -35,6 +36,8 @@ function App() {
         <Route path="/product/:productId" element={<ProductPage />} />
 
         <Route path="/category/:categoryId" element={<Category />} />
+        <Route path="/loading" element={<Loading />} />
+      
         <Route path="*" element={<NotFound />} />
         <Route
           path="/orderConfirmation/:orderId"

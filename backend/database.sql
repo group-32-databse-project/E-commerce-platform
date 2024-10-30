@@ -252,6 +252,18 @@ CREATE TABLE `customer_address` (
 
 
 
+CREATE TABLE `notifications` (
+  `id` INT AUTO_INCREMENT,
+  `user_id` INT NOT NULL,
+  `order_id` INT NOT NULL,
+  `message` VARCHAR(255) NOT NULL,
+  `is_read` BOOLEAN DEFAULT FALSE,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`user_id`) REFERENCES `user`(`user_id`) ON DELETE CASCADE,
+  FOREIGN KEY (`order_id`) REFERENCES `shop_order`(`order_id`) ON DELETE CASCADE
+);
+
 DELIMITER $$
 -- Trigger to Reduce Inventory Stock when an Order is Made
 CREATE TRIGGER reduce_inventory_stock

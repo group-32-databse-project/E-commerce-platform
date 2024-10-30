@@ -25,296 +25,230 @@ const FormGrid = styled(Grid)(() => ({
   flexDirection: "column",
 }));
 
-export default function AddressForm() {
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    address1: "",
-    address2: "",
-    city: "",
-    zip: "",
-    areaType: "town",
-    saveAddress: false,
-  });
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success",
-  });
+const AddressForm = () => {
+  const [customerData, setCustomerData] = useState({ addresses: [] });
+  const token = localStorage.getItem('token');
+  let id = null;
 
-  const handleInputChange = (event) => {
-    const { name, value, type, checked } = event.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: type === "checkbox" ? checked : value,
+  if (token) {
+    try {
+      const decodedToken = jwtDecode(token); // Use named import
+      id = decodedToken.customerId; // Assuming the token contains an 'id' field
+      console.log('Decoded token:', id);
+    } catch (error) {
+      console.error('Error decoding token:', error);
+    }
+  }
+
+  useEffect(() => {
+    if (id) {
+      // Fetch data from backend
+      fetch(`/api/customers/${id}/addresses`)
+        .then(response => response.json())
+        .then(data => {
+          setCustomerData(data);
+          console.log('Profile data:', data);
+        })
+        .catch(error => {
+          console.error('Error fetching profile data:', error);
+        });
+    }
+  }, [id]);
+
+  const handleInputChange = (e, addressId) => {
+    const { name, value } = e.target;
+    setCustomerData(prevState => ({
+      ...prevState,
+      addresses: prevState.addresses.map(address =>
+        address.address_id === addressId ? { ...address, [name]: value } : address
+      ),
     }));
   };
 
-  const getValidatedAddress = () => {
-    const requiredFields = [
-      "firstName",
-      "lastName",
-      "address1",
-      "city",
-      "zip",
-      "areaType",
-    ];
-    const isValid = requiredFields.every(
-      (field) => formData[field].trim() !== ""
-    );
-
-    if (isValid) {
-      const { firstName, lastName, address1, address2, city, zip, areaType } =
-        formData;
-      return {
-        //address_line1, address_line2,  city, postal_code, is_main_city
-        firstName: firstName,
-        lastName: lastName,
-        address_line1: address1,
-        address_line2: address2,
-        city: city,
-        postal_code: zip,
-        is_main_city: areaType !== "rural", // true if rural, false if town
-      };
-    } else {
-      console.error("Please fill in all required fields");
-      return null;
-    }
+  const handleSave = (addressId) => {
+    const address = customerData.addresses.find(addr => addr.address_id === addressId);
+    fetch(`/api/addresses/${addressId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(address),
+    })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Address updated successfully:', data);
+      })
+      .catch(error => {
+        console.error('Error updating address:', error);
+      });
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    const validatedAddress = getValidatedAddress();
-    if (validatedAddress) {
-      setLoading(true);
-      try {
-        await saveAddress(validatedAddress);
-        setSuccess(true);
-        setSnackbar({
-          open: true,
-          message: "Address saved successfully!",
-          severity: "success",
-        });
-        // Optionally, reset the form or navigate to another page
-        // setFormData({ ... }); // Reset form
-        // setTimeout(() => navigate("/next-page"), 2000); // Navigate after 2 seconds
-      } catch (error) {
-        setSnackbar({
-          open: true,
-          message: "Error saving address. Please try again.",
-          severity: "error",
-        });
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
+  if (!customerData || !customerData.addresses) {
+    return <div>Loading...</div>;
+  }
 
-  const handleCloseSnackbar = (event, reason) => {
-    if (reason === "clickaway") {
-      return;
-    }
-    setSnackbar({ ...snackbar, open: false });
+  const settings = {
+    dots: true,
+    infinite: false,
+    speed: 500,
+    slidesToShow: 2,
+    slidesToScroll: 2,
   };
 
   return (
-    <>
-      <Grid container spacing={3}>
-        <FormGrid size={{ xs: 12, md: 6 }}>
-          <FormLabel htmlFor="first-name" required>
-            First name
-          </FormLabel>
-          <OutlinedInput
-            id="first-name"
-            name="firstName"
-            type="text"
-            placeholder="John"
-            autoComplete="given-name"
-            required
-            size="small"
-            value={formData.firstName}
-            onChange={handleInputChange}
-          />
-        </FormGrid>
-        <FormGrid size={{ xs: 12, md: 6 }}>
-          <FormLabel htmlFor="last-name" required>
-            Last name
-          </FormLabel>
-          <OutlinedInput
-            id="last-name"
-            name="lastName"
-            type="text"
-            placeholder="Snow"
-            autoComplete="family-name"
-            required
-            size="small"
-            value={formData.lastName}
-            onChange={handleInputChange}
-          />
-        </FormGrid>
-        <FormGrid size={{ xs: 12 }}>
-          <FormLabel htmlFor="address1" required>
-            Address line 1
-          </FormLabel>
-          <OutlinedInput
-            id="address1"
-            name="address1"
-            type="text"
-            placeholder="Street name and number"
-            autoComplete="shipping address-line1"
-            required
-            size="small"
-            value={formData.address1}
-            onChange={handleInputChange}
-          />
-        </FormGrid>
-        <FormGrid size={{ xs: 12 }}>
-          <FormLabel htmlFor="address2">Address line 2</FormLabel>
-          <OutlinedInput
-            id="address2"
-            name="address2"
-            type="text"
-            placeholder="Apartment, suite, unit, etc. (optional)"
-            autoComplete="shipping address-line2"
-            required
-            size="small"
-            value={formData.address2}
-            onChange={handleInputChange}
-          />
-        </FormGrid>
-        <FormGrid size={{ xs: 6 }}>
-          <FormLabel htmlFor="city" required>
-            City
-          </FormLabel>
-          <OutlinedInput
-            id="city"
-            name="city"
-            type="text"
-            placeholder="New York"
-            autoComplete="City"
-            required
-            size="small"
-            value={formData.city}
-            onChange={handleInputChange}
-          />
-        </FormGrid>
-
-        <FormGrid size={{ xs: 6 }}>
-          <FormLabel htmlFor="zip" required>
-            Zip / Postal code
-          </FormLabel>
-          <OutlinedInput
-            id="zip"
-            name="zip"
-            type="text"
-            placeholder="12345"
-            autoComplete="shipping postal-code"
-            required
-            size="small"
-            value={formData.zip}
-            onChange={handleInputChange}
-          />
-        </FormGrid>
-        <FormGrid size={{ xs: 12 }}>
-          <FormLabel id="area-type-label">Area Type</FormLabel>
-          <RadioGroup
-            row
-            aria-labelledby="area-type-label"
-            name="areaType"
-            value={formData.areaType}
-            onChange={handleInputChange}
-          >
-            <FormControlLabel
-              value="town"
-              control={<Radio />}
-              label="Town Area"
-            />
-            <FormControlLabel
-              value="rural"
-              control={<Radio />}
-              label="Rural Area"
-            />
-          </RadioGroup>
-        </FormGrid>
-
-        {/* make a button to choose in city or not */}
-
-        <FormGrid size={{ xs: 12 }}>
-          <FormControlLabel
-            control={
-              <Checkbox
-                name="saveAddress"
-                checked={formData.saveAddress}
-                onChange={handleInputChange}
-              />
-            }
-            label="Use this address for payment details"
-          />
-        </FormGrid>
-        <form onSubmit={handleSubmit}>
-          <Grid container spacing={3}>
-            {/* ... existing form fields ... */}
-
-            <FormGrid size={{ xs: 12 }}>
+    <Slider {...settings}>
+      {customerData.addresses.map((address) => (
+        <div key={address.address_id}>
+          <Card elevation={3} sx={{ padding: 2, margin: '0 auto', maxWidth: 600 }}>
+            <CardContent>
+              <FormGrid item xs={12} md={6}>
+                <FormLabel htmlFor={`first-name-${address.address_id}`} required>
+                  First name
+                </FormLabel>
+                <OutlinedInput
+                  id={`first-name-${address.address_id}`}
+                  name="first_name"
+                  type="name"
+                  placeholder="John"
+                  autoComplete="first name"
+                  required
+                  size="small"
+                  value={customerData.first_name}
+                  readOnly
+                  onChange={(e) => handleInputChange(e, address.address_id)}
+                />
+              </FormGrid>
+              <FormGrid item xs={12} md={6}>
+                <FormLabel htmlFor={`last-name-${address.address_id}`} required>
+                  Last name
+                </FormLabel>
+                <OutlinedInput
+                  id={`last-name-${address.address_id}`}
+                  name="last_name"
+                  type="last-name"
+                  placeholder="Snow"
+                  autoComplete="last name"
+                  required
+                  size="small"
+                  value={customerData.last_name}
+                  readOnly
+                  onChange={(e) => handleInputChange(e, address.address_id)}
+                />
+              </FormGrid>
+              <FormGrid item xs={12}>
+                <FormLabel htmlFor={`address1-${address.address_id}`} required>
+                  Address line 1
+                </FormLabel>
+                <OutlinedInput
+                  id={`address1-${address.address_id}`}
+                  name="address_line1"
+                  type="address1"
+                  placeholder="Street name and number"
+                  autoComplete="shipping address-line1"
+                  required
+                  size="small"
+                  value={address.address_line1}
+                  onChange={(e) => handleInputChange(e, address.address_id)}
+                />
+              </FormGrid>
+              <FormGrid item xs={12}>
+                <FormLabel htmlFor={`address2-${address.address_id}`}>Address line 2</FormLabel>
+                <OutlinedInput
+                  id={`address2-${address.address_id}`}
+                  name="address_line2"
+                  type="address2"
+                  placeholder="Apartment, suite, unit, etc. (optional)"
+                  autoComplete="shipping address-line2"
+                  size="small"
+                  value={address.address_line2 || ''}
+                  onChange={(e) => handleInputChange(e, address.address_id)}
+                />
+              </FormGrid>
+              <FormGrid item xs={6}>
+                <FormLabel htmlFor={`city-${address.address_id}`} required>
+                  City
+                </FormLabel>
+                <OutlinedInput
+                  id={`city-${address.address_id}`}
+                  name="city"
+                  type="city"
+                  placeholder="New York"
+                  autoComplete="City"
+                  required
+                  size="small"
+                  value={address.city}
+                  onChange={(e) => handleInputChange(e, address.address_id)}
+                />
+              </FormGrid>
+              <FormGrid item xs={6}>
+                <FormLabel htmlFor={`state-${address.address_id}`} required>
+                  State
+                </FormLabel>
+                <OutlinedInput
+                  id={`state-${address.address_id}`}
+                  name="region"
+                  type="state"
+                  placeholder="NY"
+                  autoComplete="State"
+                  required
+                  size="small"
+                  value={address.region}
+                  onChange={(e) => handleInputChange(e, address.address_id)}
+                />
+              </FormGrid>
+              <FormGrid item xs={6}>
+                <FormLabel htmlFor={`zip-${address.address_id}`} required>
+                  Zip / Postal code
+                </FormLabel>
+                <OutlinedInput
+                  id={`zip-${address.address_id}`}
+                  name="postal_code"
+                  type="zip"
+                  placeholder="12345"
+                  autoComplete="shipping postal-code"
+                  required
+                  size="small"
+                  value={address.postal_code}
+                  onChange={(e) => handleInputChange(e, address.address_id)}
+                />
+              </FormGrid>
+              <FormGrid item xs={6}>
+                <FormLabel htmlFor={`country-${address.address_id}`} required>
+                  Country
+                </FormLabel>
+                <OutlinedInput
+                  id={`country-${address.address_id}`}
+                  name="country"
+                  type="country"
+                  placeholder="United States"
+                  autoComplete="shipping country"
+                  required
+                  size="small"
+                  value="United States" // Assuming country is always United States
+                  
+                />
+              </FormGrid>
+              <FormGrid item xs={12}>
+                <FormControlLabel
+                  control={<Checkbox name="saveAddress" value="yes" />}
+                  label="Use this address for payment details"
+                  disabled
+                />
+              </FormGrid>
               <Button
-                type="submit"
                 variant="contained"
                 color="primary"
-                fullWidth
-                disabled={loading}
-                onClick={handleSubmit}
-                sx={{ position: "relative" }}
+                onClick={() => handleSave(address.address_id)}
+                sx={{ mt: 2, width: '100px' }}
               >
-                {loading && (
-                  <CircularProgress
-                    size={24}
-                    sx={{
-                      position: "absolute",
-                      top: "50%",
-                      left: "50%",
-                      marginTop: "-12px",
-                      marginLeft: "-12px",
-                    }}
-                  />
-                )}
-                {success ? "Address Saved" : "Save Address"}
+                Save
               </Button>
-            </FormGrid>
-          </Grid>
-        </form>
-        <Snackbar
-          open={snackbar.open}
-          autoHideDuration={6000}
-          onClose={handleCloseSnackbar}
-          anchorOrigin={{ vertical: "top", horizontal: "center" }}
-        >
-          <Alert
-            onClose={handleCloseSnackbar}
-            severity={snackbar.severity}
-            sx={{ width: "100%" }}
-            icon={
-              snackbar.severity === "success" ? (
-                <CheckCircleOutline fontSize="inherit" />
-              ) : undefined
-            }
-          >
-            <Typography variant="body1">{snackbar.message}</Typography>
-          </Alert>
-        </Snackbar>
-
-        <Fade in={success} timeout={1000}>
-          <Typography
-            variant="h6"
-            align="center"
-            color="primary"
-            sx={{ mt: 2, fontWeight: "bold" }}
-          >
-            Thank you for submitting your address!
-          </Typography>
-        </Fade>
-      </Grid>
-    </>
+            </CardContent>
+          </Card>
+        </div>
+      ))}
+    </Slider>
   );
 }
+
+export default AddressForm;

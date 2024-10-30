@@ -15,6 +15,11 @@ class Product {
     return rows[0];
   }
 
+  static async getProductvariantsById(categoryId) {
+    const [rows] = await db.query('SELECT * FROM product WHERE category_id = ?', [categoryId]);
+    return rows;
+  }
+
   static async createProduct(productData) {
     const { category_id, product_name, description, product_image, weight } =
       productData;

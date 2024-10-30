@@ -1,21 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import {
   Box,
   Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  IconButton,
   Button,
   Container,
-  Divider,
-  useTheme,
-  useMediaQuery,
-  Fade,
+  CircularProgress,
   Snackbar,
   Alert,
   TextField,
@@ -37,61 +27,46 @@ import { calculateTotal, calculateTax } from "../../api/calculateTotal";
 
 const Cart = () => {
   const [cartData, setCartData] = useState(null);
-  const [savedItems, setSavedItems] = useState([]);
-  const [coupon, setCoupon] = useState("");
-  const [discount, setDiscount] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [snackbar, setSnackbar] = useState({
     open: false,
-    message: "",
-    severity: "success",
+    message: '',
+    severity: 'success',
   });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const [loadingStates, setLoadingStates] = useState({}); // Per-item loading states
-  const [isSavedItemsLoading, setIsSavedItemsLoading] = useState(0);
 
   useEffect(() => {
     const fetchCartData = async () => {
       setLoading(true);
       try {
-        const customerId = localStorage.getItem("customerId");
-        const token = localStorage.getItem("token");
+        const customerId = localStorage.getItem('customerId');
+        const token = localStorage.getItem('token');
 
         if (!customerId || !token) {
-          throw new Error("Customer ID or token not found. Please log in.");
+          throw new Error('Customer ID or token not found. Please log in.');
         }
 
-        const response = await fetch(`/api/cart/${customerId}`, {
+        const response = await axios.get(`/api/cart/${customerId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
         });
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(
-            `HTTP error! status: ${response.status}, body: ${errorText}`
-          );
-        }
-
-        const data = await response.json();
-        console.log("Fetched cart data:", data);
-        setCartData(data);
+        setCartData(response.data);
       } catch (err) {
-        console.error("Error fetching cart data:", err);
+        console.error('Error fetching cart data:', err);
         setError(err.message);
         setSnackbar({
           open: true,
           message: err.message,
-          severity: "error",
+          severity: 'error',
         });
       } finally {
         setLoading(false);
       }
     };
+
     fetchCartData();
   }, []);
 
@@ -267,67 +242,14 @@ const Cart = () => {
     setSnackbar({ ...snackbar, open: false });
   };
 
-  const handleMoveToCart = async (item) => {
-    item.saved_for_later = 0;
-
-    //remove from saveditems
-    setSavedItems(
-      savedItems.filter(
-        (i) => i.shopping_cart_item_id !== item.shopping_cart_item_id
-      )
-    );
-
-    try {
-      const token = localStorage.getItem("token");
-      const customerId = cartData.customer_id;
-
-      const response = await fetch(`/api/cart/${customerId}/unsaveItem`, {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          shopping_cart_item_id: item.shopping_cart_item_id,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to save item for later.");
-      }
-
-      setSnackbar({
-        open: true,
-        message: "Item back to cart.",
-        severity: "success",
-      });
-    } catch (err) {
-      console.error("Error add to cart:", err);
-      setSnackbar({
-        open: true,
-        message: err.message,
-        severity: "error",
-      });
-    }
-  };
-  // Helper function to generate a random color
-  const getRandomColor = () => {
-    const letters = "0123456789ABCDEF";
-    let color = "";
-    for (let i = 0; i < 6; i++) {
-      color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-  };
-
   if (loading) {
     return (
       <Box
         sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "80vh",
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '80vh',
         }}
       >
         <CircularProgress />
@@ -339,7 +261,7 @@ const Cart = () => {
     return (
       <>
         <Header />
-        <Box sx={{ textAlign: "center", mt: 5 }}>
+        <Box sx={{ textAlign: 'center', mt: 5 }}>
           <Typography color="error" variant="h6">
             {error}
           </Typography>
@@ -361,10 +283,7 @@ const Cart = () => {
     return (
       <>
         <Header />
-        <Container maxWidth="md" sx={{ py: 8, textAlign: "center" }}>
-          <ShoppingCartIcon
-            sx={{ fontSize: 80, color: theme.palette.primary.main, mb: 2 }}
-          />
+        <Container maxWidth="md" sx={{ py: 8, textAlign: 'center' }}>
           <Typography variant="h4" gutterBottom>
             Your cart is empty.
           </Typography>
@@ -814,12 +733,12 @@ const Cart = () => {
         open={snackbar.open}
         autoHideDuration={3000}
         onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
         <Alert
           onClose={handleCloseSnackbar}
           severity={snackbar.severity}
-          sx={{ width: "100%" }}
+          sx={{ width: '100%' }}
         >
           {snackbar.message}
         </Alert>

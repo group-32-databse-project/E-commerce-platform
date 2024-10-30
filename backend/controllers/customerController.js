@@ -92,6 +92,7 @@ exports.getCustomerById = async (req, res) => {
         customer.customer_id
       );
       res.json(customer);
+      console.log('Customer found:', customer);
     } else {
       res.status(404).json({ message: "Customer not found" });
     }
