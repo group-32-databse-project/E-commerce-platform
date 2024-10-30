@@ -11,6 +11,7 @@ class Order {
     subtotal,
     shipping,
     tax,
+    shipping_date,
     order_status,
     discount
   ) {
@@ -29,7 +30,7 @@ class Order {
         shipping_date,
         order_status,
         discount
-      ) VALUES (?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?)`,
+      ) VALUES (?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         customer_id,
         delivery_module_id,
@@ -40,6 +41,7 @@ class Order {
         subtotal,
         shipping,
         parseFloat(tax || 0),
+        shipping_date,
         order_status,
         discount,
       ]

@@ -152,55 +152,28 @@ const OrderConfirmation = () => {
         const fetchedOrderDetail = await getOrderDetail(orderId);
         console.log("fetchedOrderDetail", fetchedOrderDetail);
         setOrderDetail(fetchedOrderDetail);
+        fetchOrderItems(fetchedOrderDetail);
       } catch (error) {
         console.error("Failed to fetch order detail:", error);
       }
     };
-    const fetchOrderItem = async () => {
+
+    const fetchOrderItems = async (fetchedOrderDetail) => {
       try {
-        const fetchedOrderItem = await getOrderItem(orderDetail.order_id);
-        orderDetail.items = fetchedOrderItem;
-        console.log(" xxxxxxxxxx ");
-        console.log("❤️", orderDetail);
-        setOrderDetail(orderDetail);
+        const fetchedOrderItem = await getOrderItem(orderId);
+        console.log("fetchedOrderItem", fetchedOrderItem);
+        setOrderDetail((prevOrderDetail) => ({
+          ...prevOrderDetail,
+          items: fetchedOrderItem,
+        }));
       } catch (error) {
         console.error("Failed to fetch order item:", error);
       }
     };
-    fetchOrderDetail();
-    fetchOrderItem();
-  }, []);
-  console.log("orderDetail", orderDetail);
 
-  const orderDetails = {
-    orderId: "ORD-2024-10275",
-    orderDate: "October 27, 2024",
-    expectedDelivery: "October 30, 2024",
-    status: "Order Confirmed",
-    progress: 25,
-    items: [
-      {
-        id: 1,
-        name: "Wireless Headphones",
-        quantity: 1,
-        price: 129.99,
-        image: "🎧",
-      },
-      { id: 2, name: "Phone Case", quantity: 2, price: 24.99, image: "📱" },
-    ],
-    shipping: {
-      name: "John Doe",
-      address: "123 Main Street",
-      city: "San Francisco",
-      state: "CA",
-      zip: "94105",
-      method: "Express Shipping (2-3 days)",
-    },
-    subtotal: 179.97,
-    shippingCost: 9.99,
-    tax: 14.4,
-    total: 204.36,
-  };
+    fetchOrderDetail();
+  }, [orderId]);
+  console.log("orderDetail", orderDetail);
 
   return (
     <Grid container justifyContent="center">
@@ -270,13 +243,14 @@ const OrderConfirmation = () => {
                   >
                     Thank you for your purchase
                   </Typography>
-                  <Chip
-                    icon={<CheckCircleIcon />}
-                    label={orderDetails.status}
-                    color="success"
-                    sx={{ mt: 2 }}
-                  />
-
+                  {orderDetail && (
+                    <Chip
+                      icon={<CheckCircleIcon />}
+                      label={orderDetail.order_status}
+                      color="success"
+                      sx={{ mt: 2 }}
+                    />
+                  )}
                   {/* Added Buttons for Shopping */}
                   <Box
                     sx={{
@@ -474,6 +448,16 @@ const OrderConfirmation = () => {
                       <Grid item xs={6} sx={{ textAlign: "right" }}>
                         <Typography variant="body1">
                           ${orderDetail.tax}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography variant="body2" color="text.secondary">
+                          Discount
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={6} sx={{ textAlign: "right" }}>
+                        <Typography variant="body1" sx={{ color: "#4CAF50" }}>
+                          ${orderDetail.discount}
                         </Typography>
                       </Grid>
                     </Grid>

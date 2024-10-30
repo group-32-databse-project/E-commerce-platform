@@ -18,6 +18,13 @@ exports.createOrder = async (req, res) => {
   const tax = cart.tax;
   const discount = cart.discount;
   const order_status = "pending";
+  const shipping_date = delivery_address[0].is_main_city
+    ? new Date(new Date().setDate(new Date().getDate() + 5))
+    : new Date(new Date().setDate(new Date().getDate() + 7));
+
+  // Convert to MySQL date format YYYY-MM-DD
+  const formatted_shipping_date = shipping_date.toISOString().split("T")[0];
+
   const orderId = await Order.createOrder(
     customer_id,
     delivery_module_id,
@@ -28,6 +35,7 @@ exports.createOrder = async (req, res) => {
     subtotal,
     shipping,
     tax,
+    formatted_shipping_date,
     order_status,
     discount
   );
