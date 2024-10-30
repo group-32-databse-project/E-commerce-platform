@@ -24,7 +24,7 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import StarIcon from "@mui/icons-material/Star";
 import StarHalfIcon from "@mui/icons-material/StarHalf";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
-import VisibilityIcon from "@mui/icons-material/Visibility";
+// import VisibilityIcon from "@mui/icons-material/Visibility";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import "../assets/styles/allcategory.css";
@@ -32,6 +32,7 @@ import { keyframes } from "@mui/system";
 import { useNavigate } from "react-router-dom";
 import { addToWishlist, removeFromWishlist, getWishlist } from "../services/wishlist";
 import { Favorite, FavoriteBorder } from "@mui/icons-material";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 
 // Styled Components
 
@@ -166,66 +167,6 @@ const WishlistButton = styled(IconButton)(({ theme }) => ({
   },
 }));
 
-// Enhanced QuickViewButton with consistent styling
-const QuickViewButton = styled(IconButton)(({ theme }) => ({
-  position: "absolute",
-  top: theme.spacing(2),
-  right: theme.spacing(10),
-  backgroundColor: "rgba(255, 255, 255, 0.9)",
-  zIndex: 3,
-  "&:hover": {
-    backgroundColor: "rgba(255, 255, 255, 1)",
-  },
-}));
-
-// Refined Modal Styles for a more polished appearance
-const modalStyle = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: "95%",
-  maxWidth: 900,
-  bgcolor: "background.paper",
-  borderRadius: 4,
-  boxShadow: 24,
-  p: 5,
-};
-
-// Enhanced ImageCarousel with improved responsiveness
-const ImageCarousel = styled("div")(({ theme }) => ({
-  position: "relative",
-  width: "100%",
-  height: "450px",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  overflow: "hidden",
-  borderRadius: theme.spacing(1),
-}));
-
-// CarouselImage with better hover effect
-const CarouselImage = styled("img")(({ theme }) => ({
-  width: "100%",
-  height: "100%",
-  objectFit: "contain",
-  transition: "transform 0.3s ease",
-  "&:hover": {
-    transform: "scale(1.05)",
-  },
-}));
-
-// CarouselButton with positioned arrows
-const CarouselButton = styled(IconButton)(({ theme }) => ({
-  position: "absolute",
-  top: "50%",
-  transform: "translateY(-50%)",
-  backgroundColor: "rgba(255, 255, 255, 0.8)",
-  "&:hover": {
-    backgroundColor: "rgba(255, 255, 255, 1)",
-  },
-}));
-
 // Enhanced StyledButton with more pronounced styles
 const StyledButton = styled(Button)(({ theme, color }) => ({
   flex: 1, // Ensure equal width
@@ -318,6 +259,34 @@ const IconWrapper = styled("span")(({ theme }) => ({
   },
 }));
 
+// Add new styled component for QuickView button
+const QuickViewButton = styled(IconButton)(({ theme }) => ({
+  position: 'absolute',
+  top: theme.spacing(2),
+  right: theme.spacing(8), // Position it to the left of wishlist button
+  backgroundColor: 'rgba(255, 255, 255, 0.9)',
+  zIndex: 3,
+  '&:hover': {
+    backgroundColor: 'rgba(255, 255, 255, 1)',
+  },
+}));
+
+// Add styled component for Modal
+const ModalStyle = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: '80%',
+  maxWidth: 800,
+  bgcolor: 'background.paper',
+  borderRadius: 2,
+  boxShadow: 24,
+  p: 4,
+  maxHeight: '90vh',
+  overflow: 'auto'
+};
+
 const OurProduct = ({ filters }) => {
   const [products, setProducts] = useState([]);
   const [error, setError] = useState("");
@@ -325,11 +294,10 @@ const OurProduct = ({ filters }) => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 9; // Three items per row
-  const [openModal, setOpenModal] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [carouselIndex, setCarouselIndex] = useState(0);
   const navigate = useNavigate();
   const [wishlist, setWishlist] = useState([]);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [openModal, setOpenModal] = useState(false);
 
   // Fetch products based on filters
   useEffect(() => {
@@ -390,7 +358,9 @@ const OurProduct = ({ filters }) => {
     fetchWishlist();
   }, []);
 
-  const handleWishlistToggle = async (productId) => {
+  // Modify handleWishlistToggle to accept event and stop propagation
+  const handleWishlistToggle = async (productId, event) => {
+    event.stopPropagation(); // Prevent card navigation
     const isInWishlist = wishlist.some(item => item.product_id === productId);
     try {
       if (isInWishlist) {
@@ -441,34 +411,11 @@ const OurProduct = ({ filters }) => {
     setCurrentPage((prev) => Math.max(prev - 1, 1));
   };
 
-  // Modal Handlers
-  const handleOpenModal = (product, event) => {
-    event.stopPropagation(); // Prevent card navigation
+  // Add handler for QuickView
+  const handleQuickView = (product, event) => {
+    event.stopPropagation();
     setSelectedProduct(product);
     setOpenModal(true);
-    setCarouselIndex(0);
-  };
-
-  const handleCloseModal = () => {
-    setOpenModal(false);
-    setSelectedProduct(null);
-  };
-
-  // Carousel Handlers
-  const handleNextImage = () => {
-    if (selectedProduct) {
-      setCarouselIndex((prev) =>
-        prev === selectedProduct.images.length - 1 ? 0 : prev + 1
-      );
-    }
-  };
-
-  const handlePrevImage = () => {
-    if (selectedProduct) {
-      setCarouselIndex((prev) =>
-        prev === 0 ? selectedProduct.images.length - 1 : prev - 1
-      );
-    }
   };
 
   if (loading) {
@@ -503,6 +450,14 @@ const OurProduct = ({ filters }) => {
                 <StyledCard
                   onClick={() => navigate(`/product/${product.product_id}`)}
                 >
+                  {/* Add QuickView button */}
+                  <QuickViewButton
+                    aria-label="quick view"
+                    onClick={(event) => handleQuickView(product, event)}
+                  >
+                    <VisibilityIcon />
+                  </QuickViewButton>
+
                   {/* Wishlist and Quick View Buttons */}
                   <WishlistButton
                     aria-label="add to wishlist"
@@ -511,14 +466,6 @@ const OurProduct = ({ filters }) => {
                   >
                     {wishlist.some(item => item.product_id === product.product_id) ? <Favorite /> : <FavoriteBorder />}
                   </WishlistButton>
-
-                  <QuickViewButton
-                    aria-label="quick view"
-                    color="primary"
-                    onClick={(event) => handleOpenModal(product, event)}
-                  >
-                    <VisibilityIcon />
-                  </QuickViewButton>
 
                   {/* Product Image with Badge */}
                   <Badge
@@ -673,123 +620,57 @@ const OurProduct = ({ filters }) => {
           Action completed successfully!
         </Alert>
       </Snackbar>
-      {/* Quick View Modal */}
-      {selectedProduct && (
-        <Modal
-          open={openModal}
-          onClose={handleCloseModal}
-          aria-labelledby="quick-view-title"
-          aria-describedby="quick-view-description"
-        >
-          <Box sx={modalStyle}>
-            {/* Product Title */}
-            <Typography
-              id="quick-view-title"
-              variant="h5"
-              component="h2"
-              gutterBottom
-              align="center"
-            >
-              {selectedProduct.product_name}
-            </Typography>
 
-            {/* Image Carousel */}
-            <ImageCarousel>
-              <CarouselImage
-                src={selectedProduct.images[carouselIndex]}
-                alt={`${selectedProduct.product_name} Image ${
-                  carouselIndex + 1
-                }`}
-              />
-              {selectedProduct.images.length > 1 && (
-                <>
-                  <CarouselButton
-                    onClick={handlePrevImage}
-                    aria-label="Previous Image"
-                  >
-                    <ArrowBackIosNewIcon />
-                  </CarouselButton>
-                  <CarouselButton
-                    onClick={handleNextImage}
-                    aria-label="Next Image"
-                    style={{ right: 0, left: "auto" }}
-                  >
-                    <ArrowForwardIosIcon />
-                  </CarouselButton>
-                </>
-              )}
-            </ImageCarousel>
-
-            {/* Product Description */}
-            <Typography id="quick-view-description" sx={{ mt: 2 }}>
-              {selectedProduct.description}
-            </Typography>
-
-            {/* Price Information */}
-            <Typography variant="h6" sx={{ mt: 2 }}>
-              Price: ${selectedProduct.total_price}
-              {selectedProduct.isOnSale && (
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  component="span"
-                  style={{
-                    textDecoration: "line-through",
-                    marginLeft: "8px",
-                  }}
-                >
-                  ${selectedProduct.original_price}
-                </Typography>
-              )}
-            </Typography>
-
-            {/* Weight and Rating */}
-            <Typography variant="body2" color="text.secondary">
-              Weight: {selectedProduct.weight}
-            </Typography>
-            <Rating
-              value={selectedProduct.rating}
-              count={selectedProduct.ratingCount}
-            />
-
-            {/* Tags */}
-            <Box
-              sx={{
-                mt: 2,
-                display: "flex",
-                gap: "10px",
-                flexWrap: "wrap",
-              }}
-            >
-              {selectedProduct.tags.map((tag, index) => (
-                <Chip key={index} label={tag} variant="outlined" />
-              ))}
-            </Box>
-
-            {/* Action Buttons in Modal */}
-            <Box
-              sx={{ mt: 4, display: "flex", gap: 2, justifyContent: "center" }}
-            >
-              <StyledButton
-                color="primary"
-                onClick={(event) => {
-                  onAddToCart(selectedProduct.x, event);
-                  handleCloseModal();
-                }}
-                fullWidth
-                sx={{ maxWidth: "200px" }}
-              >
-                <ButtonContent>
-                  <IconWrapper>
-                    <ShoppingCartIcon />
-                  </IconWrapper>
-                  Add to Cart
-                </ButtonContent>
-              </StyledButton>
-            </Box>
-          </Box>
-        </Modal>
-      )}
+      {/* Add Modal */}
+      <Modal
+        open={openModal}
+        onClose={() => setOpenModal(false)}
+        aria-labelledby="quick-view-modal"
+      >
+        <Box sx={ModalStyle}>
+          {selectedProduct && (
+            <>
+              <Grid container spacing={3}>
+                <Grid item xs={12} md={6}>
+                  <img
+                    src={selectedProduct.product_image}
+                    alt={selectedProduct.product_name}
+                    style={{ width: '100%', height: 'auto' }}
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <Typography variant="h4" gutterBottom>
+                    {selectedProduct.product_name}
+                  </Typography>
+                  <Typography variant="body1" paragraph>
+                    {selectedProduct.description}
+                  </Typography>
+                  <Typography variant="h6" color="primary" gutterBottom>
+                    ${selectedProduct.variants?.[0]?.total_price || 'N/A'}
+                  </Typography>
+                  <Typography variant="body2" gutterBottom>
+                    Weight: {selectedProduct.weight}
+                  </Typography>
+                  <Rating value={selectedProduct.rating} count={selectedProduct.ratingCount} />
+                  <Box sx={{ mt: 2 }}>
+                    <StyledButton
+                      variant="contained"
+                      color="primary"
+                      fullWidth
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/product/${selectedProduct.product_id}`);
+                      }}
+                    >
+                      View Full Details
+                    </StyledButton>
+                  </Box>
+                </Grid>
+              </Grid>
+            </>
+          )}
+        </Box>
+      </Modal>
     </ProductsSection>
   );
 };

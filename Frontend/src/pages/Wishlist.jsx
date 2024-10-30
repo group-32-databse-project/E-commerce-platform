@@ -146,6 +146,10 @@ const Wishlist = () => {
   };
 
   const handleOpenModal = (product) => {
+    if (!product) {
+      console.error("No product data available.");
+      return;
+    }
     setSelectedProduct(product);
     setOpenModal(true);
   };
