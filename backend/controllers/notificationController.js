@@ -7,8 +7,10 @@ class NotificationController {
    */
   static async getUserNotifications(req, res) {
     try {
-      const userId = req.user.id; // Ensure your authentication middleware sets req.user
-      const notifications = await Notification.getNotificationsByUserId(userId);
+      const customerId = req.customer.id; // Ensure your authentication middleware sets req.user
+      const notifications = await Notification.getNotificationsByUserId(
+        customerId
+      );
       res.json({ success: true, notifications });
     } catch (error) {
       console.error('Error fetching notifications:', error);

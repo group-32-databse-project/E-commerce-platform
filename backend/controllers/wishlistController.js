@@ -43,7 +43,7 @@ exports.removeFromWishlist = async (req, res) => {
 };
 
 exports.getWishlist = async (req, res) => {
-  const customerId = req.user.id;
+  const customerId = req.customer.id;
 
   try {
     const wishlist = await WishlistItem.getWishlist(customerId);

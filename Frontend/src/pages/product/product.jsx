@@ -34,7 +34,6 @@ import {
 import Header from "../../components/header";
 import Footer from "../../components/footer";
 import addToCart from "../../api/addToCart";
-import { useParams } from "react-router-dom";
 import Variation from "./variation";
 import { addToWishlist } from "../../services/wishlist";
 

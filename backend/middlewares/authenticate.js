@@ -15,7 +15,7 @@ const authenticate = (req, res, next) => {
         if (err || !decoded.customerId) {
             return res.status(401).json({ message: 'Failed to authenticate token' });
         }
-        req.user = { id: decoded.customerId };
+        req.customer = { id: decoded.customerId };
         next();
     });
 };

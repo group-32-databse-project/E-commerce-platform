@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 
+
 // Load environment variables
 dotenv.config();
 
@@ -45,6 +46,10 @@ app.use('/api/category', categoryRoutes); // Optional: Review if duplicate
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/filters', filterRoutes);
 app.use('/api/banner', bannerRoutes);
+app.use("/api/admin", adminRoutes); // New Admin Routes
+app.use(`/api/payment`, paymentRoutes);
+app.use("/api/test", testRoutes);
+
 
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
