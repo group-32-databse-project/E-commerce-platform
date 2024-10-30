@@ -19,6 +19,7 @@ import Loading from "./pages/loading/loading.js";
 import Wishlist from "./pages/Wishlist";
 import OurProduct from "./components/OurProduct";
 import PrivateRoute from "./components/PrivateRoute";
+import DealsPage from "./pages/deals/DealsPage";
 
 function App() {
   return (
@@ -37,11 +38,9 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/category/:categoryId" element={<Category />} />
         <Route path="/loading" element={<Loading />} />
-        {/* Remove the Favorites and WishlistProductList routes */}
-        {/* <Route path="/favorites" element={<FavoritesPage />} />
-        <Route path="/wishlist-products" element={<PrivateRoute><WishlistProductList /></PrivateRoute>} /> */}
-        {/* Consolidate Wishlist to a single route */}
         <Route path="/wishlist" element={<PrivateRoute><Wishlist /></PrivateRoute>} />
+        <Route path="/deals" element={<DealsPage />} />
+        <Route path="/saved" element={<PrivateRoute><Wishlist /></PrivateRoute>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
