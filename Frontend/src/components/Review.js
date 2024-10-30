@@ -110,7 +110,7 @@ export default function Review() {
                     Card number:
                   </Typography>
                   <Typography variant="body2">
-                    {payment.last_four_digits}
+                    **** **** **** {payment.last_four_digits}
                   </Typography>
                 </Stack>
               </React.Fragment>

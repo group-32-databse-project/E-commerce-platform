@@ -11,10 +11,25 @@ class Order {
     subtotal,
     shipping,
     tax,
-    order_status
+    order_status,
+    discount
   ) {
     const [result] = await db.query(
-      `INSERT INTO shop_order (customer_id, delivery_module_id, order_date, payment_method_id, delivery_method, delivery_address_id, total_order_price, subtotal, shipping, tax, shipping_date, order_status) VALUES (?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, NULL, ?)`,
+      `INSERT INTO shop_order (
+        customer_id, 
+        delivery_module_id,
+        order_date,
+        payment_method_id,
+        delivery_method,
+        delivery_address_id,
+        total_order_price,
+        subtotal,
+        shipping,
+        tax,
+        shipping_date,
+        order_status,
+        discount
+      ) VALUES (?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?)`,
       [
         customer_id,
         delivery_module_id,
@@ -24,11 +39,12 @@ class Order {
         total_order_price,
         subtotal,
         shipping,
-        tax,
+        parseFloat(tax || 0),
         order_status,
+        discount,
       ]
     );
-    return result.insertId; // Return the ID of the newly created order
+    return result.insertId;
   }
 
   static async getOrderById(orderId) {

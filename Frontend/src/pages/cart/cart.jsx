@@ -717,7 +717,9 @@ const Cart = () => {
                     }}
                   >
                     <Typography>Subtotal</Typography>
-                    <Typography>${calculateSubtotal().toFixed(2)}</Typography>
+                    <Typography>
+                      ${calculateSubtotal(cartData).toFixed(2)}
+                    </Typography>
                   </Box>
                   <Box
                     sx={{
@@ -728,7 +730,7 @@ const Cart = () => {
                   >
                     <Typography>Shipping</Typography>
                     <Typography>
-                      ${calculateShipping(calculateSubtotal())}
+                      ${calculateShipping(calculateSubtotal(cartData))}
                     </Typography>
                   </Box>
                   <Box
@@ -739,7 +741,7 @@ const Cart = () => {
                     }}
                   >
                     <Typography>Tax (8%)</Typography>
-                    <Typography>${calculateTax()}</Typography>
+                    <Typography>${calculateTax(cartData)}</Typography>
                   </Box>
                   {discount > 0 && (
                     <Box

@@ -24,10 +24,10 @@ class ShoppingCart {
     );
   }
 
-  static async savePrice(cartId, price) {
+  static async savePrice(cartId, price, subtotal, shipping, tax, discount) {
     await db.query(
-      "UPDATE shopping_cart SET total_price = ? WHERE shopping_cart_id = ?",
-      [price, cartId]
+      "UPDATE shopping_cart SET total_price = ?, subtotal = ?, shipping = ?, tax = ?, discount = ? WHERE shopping_cart_id = ?",
+      [price, subtotal, shipping, tax, discount, cartId]
     );
   }
 

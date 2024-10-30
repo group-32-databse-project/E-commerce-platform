@@ -3,11 +3,11 @@ import calculateShipping from "./shipping";
 
 const calculateTotal = (cartData, discount) => {
   const subtotal = calculateSubtotal(cartData);
-  const shipping = calculateShipping();
-  const tax = parseFloat(calculateTax());
-
-  savePrice(cartData, subtotal + shipping + tax - discount);
-  return (subtotal + shipping + tax - discount).toFixed(2);
+  const shipping = calculateShipping(subtotal);
+  const tax = parseFloat(calculateTax(cartData));
+  const price = subtotal + shipping + tax - discount;
+  savePrice(cartData, price, subtotal, shipping, tax, discount);
+  return price.toFixed(2);
 };
 const calculateSubtotal = (cartData) => {
   return (
@@ -18,11 +18,17 @@ const calculateSubtotal = (cartData) => {
   );
 };
 // Calculate tax (example logic)
-const calculateTax = () => {
-  return (calculateSubtotal() * 0.08).toFixed(2); // 8% tax
+const calculateTax = (cartData) => {
+  return (calculateSubtotal(cartData) * 0.08).toFixed(2); // 8% tax
 };
-const savePrice = (cartData, price) => {
-  axios.patch(`/api/cart/${cartData.customer_id}/savePrice`, { price });
+const savePrice = (cartData, price, subtotal, shipping, tax, discount) => {
+  axios.patch(`/api/cart/${cartData.customer_id}/savePrice`, {
+    price,
+    subtotal,
+    shipping,
+    tax,
+    discount,
+  });
 };
 
 export { calculateTotal, calculateSubtotal, calculateTax };

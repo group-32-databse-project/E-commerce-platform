@@ -125,10 +125,17 @@ exports.saveForLater = async (req, res) => {
 
 exports.savePrice = async (req, res) => {
   const { customerId } = req.params;
-  const { price } = req.body;
+  const { price, subtotal, shipping, tax, discount } = req.body;
   try {
     const cart = await ShoppingCart.getCartByCustomerId(customerId);
-    await ShoppingCart.savePrice(cart.shopping_cart_id, price);
+    await ShoppingCart.savePrice(
+      cart.shopping_cart_id,
+      price,
+      subtotal,
+      shipping,
+      tax,
+      discount
+    );
     res.status(200).json({ message: "Price saved" });
   } catch (error) {
     console.error("Error in savePrice:", error);

@@ -13,9 +13,10 @@ exports.createOrder = async (req, res) => {
   const delivery_address_id = delivery_address[0].address_id;
 
   const total_order_price = cart.total_price;
-  const subtotal = 0;
-  const shipping = 0;
-  const tax = 0;
+  const subtotal = cart.subtotal;
+  const shipping = cart.shipping;
+  const tax = cart.tax;
+  const discount = cart.discount;
   const order_status = "pending";
   const orderId = await Order.createOrder(
     customer_id,
@@ -23,12 +24,12 @@ exports.createOrder = async (req, res) => {
     payment_method_id,
     delivery_method,
     delivery_address_id,
-
     total_order_price,
     subtotal,
     shipping,
     tax,
-    order_status
+    order_status,
+    discount
   );
 
   console.log("orderId", orderId);
