@@ -165,10 +165,11 @@ const Header = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [toyset, setToyset] = useState([]);
   const [elecset, setElecset] = useState([]);
-  const [catlist, setCatlist] = useState([]);
+  
   const { authToken } = useAuth();
   
-  const [notifications, setNotifications] = useState([]);
+ 
+  
   const [catlist, setCatlist] = useState([]); 
   const [notifications, setNotifications] = useState([
     {

@@ -340,6 +340,7 @@ const OurProduct = () => {
         }
         const data = await response.json();
         setProducts(data);
+        //console.log(data);
         setLoading(false);
       } catch (err) {
         setError(err.message || "An error occurred.");

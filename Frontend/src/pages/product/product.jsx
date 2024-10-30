@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+
 import { useNavigate, useParams } from "react-router-dom";
 import {
   Box,
@@ -35,6 +36,8 @@ import Footer from "../../components/footer";
 import addToCart from "../../services/addToCart";
 import Variation from "./variation";
 import { addToWishlist } from "../../services/wishlist";
+
+
 
 // Create a custom theme with standard measurements and professional style
 const theme = createTheme({
@@ -166,6 +169,7 @@ const ProductPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [price, setPrice] = useState(null);
+
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -455,6 +459,7 @@ const ProductPage = () => {
                       color="primary"
                       size="large"
                       sx={{ height: 48 }}
+                      
                     >
                       Buy It Now
                     </Button>
