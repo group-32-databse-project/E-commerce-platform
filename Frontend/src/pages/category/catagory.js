@@ -2,6 +2,7 @@ import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Header from "../../components/header";
 import CategoryList from "../../components/catagoryList";
+import Banner from "../Dashboard/Banner";
 
 import FilterSidebar from "../../components/FilterSidebar";
 
@@ -25,7 +26,7 @@ const Category = () => {
           {/* Main Content */}
           <main className="col-md-9">
             {/* Hero Section */}
-
+            <Banner />
             {/* Our Products */}
             <section className="products-section mb-4"></section>
             <CategoryList />

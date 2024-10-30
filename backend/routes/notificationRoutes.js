@@ -1,11 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const NotificationController = require('../controllers/notificationController');
+const authenticate = require('../middlewares/authenticate'); // New authentication middleware
 
-// Get notifications for a user
-router.get('/user/:userId', NotificationController.getUserNotifications);
+// Apply authentication middleware to all notification routes
+router.use(authenticate);
 
-// Mark a notification as read
-router.put('/read/:id', NotificationController.markAsRead);
+// GET /api/notifications - Retrieve all notifications for the authenticated user
+router.get('/', NotificationController.getUserNotifications);
+
+// PATCH /api/notifications/:id/read - Mark a specific notification as read
+router.patch('/:id/read', NotificationController.markNotificationAsRead);
 
 module.exports = router;

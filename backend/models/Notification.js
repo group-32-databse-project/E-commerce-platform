@@ -17,7 +17,6 @@ class Notification {
       ORDER BY n.created_at DESC
     `;
     
-    
     try {
       const [rows] = await db.query(query, [userId]);
       console.log(`getNotificationsByUserId: Retrieved ${rows.length} notifications for user ID: ${userId}`);
