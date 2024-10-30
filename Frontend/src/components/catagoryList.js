@@ -29,6 +29,8 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import "../assets/styles/allcategory.css";
 import { keyframes } from "@mui/system";
 import { useNavigate, useParams } from "react-router-dom";
+import { addToWishlist, removeFromWishlist, getWishlist } from "../services/wishlist";
+import { Favorite, FavoriteBorder } from "@mui/icons-material";
 
 // Styled Components
 
@@ -327,18 +329,21 @@ const OurProduct = () => {
   const [carouselIndex, setCarouselIndex] = useState(0);
   const navigate = useNavigate();
   const { categoryId } = useParams(); // Extract categoryId from URL params
+  const [wishlist, setWishlist] = useState([]);
 
   // Fetch products from API
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         console.log(categoryId);
-        const response = await fetch(`/api/products/category/${categoryId}`);
+        const response = await fetch(`/api/products/${categoryId}/category`);
+        
         if (!response.ok) {
           throw new Error("Failed to fetch products.");
         }
         const data = await response.json();
         setProducts(data);
+        console.log("products",data);
         setLoading(false);
       } catch (err) {
         setError(err.message || "An error occurred.");
@@ -347,6 +352,34 @@ const OurProduct = () => {
     };
     fetchProducts();
   }, [categoryId]); // Add categoryId as a dependency
+
+  useEffect(() => {
+    const fetchWishlist = async () => {
+      try {
+        const wishlistData = await getWishlist();
+        setWishlist(wishlistData || []);
+      } catch (error) {
+        console.error("Error fetching wishlist:", error);
+      }
+    };
+
+    fetchWishlist();
+  }, []);
+
+  const handleWishlistToggle = async (productId) => {
+    const isInWishlist = wishlist.some(item => item.product_id === productId);
+    try {
+      if (isInWishlist) {
+        await removeFromWishlist(productId);
+        setWishlist(prev => prev.filter(item => item.product_id !== productId));
+      } else {
+        await addToWishlist(productId);
+        setWishlist(prev => [...prev, { product_id: productId }]);
+      }
+    } catch (error) {
+      console.error("Error toggling wishlist:", error);
+    }
+  };
 
   // Handle Add to Cart
   const onAddToCart = (variantId) => {
@@ -438,12 +471,8 @@ const OurProduct = () => {
           >
             <StyledCard>
               {/* Wishlist and Quick View Buttons */}
-              <WishlistButton
-                aria-label="add to wishlist"
-                color="secondary"
-                onClick={() => onAddToWishlist(product.product_id)}
-              >
-                <FavoriteIcon />
+              <WishlistButton onClick={() => handleWishlistToggle(product.product_id)}>
+                {wishlist.some(item => item.product_id === product.product_id) ? <Favorite color="secondary" /> : <FavoriteBorder />}
               </WishlistButton>
 
               <QuickViewButton

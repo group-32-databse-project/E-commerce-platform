@@ -15,6 +15,9 @@ const deliveryRoutes = require('./routes/deliveryRoutes');
 const searchRoutes = require('./routes/searchRoutes');
 const authRoutes = require('./routes/authRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
+const paymentRoutes = require("./routes/paymentRoutes");
+const testRoutes = require('./routes/testRoutes');
+const wishlistRoutes = require('./routes/wishlistRoutes');
 const notificationRoutes = require('./routes/notificationRoutes'); // Import Notification Routes
 const filterRoutes = require('./routes/filterRoutes'); 
 const bannerRoutes = require('./routes/bannerRoutes');
@@ -38,6 +41,7 @@ app.use('/api/search', searchRoutes);
 app.use('/api', authRoutes);
 app.use('/api/notifications', notificationRoutes); // Register Notification Routes
 app.use('/api/category', categoryRoutes); // Optional: Review if duplicate
+app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/filters', filterRoutes);
 app.use('/api/banner', bannerRoutes);
 

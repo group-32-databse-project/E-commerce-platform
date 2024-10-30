@@ -1,8 +1,9 @@
 const Customer = require('../models/Customer');
+const PhoneNumber = require('../models/PhoneNumber');
 const Address = require('../models/Address');
 const ShoppingCart = require('../models/ShoppingCart');
+const CustomerAddress = require("../models/CustomerAddress");
 const bcrypt = require('bcrypt');
-
 const jwt = require('jsonwebtoken');
 
 exports.registerCustomer = async (req, res) => {
@@ -41,21 +42,92 @@ exports.loginCustomer = async (req, res) => {
   }
 };
 
+exports.addAddress = async (req, res) => {
+  try {
+    const customerId = req.params.customerId;
+    const formData = req.body;
 
+    const addressId = await Address.createAddress(formData);
+    await CustomerAddress.createCustomerAddress(customerId, addressId);
+    res.status(200).json({ message: "Address added" });
+  } catch (error) {
+    console.log(error);
+    console.error("Error in addAddress:", error);
+    res
+      .status(500)
+      .json({ message: "Error adding address", error: error.toString() });
+  }
+};
 
 exports.getCustomerById = async (req, res) => {
   try {
     const customer = await Customer.getCustomerById(req.params.id);
     if (customer) {
-      // Fetch addresses
-      customer.addresses = await Address.getAddressesByCustomerId(customer.customer_id);
       res.json(customer);
+      console.log('Customer found:', customer);
     } else {
       res.status(404).json({ message: 'Customer not found' });
     }
   } catch (error) {
     console.error('Error in getCustomerById:', error);
     res.status(500).json({ message: 'Error fetching customer', error: error.toString() });
+  }
+};
+
+exports.getAddressesByCustomerId = async (req, res) => {
+  try {
+    const customer = await Customer.getCustomerById(req.params.id);
+    if (customer) {
+      // Fetch addresses
+      customer.addresses = await Address.getAddressesByCustomerId(customer.customer_id);
+      res.json(customer);
+      console.log('Customer addresses:', customer.addresses);
+    } else {
+      res.status(404).json({ message: 'Customer not found' });
+    }
+  } catch (error) {
+    console.error('Error in getAddressesByCustomerId:', error);
+    res.status(500).json({ message: 'Error fetching customer addresses', error: error.toString() });
+  }
+};
+
+exports.getPaymentDeatails = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const customer = await Customer.getCustomerById(id);
+    if (customer) {
+      const paymentDetails = await Customer.getPaymentDetailsByCustomerId(customer.customer_id);
+      res.json(paymentDetails);
+      console.log('Payment details:', paymentDetails);
+    } else {
+      res.status(404).json({ message: 'Customer not found' });
+    }
+  } catch (error) {
+    console.error('Error in getPaymentDetails:', error);
+    res.status(500).json({ message: 'Error fetching payment details', error: error.toString() });
+  }
+};
+
+exports.updateprofile = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { phone_number, ...profileData } = req.body;
+   
+    const customer = await Customer.getCustomerById(id);
+    if (customer) {
+      const updatedCustomer = await Customer.updateCustomer(id, profileData.customerData);
+      if (profileData.customerData.phone_number) {
+        await PhoneNumber.save(profileData.customerData.phone_number, id);
+      }
+      res.json(updatedCustomer);
+      console.log('Customer updated:', updatedCustomer);
+    } else {
+      res.status(404).json({ message: 'Customer not found' });
+    }
+  } catch (error) {
+    console.error('Error in updateCustomer:', error);
+    res.status(500).json({ message: 'Error updating customer', error: error.toString() });
   }
 };
 

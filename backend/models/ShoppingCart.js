@@ -9,10 +9,9 @@ class ShoppingCart {
     return result.insertId;
   }
 
-
   static async getCartByCustomerId(customerId) {
     const [rows] = await db.query(
-      "SELECT * FROM shopping_cart WHERE customer_id = ?",
+      "SELECT * FROM shopping_cart WHERE customer_id = ? ",
       [customerId]
     );
     return rows[0];
@@ -22,6 +21,13 @@ class ShoppingCart {
     await db.query(
       "UPDATE shopping_cart SET updated_at = NOW() WHERE shopping_cart_id = ?",
       [cartId]
+    );
+  }
+
+  static async savePrice(cartId, price) {
+    await db.query(
+      "UPDATE shopping_cart SET total_price = ? WHERE shopping_cart_id = ?",
+      [price, cartId]
     );
   }
 

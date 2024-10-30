@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { FaUserCircle } from 'react-icons/fa';
+import { jwtDecode } from 'jwt-decode'; // Use named import
 
 const CustomerDeatailForm = () => {
   const [customerData, setCustomerData] = useState({
@@ -11,42 +12,64 @@ const CustomerDeatailForm = () => {
     birthday: '',
     gender: 'Male',
   });
+  const token = localStorage.getItem('token');
+  let id = null;
+
+  if (token) {
+    try {
+      const decodedToken = jwtDecode(token); // Use named import
+      id = decodedToken.customerId; // Assuming the token contains an 'id' field
+     console.log('Decoded id:', id);
+    } catch (error) {
+      console.error('Error decoding token:', error);
+    }
+  }
 
   useEffect(() => {
     // Fetch data from backend
-    fetch('/api/customers/:id')
+    fetch(`/api/customers/${id}`)
       .then(response => response.json())
       .then(data => {
         setCustomerData(data);
+        console.log('customer Profile data:', customerData);
+       
       })
       .catch(error => {
         console.error('Error fetching profile data:', error);
       });
-  }, []);
+  }, [id]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    console.log('name:',name);
+    console.log('value:',value);
     setCustomerData(prevState => ({
       ...prevState,
+      
       [name]: value,
     }));
+    customerData.name = value;
+    console.log('phone hi:',customerData.phone_number);
   };
 
   const handleSave = () => {
     // Send data to backend
-    fetch('/api/profile', {
+    console.log('all:',customerData);
+    console.log('phone:',customerData.phone_number);
+    fetch(`/api/customers/${id}/update`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+      'Content-Type': 'application/json',
       },
-      body: JSON.stringify(customerData),
+      
+      body: JSON.stringify({ customerData}), // Use JSON.stringify to convert the object to a JSON string
     })
       .then(response => response.json())
       .then(data => {
-        console.log('Profile updated successfully:', data);
+      console.log('Profile updated successfully:', data);
       })
       .catch(error => {
-        console.error('Error updating profile:', error);
+      console.error('Error updating profile:', error);
       });
   };
 
@@ -58,15 +81,15 @@ const CustomerDeatailForm = () => {
           <Label>First Name</Label>
           <Input
             type="text"
-            name="firstName"
-            value={customerData.firstName}
+            name="first_name"
+            value={customerData.first_name}
             onChange={handleInputChange}
           />
           <Label>Last Name</Label>
           <Input
             type="text"
-            name="lastName"
-            value={customerData.lastName}
+            name="last_name"
+            value={customerData.last_name}
             onChange={handleInputChange}
           />
         </FormRow>
@@ -74,29 +97,22 @@ const CustomerDeatailForm = () => {
           <Label>Email</Label>
           <Input
             type="email"
-            name="email"
-            value={customerData.email}
+            name="email_address"
+            value={customerData.email_address}
             onChange={handleInputChange}
+           
           />
         </FormRow>
         <FormRow>
           <Label>Phone</Label>
           <Input
             type="text"
-            name="phone"
-            value={customerData.phone}
+            name="phone_number"
+            value={customerData.phone_number}
             onChange={handleInputChange}
           />
         </FormRow>
-        <FormRow>
-          <Label>Birthday</Label>
-          <Input
-            type="date"
-            name="birthday"
-            value={customerData.birthday}
-            onChange={handleInputChange}
-          />
-        </FormRow>
+       
         <FormRow>
           <Label>Gender</Label>
           <GenderOptions>

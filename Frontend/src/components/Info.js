@@ -7,6 +7,15 @@ import Typography from "@mui/material/Typography";
 import { useState, useEffect } from "react";
 import CircularProgress from "@mui/material/CircularProgress";
 import Alert from "@mui/material/Alert";
+import {
+  calculateTotal,
+  calculateTax,
+  calculateSubtotal,
+} from "../services/calculateTotal";
+import calculateShipping from "../services/shipping";
+import { Card, CardContent, Paper, Box, Stack, Divider } from "@mui/material";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import { useTheme } from "@mui/material/styles";
 
 function Info() {
   const [cartData, setCartData] = useState(null);
@@ -66,34 +75,102 @@ function Info() {
     return <Typography>No items in cart</Typography>;
   }
 
-  const totalPrice = cartData.items
-    .map((item) => item.total_price * item.quantity)
-    .reduce((acc, curr) => acc + curr, 0);
-
+  const totalPrice = calculateTotal(cartData, 0);
+  const subtotal = calculateSubtotal(cartData);
   return (
-    <React.Fragment>
-      <Typography variant="subtitle2" sx={{ color: "text.secondary" }}>
-        Total
-      </Typography>
-      <Typography variant="h4" gutterBottom>
-        {totalPrice}
-      </Typography>
-      <List disablePadding>
-        {cartData.items.map((item) => (
-          <ListItem key={item.id} sx={{ py: 1, px: 0 }}>
-            <ListItemText
-              sx={{ mr: 2 }}
-              primary={item.product_name}
-              secondary={`Quantity: ${item.quantity}`}
-            />
-            <Typography variant="body1" sx={{ fontWeight: "medium" }}>
-              ${(item.total_price * item.quantity).toFixed(2)}
+    <Card elevation={2} sx={{ maxWidth: 400, width: "100%" }}>
+      <CardContent>
+        {/* Header */}
+        <Box sx={{ display: "flex", alignItems: "center", mb: 3, gap: 1 }}>
+          <ShoppingCartIcon color="primary" />
+          <Typography variant="h6" component="h2">
+            Order Summary
+          </Typography>
+        </Box>
+
+        {/* Items List */}
+        <Paper
+          sx={{
+            maxHeight: 280,
+            overflow: "auto",
+            mb: 3,
+            "&::-webkit-scrollbar": {
+              width: "8px",
+            },
+            "&::-webkit-scrollbar-thumb": {
+              borderRadius: "4px",
+            },
+          }}
+        >
+          <List disablePadding>
+            {cartData.items.map((item, index) => (
+              <React.Fragment key={item.id}>
+                <ListItem sx={{ py: 1.5, px: 2 }}>
+                  <ListItemText
+                    primary={
+                      <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                        {item.product_name}
+                      </Typography>
+                    }
+                    secondary={`Quantity: ${item.quantity}`}
+                    sx={{ mr: 2 }}
+                  />
+                  <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                    ${(item.total_price * item.quantity).toFixed(2)}
+                  </Typography>
+                </ListItem>
+                {index < cartData.items.length - 1 && <Divider />}
+              </React.Fragment>
+            ))}
+          </List>
+        </Paper>
+
+        {/* Summary Section */}
+        <Stack spacing={2}>
+          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+            <Typography variant="body2" color="text.secondary">
+              Subtotal
             </Typography>
-          </ListItem>
-        ))}
-      </List>
-    </React.Fragment>
+            <Typography variant="body2">${subtotal.toFixed(2)}</Typography>
+          </Box>
+
+          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+            <Typography variant="body2" color="text.secondary">
+              Shipping
+            </Typography>
+            <Typography variant="body2">${calculateShipping()}</Typography>
+          </Box>
+
+          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+            <Typography variant="body2" color="text.secondary">
+              Tax
+            </Typography>
+            <Typography variant="body2">${calculateTax()}</Typography>
+          </Box>
+
+          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+            <Typography variant="body2" color="text.secondary">
+              Discount
+            </Typography>
+            <Typography variant="body2" sx={{ color: "success.main" }}>
+              -$0.00
+            </Typography>
+          </Box>
+
+          <Divider sx={{ my: 1 }} />
+
+          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+            <Typography variant="h6">Total</Typography>
+            <Typography variant="h6" color="primary">
+              ${totalPrice}
+            </Typography>
+          </Box>
+        </Stack>
+      </CardContent>
+    </Card>
   );
 }
 
 export default Info;
+
+

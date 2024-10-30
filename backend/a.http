@@ -14,3 +14,32 @@ Content-Type: application/json
 GET http://localhost:5001/api/categories/toys
 Content-Type: application/json
 
+###GET
+GET http://localhost:5001/api/customers/1
+Content-Type: application/json
+
+###GET
+GET http://localhost:5001/api/customers/1/addresses
+Content-Type: application/json
+
+###GET
+GET http://localhost:5001/api/customers/11/payment
+Content-Type: application/json
+
+### GET
+GET http://localhost:5001/api/orders/1/customer
+Content-Type: application/json
+
+
+
+
+### POST
+POST http://localhost:5001/api/customers/2/update
+Content-Type: application/json
+
+{
+  "phone_number": "0711234509"
+  "first_name": "Jane"
+  "last_name": "James"
+  "email_address": "ddkjhlp@gmail.com"
+}

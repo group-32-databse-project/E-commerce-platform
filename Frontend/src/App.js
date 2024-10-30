@@ -7,22 +7,25 @@ import HomePage from "./pages/Dashboard/home.jsx";
 import SignIn from "./pages/sign/sign-in/SignIn.jsx";
 import SignUp from "./pages/sign/sign-up/signup.jsx";
 import Cart from "./pages/cart/cart.jsx";
-import About from "./pages/about/about.jsx"
+import About from "./pages/about/about.jsx";
 import Contact from "./pages/contact/contact.jsx";
 import Notification from "./pages/notifications/notification.js";
 import Help from "./pages/help/help.js";
 import NotFound from "./pages/notFound/NotFound.jsx";
 import ProductPage from "./pages/product/product.jsx";
 import Profile from "./pages/profile/profile.js";
-
 import Category from "./pages/category/catagory.js";
+import Loading from "./pages/loading/loading.js";
+import Wishlist from "./pages/Wishlist";
+import OurProduct from "./components/OurProduct";
+import PrivateRoute from "./components/PrivateRoute";
+
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/product/:productId" element={<ProductPage />} />
-       
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
@@ -33,6 +36,12 @@ function App() {
         <Route path="/help" element={<Help />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/category/:categoryId" element={<Category />} />
+        <Route path="/loading" element={<Loading />} />
+        {/* Remove the Favorites and WishlistProductList routes */}
+        {/* <Route path="/favorites" element={<FavoritesPage />} />
+        <Route path="/wishlist-products" element={<PrivateRoute><WishlistProductList /></PrivateRoute>} /> */}
+        {/* Consolidate Wishlist to a single route */}
+        <Route path="/wishlist" element={<PrivateRoute><Wishlist /></PrivateRoute>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
