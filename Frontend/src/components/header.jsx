@@ -461,90 +461,105 @@ const Header = () => {
               >
                 <img src={logo} alt="c-Store Logo" style={{ height: 40 }} />
               </Box>
-    
+
               {/* Search Bar */}
               {!isMobile && (
                 <Search>
-                <SearchIconWrapper>
-                  <SearchIcon />
-                </SearchIconWrapper>
-                <StyledInputBase
-                  placeholder="Search…"
-                  inputProps={{ "aria-label": "search" }}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                {searchResults.length > 0 && (
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      top: '100%',
-                      left: 0,
-                      right: 0,
-                      backgroundColor: '#A0D6DE',
-                      boxShadow: 3,
-                      zIndex: 10,
-                      borderRadius: 10,
-                      overflow: 'hidden',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    <Grid container spacing={2} sx={{ padding: 2 }}>
-                      {searchResults.map((item) => (
-                        <Grid item xs={12} key={item.product_id}>
-                         <Box
-                        sx={{ padding: 1, borderBottom: '1px solid #e0e0e0', cursor: 'pointer' }}
-                        onClick={() => navigate(`/product/${item.product_id}`)} // Navigate to the corresponding webpage
-                      >
-                            {item.product_name}
-                          </Box>
-                        </Grid>
-                      ))}
-                    </Grid>
-                  </Box>
-                )}
-              </Search>
-              )}
-    
-                      {!isMobile && (
-                      <FormControl variant="outlined" size="small" sx={{ minWidth: 160, ml: 2 }}>
-                        <Select
-                        value={category}
-                        onChange={(e) => {
-                          setCategory(e.target.value);
-                          navigate(`/${e.target.value.toLowerCase().replace(/\s+/g, '-')}`);
-                        }}
-                        displayEmpty
-                        sx={{
-                          bgcolor: alpha(theme.palette.grey[200], 1),
-                          color: "#333333",
-                          "& .MuiSvgIcon-root": { color: "#333333" },
-                          "&:hover": {
-                          bgcolor: alpha(theme.palette.grey[300], 1),
-                          },
-                          borderRadius: 1,
-                        }}
-                        IconComponent={ExpandMoreIcon}
-                        >
-                        <MenuItem value="All Categories">All Categories</MenuItem>
-                        {categories.map((cat) => (
-                          <MenuItem key={cat.name} value={cat.name}>
-                          {cat.name}
-                          </MenuItem>
+                  <SearchIconWrapper>
+                    <SearchIcon />
+                  </SearchIconWrapper>
+                  <StyledInputBase
+                    placeholder="Search…"
+                    inputProps={{ "aria-label": "search" }}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                  {searchResults.length > 0 && (
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: "100%",
+                        left: 0,
+                        right: 0,
+                        backgroundColor: "#A0D6DE",
+                        boxShadow: 3,
+                        zIndex: 10,
+                        borderRadius: 10,
+                        overflow: "hidden",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <Grid container spacing={2} sx={{ padding: 2 }}>
+                        {searchResults.map((item) => (
+                          <Grid item xs={12} key={item.product_id}>
+                            <Box
+                              sx={{
+                                padding: 1,
+                                borderBottom: "1px solid #e0e0e0",
+                                cursor: "pointer",
+                              }}
+                              onClick={() =>
+                                navigate(`/product/${item.product_id}`)
+                              } // Navigate to the corresponding webpage
+                            >
+                              {item.product_name}
+                            </Box>
+                          </Grid>
                         ))}
-                        </Select>
-                      </FormControl>
-                      )}
-                
-                      {/* Spacer */}
+                      </Grid>
+                    </Box>
+                  )}
+                </Search>
+              )}
+
+              {!isMobile && (
+                <FormControl
+                  variant="outlined"
+                  size="small"
+                  sx={{ minWidth: 160, ml: 2 }}
+                >
+                  <Select
+                    value={category}
+                    onChange={(e) => {
+                      setCategory(e.target.value);
+                      navigate(
+                        `/${e.target.value.toLowerCase().replace(/\s+/g, "-")}`
+                      );
+                    }}
+                    displayEmpty
+                    sx={{
+                      bgcolor: alpha(theme.palette.grey[200], 1),
+                      color: "#333333",
+                      "& .MuiSvgIcon-root": { color: "#333333" },
+                      "&:hover": {
+                        bgcolor: alpha(theme.palette.grey[300], 1),
+                      },
+                      borderRadius: 1,
+                    }}
+                    IconComponent={ExpandMoreIcon}
+                  >
+                    <MenuItem value="All Categories">All Categories</MenuItem>
+                    {categories.map((cat) => (
+                      <MenuItem key={cat.name} value={cat.name}>
+                        {cat.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              )}
+
+              {/* Spacer */}
               <Box sx={{ flexGrow: 1 }} />
-    
+
               {/* Icons and Actions */}
               {!isMobile && (
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   {/* Notification Icon */}
                   <Tooltip title="Notifications">
-                    <IconButton color="inherit" onClick={handleNotificationOpen}>
+                    <IconButton
+                      color="inherit"
+                      onClick={handleNotificationOpen}
+                    >
                       <Badge
                         badgeContent={
                           notifications.filter((notif) => !notif.read).length
@@ -563,8 +578,16 @@ const Header = () => {
                     transformOrigin={{ vertical: "top", horizontal: "right" }}
                     sx={{ mt: 1, minWidth: 350 }}
                   >
-                    <Box sx={{ px: 2, py: 1, backgroundColor: theme.palette.primary.light }}>
-                      <Typography variant="h6" color="#ffffff">Notifications</Typography>
+                    <Box
+                      sx={{
+                        px: 2,
+                        py: 1,
+                        backgroundColor: theme.palette.primary.light,
+                      }}
+                    >
+                      <Typography variant="h6" color="#ffffff">
+                        Notifications
+                      </Typography>
                     </Box>
                     <Divider />
                     <Box sx={{ maxHeight: 400, overflowY: "auto" }}>
@@ -596,11 +619,22 @@ const Header = () => {
                                 {getNotificationIcon(notif.type)}
                               </Avatar>
                               <Box sx={{ flexGrow: 1 }}>
-                                <Typography variant="body2" color="text.primary">
+                                <Typography
+                                  variant="body2"
+                                  color="text.primary"
+                                >
                                   {notif.message}
                                 </Typography>
-                                <Typography variant="caption" color="text.secondary">
-                                  {notif.created_at ? formatDistanceToNow(new Date(notif.created_at), { addSuffix: true }) : 'Unknown time'}
+                                <Typography
+                                  variant="caption"
+                                  color="text.secondary"
+                                >
+                                  {notif.created_at
+                                    ? formatDistanceToNow(
+                                        new Date(notif.created_at),
+                                        { addSuffix: true }
+                                      )
+                                    : "Unknown time"}
                                 </Typography>
                               </Box>
                               <IconButton
@@ -625,14 +659,17 @@ const Header = () => {
                     </Box>
                     <Divider />
                     <Box sx={{ px: 2, py: 1, textAlign: "center" }}>
-                      <Link to="/notifications" style={{ textDecoration: "none" }}>
+                      <Link
+                        to="/notifications"
+                        style={{ textDecoration: "none" }}
+                      >
                         <Typography variant="body2" color="primary">
                           View All
                         </Typography>
                       </Link>
                     </Box>
                   </Menu>
-    
+
                   {/* Separate Button: Help */}
                   <Tooltip title="Help & Support">
                     <IconButton
@@ -644,7 +681,7 @@ const Header = () => {
                       <HelpOutlineIcon sx={{ color: "#333333" }} />
                     </IconButton>
                   </Tooltip>
-    
+
                   {/* Authentication Buttons */}
                   {isLoggedIn ? (
                     <>
@@ -653,7 +690,9 @@ const Header = () => {
                           onClick={handleProfileMenuOpen}
                           sx={{ p: 0, ml: 1 }}
                         >
-                          <PersonIcon sx={{ color: "#333333", fontSize: "1.5rem" }} />
+                          <PersonIcon
+                            sx={{ color: "#333333", fontSize: "1.5rem" }}
+                          />
                         </IconButton>
                       </Tooltip>
                       <Menu
@@ -705,20 +744,23 @@ const Header = () => {
                             borderRadius: 1,
                           }}
                         >
-                          <Typography variant="body2" sx={{ color: "#ffffff", px: 1 }}>
+                          <Typography
+                            variant="body2"
+                            sx={{ color: "#ffffff", px: 1 }}
+                          >
                             Register
                           </Typography>
                         </IconButton>
                       </Tooltip>
                     </>
                   )}
-    
+
                   {/* Other Icons */}
                   <Tooltip title="Cart">
                     <IconButton
                       color="inherit"
                       component={Link}
-                      to="/api/cart"
+                      to="/cart"
                       sx={{ ml: 1 }}
                     >
                       <ShoppingCartIcon sx={{ color: "#333333" }} />
@@ -738,7 +780,7 @@ const Header = () => {
                   </Tooltip>
                 </Box>
               )}
-    
+
               {/* Mobile Menu Icon */}
               {isMobile && (
                 <IconButton
@@ -752,7 +794,7 @@ const Header = () => {
                 </IconButton>
               )}
             </Toolbar>
-    
+
             {/* Search Bar for Mobile */}
             {isMobile && (
               <Toolbar disableGutters>
@@ -769,7 +811,7 @@ const Header = () => {
                 </Search>
               </Toolbar>
             )}
-    
+
             {/* Navigation Menu */}
             {!isMobile && (
               <Toolbar
@@ -786,9 +828,13 @@ const Header = () => {
                   item.hasDropdown ? (
                     <Box key={item.name} sx={{ position: "relative" }}>
                       <NavButton
-                        aria-controls={openNavMenu === item.name ? "nav-menu" : undefined}
+                        aria-controls={
+                          openNavMenu === item.name ? "nav-menu" : undefined
+                        }
                         aria-haspopup="true"
-                        aria-expanded={openNavMenu === item.name ? "true" : undefined}
+                        aria-expanded={
+                          openNavMenu === item.name ? "true" : undefined
+                        }
                         onClick={(e) => handleNavMenuOpen(e, item.name)}
                         onMouseLeave={handleNavMenuClose}
                         sx={{ paddingY: 1, px: 2 }}
@@ -841,27 +887,50 @@ const Header = () => {
                 )}
               </Toolbar>
             )}
-            
           </Container>
           <Box sx={{ flexGrow: 1 }} />
-          <Box sx={{ display: { xs: "none", md: "flex" }, fontFamily: "fantasy", color:"black" }}>
-            {renderDropdown('Toys', toyset.map((toy) => ({
-              name: toy.category_name,
-              id:toy.category_id,
-              link: `/category/${toy.category_id}`,
-            })), toysDropdownOpen, setToysDropdownOpen)}
-            {renderDropdown('Electronics', elecset.map((elec) => ({
-              name: elec.category_name,
-              id:elec.category_id,
-              link: `/category/${elec.category_id}`,
-            })), electronicsDropdownOpen, setElectronicsDropdownOpen)}
-          </Box>        
-    
+          <Box
+            sx={{
+              display: { xs: "none", md: "flex" },
+              fontFamily: "fantasy",
+              color: "black",
+            }}
+          >
+            {renderDropdown(
+              "Toys",
+              toyset.map((toy) => ({
+                name: toy.category_name,
+                id: toy.category_id,
+                link: `/category/${toy.category_id}`,
+              })),
+              toysDropdownOpen,
+              setToysDropdownOpen
+            )}
+            {renderDropdown(
+              "Electronics",
+              elecset.map((elec) => ({
+                name: elec.category_name,
+                id: elec.category_id,
+                link: `/category/${elec.category_id}`,
+              })),
+              electronicsDropdownOpen,
+              setElectronicsDropdownOpen
+            )}
+          </Box>
+
           {/* Mobile Drawer */}
-          <Drawer anchor="right" open={drawerOpen} onClose={toggleDrawer(false)}>
+          <Drawer
+            anchor="right"
+            open={drawerOpen}
+            onClose={toggleDrawer(false)}
+          >
             <Box sx={{ width: 250 }}>
               <DrawerHeader>
-                <Box component={Link} to="/" sx={{ display: "flex", alignItems: "center" }}>
+                <Box
+                  component={Link}
+                  to="/"
+                  sx={{ display: "flex", alignItems: "center" }}
+                >
                   <img src={logo} alt="c-Store Logo" style={{ height: 40 }} />
                 </Box>
                 <IconButton onClick={toggleDrawer(false)}>
@@ -872,13 +941,25 @@ const Header = () => {
               <List>
                 {isLoggedIn ? (
                   <>
-                    <ListItem button component={Link} to="/profile" onClick={toggleDrawer(false)}>
+                    <ListItem
+                      button
+                      component={Link}
+                      onClick={() => {
+                        toggleDrawer(false);
+                        navigate("/profile");
+                      }}
+                    >
                       <ListItemIcon>
                         <PersonIcon />
                       </ListItemIcon>
                       <ListItemText primary="My Account" />
                     </ListItem>
-                    <ListItem button component={Link} to="/orders" onClick={toggleDrawer(false)}>
+                    <ListItem
+                      button
+                      component={Link}
+                      to="/orders"
+                      onClick={toggleDrawer(false)}
+                    >
                       <ListItemIcon>
                         <ShoppingCartIcon />
                       </ListItemIcon>
@@ -893,13 +974,23 @@ const Header = () => {
                   </>
                 ) : (
                   <>
-                    <ListItem button component={Link} to="/signin" onClick={toggleDrawer(false)}>
+                    <ListItem
+                      button
+                      component={Link}
+                      to="/signin"
+                      onClick={toggleDrawer(false)}
+                    >
                       <ListItemIcon>
                         <PersonIcon />
                       </ListItemIcon>
                       <ListItemText primary="Sign In" />
                     </ListItem>
-                    <ListItem button component={Link} to="/signup" onClick={toggleDrawer(false)}>
+                    <ListItem
+                      button
+                      component={Link}
+                      to="/signup"
+                      onClick={toggleDrawer(false)}
+                    >
                       <ListItemIcon>
                         <PersonAddIcon />
                       </ListItemIcon>
@@ -908,26 +999,44 @@ const Header = () => {
                   </>
                 )}
                 <Divider />
-               
               </List>
               <Divider />
               <List>
-                <ListItem button component={Link} to="/notifications" onClick={toggleDrawer(false)}>
+                <ListItem
+                  button
+                  component={Link}
+                  to="/notifications"
+                  onClick={toggleDrawer(false)}
+                >
                   <ListItemIcon>
                     <NotificationsIcon />
                   </ListItemIcon>
                   <ListItemText primary="Notifications" />
-                  <Badge badgeContent={notifications.length} color="primary" sx={{ ml: 1 }}>
+                  <Badge
+                    badgeContent={notifications.length}
+                    color="primary"
+                    sx={{ ml: 1 }}
+                  >
                     {/* Optional: Add a dot or number */}
                   </Badge>
                 </ListItem>
-                <ListItem button component={Link} to="/cart" onClick={toggleDrawer(false)}>
+                <ListItem
+                  button
+                  component={Link}
+                  to="/cart"
+                  onClick={toggleDrawer(false)}
+                >
                   <ListItemIcon>
                     <ShoppingCartIcon />
                   </ListItemIcon>
                   <ListItemText primary="Cart" />
                 </ListItem>
-                <ListItem button component={Link} to="/help" onClick={toggleDrawer(false)}>
+                <ListItem
+                  button
+                  component={Link}
+                  to="/help"
+                  onClick={toggleDrawer(false)}
+                >
                   <ListItemIcon>
                     <HelpOutlineIcon />
                   </ListItemIcon>
@@ -936,9 +1045,8 @@ const Header = () => {
               </List>
             </Box>
           </Drawer>
-    
+
           {/* Login Dialog */}
-          
         </AppBar>
       );
 };

@@ -390,15 +390,18 @@ const OurProduct = ({ filters }) => {
     fetchWishlist();
   }, []);
 
-  const handleWishlistToggle = async (productId) => {
-    const isInWishlist = wishlist.some(item => item.product_id === productId);
+  const handleWishlistToggle = async (productId, event) => {
+    event.stopPropagation(); // Prevent card navigation
+    const isInWishlist = wishlist.some((item) => item.product_id === productId);
     try {
       if (isInWishlist) {
         await removeFromWishlist(productId);
-        setWishlist(prev => prev.filter(item => item.product_id !== productId));
+        setWishlist((prev) =>
+          prev.filter((item) => item.product_id !== productId)
+        );
       } else {
         await addToWishlist(productId);
-        setWishlist(prev => [...prev, { product_id: productId }]);
+        setWishlist((prev) => [...prev, { product_id: productId }]);
       }
     } catch (error) {
       console.error("Error toggling wishlist:", error);

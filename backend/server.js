@@ -47,7 +47,7 @@ app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/filters', filterRoutes);
 app.use('/api/banner', bannerRoutes);
 app.use("/api/admin", adminRoutes); // New Admin Routes
-app.use(`/api/payment`, paymentRoutes);
+app.use(`/api/payments`, paymentRoutes);
 app.use("/api/test", testRoutes);
 
 

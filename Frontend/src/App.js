@@ -19,7 +19,7 @@ import Wishlist from "./pages/Wishlist";
 import OurProduct from "./components/OurProduct";
 import PrivateRoute from "./components/PrivateRoute";
 import OrderConfirmation from "./pages/orderConfirmation/OrderConfirmation";
-
+import Profile from "./pages/profile/profile.js";
 function App() {
   return (
     <Router>
@@ -36,13 +36,21 @@ function App() {
         <Route path="/help" element={<Help />} />
         <Route path="/loading" element={<Loading />} />
         <Route path="/product/:productId" element={<ProductPage />} />
+        <Route path="/profile" element={<Profile />} />
 
         <Route path="/category/:categoryId" element={<Category />} />
         {/* Remove the Favorites and WishlistProductList routes */}
         {/* <Route path="/favorites" element={<FavoritesPage />} />
         <Route path="/wishlist-products" element={<PrivateRoute><WishlistProductList /></PrivateRoute>} /> */}
         {/* Consolidate Wishlist to a single route */}
-        <Route path="/wishlist" element={<PrivateRoute><Wishlist /></PrivateRoute>} />
+        <Route
+          path="/wishlist"
+          element={
+            <PrivateRoute>
+              <Wishlist />
+            </PrivateRoute>
+          }
+        />
         <Route path="*" element={<NotFound />} />
         <Route
           path="/orderConfirmation/:orderId"

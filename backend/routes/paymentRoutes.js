@@ -11,6 +11,7 @@ router.post("/card/save", paymentController.saveCard);
 
 
 //api/payments/card/${customerId}
+//api/payments/card/11
 router.get("/card/:id", paymentController.getCardsByCustomerId);
 
 module.exports = router;
