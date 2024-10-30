@@ -27,6 +27,17 @@ DROP TABLE IF EXISTS `category`;
 DROP TABLE IF EXISTS `shopping_cart`;
 DROP TABLE IF EXISTS `customer`;
 drop TABLE IF EXISTS `cards`;
+DROP TABLE IF EXISTS `admin`;
+
+
+CREATE TABLE admin (
+    admin_id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 
 
 -- Re-create all the tables with indexes
@@ -64,10 +75,14 @@ CREATE TABLE cards (
 );
 
 CREATE TABLE `shopping_cart` (
-  `shopping_cart_id` int auto_increment,
-  `customer_id` int,
-  `total_price` decimal(10, 2) NOT NULL DEFAULT 0.00,
-  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `shopping_cart_id` INT AUTO_INCREMENT,
+  `customer_id` INT,
+  `subtotal` DECIMAL(10, 2) DEFAULT 0.00,
+  `shipping` DECIMAL(10, 2) DEFAULT 0.00,
+  `tax` DECIMAL(10, 2) DEFAULT 0.00,
+  `discount` DECIMAL(10, 2) DEFAULT 0.00,
+  `total_price` DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`shopping_cart_id`),
   FOREIGN KEY (`customer_id`) REFERENCES `customer`(`customer_id`)
@@ -79,7 +94,7 @@ CREATE TABLE `shopping_cart` (
 
 
 CREATE TABLE `category` (
-  `category_id` int,
+  `category_id` int AUTO_INCREMENT,
   `category_name` varchar(100),
   `parent_category_id` int,
   `category_image` varchar(255),
@@ -88,7 +103,7 @@ CREATE TABLE `category` (
 );
 
 CREATE TABLE `product` (
-  `product_id` int,
+  `product_id` int AUTO_INCREMENT,
   `category_id` int,
   `product_name` varchar(255),
   `description` text(65535),
@@ -163,6 +178,7 @@ CREATE TABLE `shop_order` (
   `subtotal` decimal(10, 2) NOT NULL DEFAULT 0.00,
   `shipping` decimal(10, 2) NOT NULL DEFAULT 0.00,
   `tax` decimal(10, 2) NOT NULL DEFAULT 0.00,
+  `discount` decimal(10, 2) DEFAULT 0.00, 
   `shipping_date` datetime NULL,
   `order_status` enum('pending', 'shipped', 'delivered', 'canceled'),
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -250,19 +266,115 @@ CREATE TABLE `customer_address` (
 
 
 
+--------------- admin --------
 
+DROP VIEW IF EXISTS report;
+CREATE VIEW report AS 
+SELECT order_date, payment_method.name AS payment_method_name, delivery_method, total_order_price, subtotal, shipping, tax, shipping_date, order_status, order_item.quantity AS quantity
+FROM (shop_order INNER JOIN payment_method ON shop_order.payment_method_id = payment_method.payment_method_id) 
+	INNER JOIN order_item ON shop_order.order_id = order_item.order_item_id;
+DELIMITER $$
 
-CREATE TABLE `notifications` (
-  `id` INT AUTO_INCREMENT,
-  `user_id` INT NOT NULL,
-  `order_id` INT NOT NULL,
-  `message` VARCHAR(255) NOT NULL,
-  `is_read` BOOLEAN DEFAULT FALSE,
-  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  FOREIGN KEY (`user_id`) REFERENCES `user`(`user_id`) ON DELETE CASCADE,
-  FOREIGN KEY (`order_id`) REFERENCES `shop_order`(`order_id`) ON DELETE CASCADE
-);
+DROP PROCEDURE IF EXISTS getReport;
+
+CREATE PROCEDURE getReport(
+    IN order_time_p ENUM("Monthly", "Quartly", "Half Year", "Annual"),
+    IN payment_method_p VARCHAR(200),
+    IN delivery_method_p ENUM('standard', 'express', 'overnight'),
+    IN total_order_price_min_p DECIMAL(10,2),
+    IN total_order_price_max_p DECIMAL(10,2),
+    IN order_status_p ENUM('pending', 'shipped', 'delivered', 'canceled'),
+    IN quantity_p INT
+)
+BEGIN
+    -- Set default values if min/max price is NULL
+    IF total_order_price_min_p IS NULL THEN
+        SET total_order_price_min_p = 0;
+    END IF;
+    IF total_order_price_max_p IS NULL THEN
+        SET total_order_price_max_p = 99999999.99;
+    END IF;
+
+    -- Monthly Report
+    IF order_time_p IS NULL OR order_time_p = "Monthly" THEN
+        SELECT 
+            DATE_FORMAT(order_date, '%Y-%m') AS report_month,
+            AVG(total_order_price) AS avg_total_price,
+            AVG(subtotal) AS avg_subtotal,
+            AVG(shipping) AS avg_shipping,
+            AVG(tax) AS avg_tax,
+            AVG(quantity) AS avg_quantity
+        FROM report
+        WHERE 
+            (payment_method_p IS NULL OR payment_method_p = report.payment_method_name)
+            AND (delivery_method_p IS NULL OR delivery_method_p = report.delivery_method)
+            AND (report.total_order_price BETWEEN total_order_price_min_p AND total_order_price_max_p)
+            AND (order_status_p IS NULL OR order_status_p = report.order_status)
+            AND (quantity_p IS NULL OR quantity_p = report.quantity)
+        GROUP BY DATE_FORMAT(order_date, '%Y-%m')
+        ORDER BY report_month DESC;
+
+    -- Quarterly Report
+    ELSEIF order_time_p = "Quartly" THEN
+        SELECT 
+            CONCAT(YEAR(order_date), '-Q', QUARTER(order_date)) AS report_quarter,
+            AVG(total_order_price) AS avg_total_price,
+            AVG(subtotal) AS avg_subtotal,
+            AVG(shipping) AS avg_shipping,
+            AVG(tax) AS avg_tax,
+            AVG(quantity) AS avg_quantity
+        FROM report
+        WHERE 
+            (payment_method_p IS NULL OR payment_method_p = report.payment_method_name)
+            AND (delivery_method_p IS NULL OR delivery_method_p = report.delivery_method)
+            AND (report.total_order_price BETWEEN total_order_price_min_p AND total_order_price_max_p)
+            AND (order_status_p IS NULL OR order_status_p = report.order_status)
+            AND (quantity_p IS NULL OR quantity_p = report.quantity)
+        GROUP BY CONCAT(YEAR(order_date), '-Q', QUARTER(order_date))
+        ORDER BY report_quarter DESC;
+
+    -- Half-Year Report
+    ELSEIF order_time_p = "Half Year" THEN
+        SELECT 
+            CONCAT(YEAR(order_date), '-H', IF(MONTH(order_date) <= 6, 1, 2)) AS report_half_year,
+            AVG(total_order_price) AS avg_total_price,
+            AVG(subtotal) AS avg_subtotal,
+            AVG(shipping) AS avg_shipping,
+            AVG(tax) AS avg_tax,
+            AVG(quantity) AS avg_quantity
+        FROM report
+        WHERE 
+            (payment_method_p IS NULL OR payment_method_p = report.payment_method_name)
+            AND (delivery_method_p IS NULL OR delivery_method_p = report.delivery_method)
+            AND (report.total_order_price BETWEEN total_order_price_min_p AND total_order_price_max_p)
+            AND (order_status_p IS NULL OR order_status_p = report.order_status)
+            AND (quantity_p IS NULL OR quantity_p = report.quantity)
+        GROUP BY CONCAT(YEAR(order_date), '-H', IF(MONTH(order_date) <= 6, 1, 2))
+        ORDER BY report_half_year DESC;
+
+    -- Annual Report
+    ELSEIF order_time_p = "Annual" THEN
+        SELECT 
+            YEAR(order_date) AS report_year,
+            AVG(total_order_price) AS avg_total_price,
+            AVG(subtotal) AS avg_subtotal,
+            AVG(shipping) AS avg_shipping,
+            AVG(tax) AS avg_tax,
+            AVG(quantity) AS avg_quantity
+        FROM report
+        WHERE 
+            (payment_method_p IS NULL OR payment_method_p = report.payment_method_name)
+            AND (delivery_method_p IS NULL OR delivery_method_p = report.delivery_method)
+            AND (report.total_order_price BETWEEN total_order_price_min_p AND total_order_price_max_p)
+            AND (order_status_p IS NULL OR order_status_p = report.order_status)
+            AND (quantity_p IS NULL OR quantity_p = report.quantity)
+        GROUP BY YEAR(order_date)
+        ORDER BY report_year DESC;
+    END IF;
+END $$
+
+DELIMITER ;
+------------------- admin -------------
 
 DELIMITER $$
 -- Trigger to Reduce Inventory Stock when an Order is Made

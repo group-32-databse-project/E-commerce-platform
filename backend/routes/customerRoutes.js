@@ -30,7 +30,7 @@ router.post("/login", customerController.loginCustomer);
 router.get("/:id/addresses", customerController.getAddressesByCustomerId);
 
 // POST /api/customers/:id/payment
-router.get("/:id/payment", customerController.getPaymentDeatails);
+router.get("/:id/payment", customerController.getPaymentDetails);
 
 // Add more routes as needed (update, delete, etc.)
 

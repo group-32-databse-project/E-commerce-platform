@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect } from 'react'; // Correct import
+
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import MuiCard from '@mui/material/Card';
@@ -13,10 +13,7 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import RadioGroup from '@mui/material/RadioGroup';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { jwtDecode } from 'jwt-decode'; // Use named import
-
-
-
+import { useEffect, useState, useCallback } from "react";
 import { fetchPaymentData } from "../services/paymentstypes";
 import { styled } from "@mui/material/styles";
 
@@ -115,9 +112,9 @@ const FormGrid = styled("div")(() => ({
 
 export default function PaymentForm() {
   const [paymentType, setPaymentType] = React.useState("creditCard");
-  // const [cardNumber, setCardNumber] = React.useState("");
-  // const [cvv, setCvv] = React.useState("");
-  // const [expirationDate, setExpirationDate] = React.useState("");
+  const [cardNumber, setCardNumber] = React.useState("");
+  const [cvv, setCvv] = React.useState("");
+  const [expirationDate, setExpirationDate] = React.useState("");
   const [paymentTypes, setPaymentTypes] = React.useState([]); // State for payment types
 
   // State for Modal
@@ -164,9 +161,6 @@ export default function PaymentForm() {
 
     getPaymentTypes();
   }, []);
-  const [cardNumber, setCardNumber] = useState('');
-  const [cvv, setCvv] = useState('');
-  const [expirationDate, setExpirationDate] = useState('');
 
   const handlePaymentTypeChange = (event) => {
     setPaymentType(event.target.value);
@@ -570,7 +564,7 @@ export default function PaymentForm() {
                   placeholder="0000 0000 0000 0000"
                   required
                   size="small"
-                  value={customerData.card_number}
+                  value={cardNumber}
                   onChange={handleCardNumberChange}
                 />
               </FormGrid>
@@ -614,7 +608,7 @@ export default function PaymentForm() {
                   placeholder="MM/YY"
                   required
                   size="small"
-                  value={customerData.expiry_date}
+                  value={expirationDate}
                   onChange={handleExpirationDateChange}
                 />
               </FormGrid>
