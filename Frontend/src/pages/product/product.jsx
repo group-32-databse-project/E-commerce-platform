@@ -20,7 +20,6 @@ import {
   createTheme,
   styled,
   Container,
-  CircularProgress,
 } from "@mui/material";
 import {
   FavoriteBorder,

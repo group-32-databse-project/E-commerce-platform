@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import styled from 'styled-components';
-import { FaUserCircle } from 'react-icons/fa';
+import styled from "styled-components";
 import { jwtDecode } from 'jwt-decode'; // Use named import
 
 const CustomerDeatailForm = () => {

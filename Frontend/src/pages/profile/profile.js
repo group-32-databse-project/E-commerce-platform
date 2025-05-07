@@ -10,48 +10,49 @@ import MyOrders from '../../components/Myorders';
 import { jwtDecode } from 'jwt-decode'; // Use named import
 
 const Profile = () => {
-  const [selectedMenuItem, setSelectedMenuItem] = useState('Personal Information');
+  const [selectedMenuItem, setSelectedMenuItem] = useState(
+    "Personal Information"
+  );
   const [customerName, setCustomerName] = useState();
 
   const handleMenuItemClick = (menuItem) => {
     setSelectedMenuItem(menuItem);
   };
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
   let id = null;
 
   if (token) {
     try {
       const decodedToken = jwtDecode(token); // Use named import
       id = decodedToken.customerId; // Assuming the token contains an 'id' field
-     console.log('Decoded id:', id);
+      console.log("Decoded id:", id);
     } catch (error) {
-      console.error('Error decoding token:', error);
+      console.error("Error decoding token:", error);
     }
   }
 
   useEffect(() => {
     // Fetch data from backend
     fetch(`/api/customers/${id}`)
-      .then(response => response.json())
-      .then(data => {
-        setCustomerName(data.first_name+" "+data.last_name);
-        console.log('Profile data:', customerName);
+      .then((response) => response.json())
+      .then((data) => {
+        setCustomerName(data.first_name + " " + data.last_name);
+        console.log("Profile data:", customerName);
       })
-      .catch(error => {
-        console.error('Error fetching profile data:', error);
+      .catch((error) => {
+        console.error("Error fetching profile data:", error);
       });
-  }, [id]);
-
+  }, [customerName]);
 
   const renderContent = () => {
     switch (selectedMenuItem) {
-      case 'My Orders':
+      case "My Orders":
         return <MyOrders />;
-      case 'Personal Information':
+      case "Personal Information":
         return <CustomerDeatailForm />;
-      case 'Address':
+      case "Address":
         return <AddressForm />;
-      case 'Payment Methods':
+      case "Payment Methods":
         return <PaymentForm />;
       default:
         return <CustomerDeatailForm />;
@@ -124,9 +125,6 @@ const Name = styled.h2`
   margin: 10px 0 5px;
 `;
 
-const Balance = styled.p`
-  color: #888;
-`;
 
 const Menu = styled.ul`
   list-style: none;

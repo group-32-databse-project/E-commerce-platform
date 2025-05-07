@@ -16,7 +16,6 @@ import ProductPage from "./pages/product/product.jsx";
 import Category from "./pages/category/catagory.js";
 import Loading from "./pages/loading/loading.js";
 import Wishlist from "./pages/Wishlist";
-import OurProduct from "./components/OurProduct";
 import PrivateRoute from "./components/PrivateRoute";
 import OrderConfirmation from "./pages/orderConfirmation/OrderConfirmation";
 import Profile from "./pages/profile/profile.js";

@@ -19,7 +19,6 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import FavoriteIcon from "@mui/icons-material/Favorite";
 import StarIcon from "@mui/icons-material/Star";
 import StarHalfIcon from "@mui/icons-material/StarHalf";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
@@ -78,10 +77,6 @@ const ProductHeading = styled(Typography)(({ theme }) => ({
     borderRadius: "2px",
   },
 }));
-
-const onAddToWishlist = (variant_id) => {
-  console.log(`Added product ${variant_id} to wishlist`);
-};
 
 // Refined StyledCard with improved shadows and transitions
 const StyledCard = styled(Card)(({ theme }) => ({

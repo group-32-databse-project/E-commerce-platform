@@ -11,55 +11,44 @@ import {
   Box,
   Chip,
   IconButton,
-  Tooltip,
   CircularProgress,
-} from '@mui/material';
-import { styled } from '@mui/material/styles';
-import { 
-  Timer, 
-  LocalOffer,
-  Favorite,
-  FavoriteBorder
-} from '@mui/icons-material';
-import Header from '../../components/header';
-import Footer from '../../components/footer';
-import axios from 'axios';
-import { addToWishlist, removeFromWishlist, getWishlist } from '../../services/wishlist';
-import { useNavigate } from 'react-router-dom';
+} from "@mui/material";
+import { styled } from "@mui/material/styles";
+import { LocalOffer, Favorite, FavoriteBorder } from "@mui/icons-material";
+import Header from "../../components/header";
+import Footer from "../../components/footer";
+import axios from "axios";
+import {
+  addToWishlist,
+  removeFromWishlist,
+  getWishlist,
+} from "../../services/wishlist";
+import { useNavigate } from "react-router-dom";
 
 // Reusing styled card component pattern from your OurProduct component
 const StyledCard = styled(Card)(({ theme }) => ({
-  height: '100%',
-  display: 'flex',
-  flexDirection: 'column',
+  height: "100%",
+  display: "flex",
+  flexDirection: "column",
   borderRadius: theme.spacing(2),
-  border: 'none',
-  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-  transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-  backgroundColor: '#ffffff',
-  '&:hover': {
-    transform: 'translateY(-8px)',
-    boxShadow: '0 12px 24px rgba(0, 0, 0, 0.2)',
+  border: "none",
+  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+  transition: "transform 0.3s ease, box-shadow 0.3s ease",
+  backgroundColor: "#ffffff",
+  "&:hover": {
+    transform: "translateY(-8px)",
+    boxShadow: "0 12px 24px rgba(0, 0, 0, 0.2)",
   },
-  position: 'relative',
+  position: "relative",
 }));
 
 const DiscountBadge = styled(Chip)(({ theme }) => ({
-  position: 'absolute',
+  position: "absolute",
   top: theme.spacing(2),
   left: theme.spacing(2),
   backgroundColor: theme.palette.error.main,
-  color: 'white',
-  fontWeight: 'bold',
-  zIndex: 2,
-}));
-
-const TimerChip = styled(Chip)(({ theme }) => ({
-  position: 'absolute',
-  top: theme.spacing(2),
-  right: theme.spacing(2),
-  backgroundColor: 'rgba(0, 0, 0, 0.7)',
-  color: 'white',
+  color: "white",
+  fontWeight: "bold",
   zIndex: 2,
 }));
 

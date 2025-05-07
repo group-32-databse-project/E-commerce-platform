@@ -219,7 +219,6 @@ const Header = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [toyset, setToyset] = useState([]);
   const [elecset, setElecset] = useState([]);
-  const [catlist, setCatlist] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [wishlistCount, setWishlistCount] = useState(0);
 
@@ -370,8 +369,6 @@ const Header = () => {
     fetchWishlistCount();
   }, []);
 
-  const categories = catlist.map((cat) => ({ name: cat.category_name }));
-
   const navigationLinks = [
     { name: "Home", link: "/" },
     { name: "Saved", link: "/saved" },
@@ -501,11 +498,6 @@ const Header = () => {
                 inputProps={{ "aria-label": "Select category" }}
               >
                 <MenuItem value="All Categories">All Categories</MenuItem>
-                {categories.map((cat) => (
-                  <MenuItem key={cat.name} value={cat.name}>
-                    {cat.name}
-                  </MenuItem>
-                ))}
               </Select>
             </FormControl>
           )}

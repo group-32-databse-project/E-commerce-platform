@@ -166,7 +166,7 @@ const Banner = () => {
     }, 7500); // Switch every 5 seconds
 
     return () => clearInterval(interval);
-  }, [banners.length]);
+  }, [banners]);
 
   return (
     <BannerContainer>

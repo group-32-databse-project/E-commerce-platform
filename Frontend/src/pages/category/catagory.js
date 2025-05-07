@@ -2,12 +2,10 @@ import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Header from "../../components/header";
 import CategoryList from "../../components/catagoryList";
-import Banner from "../Dashboard/Banner";
 
 import FilterSidebar from "../../components/FilterSidebar";
 
 import Footer from "../../components/footer"; // Update if necessary
-import OurProduct from "../../components/OurProduct";
 
 const Category = () => {
   const handleFilterChange = (filters) => {

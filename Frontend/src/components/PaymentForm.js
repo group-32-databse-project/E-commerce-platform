@@ -13,7 +13,7 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import RadioGroup from '@mui/material/RadioGroup';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { fetchPaymentData } from "../services/paymentstypes";
 import { styled } from "@mui/material/styles";
 
@@ -39,7 +39,6 @@ import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
 import FileUpload from "./FileUpload";
-
 
 // Alert component for Snackbar
 const AlertSnackbar = React.forwardRef(function Alert(props, ref) {
@@ -115,7 +114,6 @@ export default function PaymentForm() {
   const [cardNumber, setCardNumber] = React.useState("");
   const [cvv, setCvv] = React.useState("");
   const [expirationDate, setExpirationDate] = React.useState("");
-  const [paymentTypes, setPaymentTypes] = React.useState([]); // State for payment types
 
   // State for Modal
   const [openModal, setOpenModal] = useState(false);
@@ -133,27 +131,19 @@ export default function PaymentForm() {
 
   const [cardName, setCardName] = useState(""); // New state for card name
 
-  const [cartData, setCartData] = useState({});
-
   useEffect(() => {
     // Fetch payment data when the component mounts
     const getPaymentTypes = async () => {
       try {
         const data = await fetchPaymentData();
         console.log(data);
-        const additionalMethods = data.filter(
-          (item) => item.name !== "Credit Card" && item.name !== "Bank Transfer"
-        );
-        setPaymentTypes(data);
+
         // Separate main and additional payment methods
         const mainMethods = ["creditCard", "bankTransfer"];
         const additional = data.filter(
           (method) => !mainMethods.includes(method.name)
         );
         setAdditionalPaymentMethods(additional);
-
-        // Set cartData with all values
-        setCartData(data);
       } catch (error) {
         console.error("Error fetching payment types:", error);
       }
@@ -285,86 +275,6 @@ export default function PaymentForm() {
       return;
     }
     setSnackbar((prev) => ({ ...prev, open: false }));
-  };
-
-  const handleSaveCardData = async () => {
-    if (!saveCard) return;
-
-    // Basic validation
-    if (!cardName.trim()) {
-      setSnackbar({
-        open: true,
-        message: "Card name is required.",
-        severity: "error",
-      });
-      return;
-    }
-
-    if (!cardNumber || cardNumber.replace(/\s/g, "").length !== 16) {
-      setSnackbar({
-        open: true,
-        message: "A valid 16-digit card number is required.",
-        severity: "error",
-      });
-      return;
-    }
-
-    if (!expirationDate || !/^\d{2}\/\d{2}$/.test(expirationDate)) {
-      setSnackbar({
-        open: true,
-        message: "A valid expiration date (MM/YY) is required.",
-        severity: "error",
-      });
-      return;
-    }
-
-    if (!cvv || cvv.length !== 3) {
-      setSnackbar({
-        open: true,
-        message: "A valid 3-digit CVV is required.",
-        severity: "error",
-      });
-      return;
-    }
-
-    setIsSaving(true); // Start loading
-
-    try {
-      const lastFourDigits = cardNumber.replace(/\s/g, "").slice(-4);
-
-      const cardData = {
-        lastFourDigits: lastFourDigits,
-        cardName: cardName.trim(),
-        expirationDate: expirationDate,
-        // Only include non-sensitive data
-        // Do not include full card number or CVV
-      };
-
-      await saveCreditCard(cardData);
-      console.log("Card data saved successfully");
-
-      setSnackbar({
-        open: true,
-        message: "Card data saved successfully.",
-        severity: "success",
-      });
-
-      // Optionally, reset the form
-      setCardNumber("");
-      setCvv("");
-      setExpirationDate("");
-      setCardName("");
-      setSaveCard(false);
-    } catch (error) {
-      console.error("Error saving card data:", error);
-      setSnackbar({
-        open: true,
-        message: `Error saving card data: ${error.message}`,
-        severity: "error",
-      });
-    } finally {
-      setIsSaving(false); // Stop loading
-    }
   };
 
   // Handler for form submission

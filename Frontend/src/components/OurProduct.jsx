@@ -6,7 +6,6 @@ import {
   CardMedia,
   CardContent,
   Typography,
-  CardActions,
   Button,
   Snackbar,
   Alert,
@@ -16,21 +15,21 @@ import {
   Modal,
   Box,
   Tooltip,
-  Chip,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-// import FavoriteIcon from "@mui/icons-material/Favorite";
 import StarIcon from "@mui/icons-material/Star";
 import StarHalfIcon from "@mui/icons-material/StarHalf";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
-// import VisibilityIcon from "@mui/icons-material/Visibility";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import "../assets/styles/allcategory.css";
 import { keyframes } from "@mui/system";
 import { useNavigate } from "react-router-dom";
-import { addToWishlist, removeFromWishlist, getWishlist } from "../services/wishlist";
+import {
+  addToWishlist,
+  removeFromWishlist,
+  getWishlist,
+} from "../services/wishlist";
 import { Favorite, FavoriteBorder } from "@mui/icons-material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 
@@ -71,10 +70,6 @@ const ProductHeading = styled(Typography)(({ theme }) => ({
     borderRadius: "2px",
   },
 }));
-
-const onAddToWishlist = (variant_id) => {
-  console.log(`Added product ${variant_id} to wishlist`);
-};
 
 // Refined StyledCard with improved shadows and transitions
 const StyledCard = styled(Card)(({ theme }) => ({
@@ -122,15 +117,6 @@ const Price = styled(Typography)(({ theme }) => ({
   color: theme.palette.primary.main,
   marginTop: theme.spacing(1),
   fontSize: "1.1rem",
-}));
-
-// Actions section with horizontally aligned buttons for better accessibility
-const Actions = styled(CardActions)(({ theme }) => ({
-  display: "flex",
-  flexDirection: "row", // Set to row for horizontal alignment
-  justifyContent: "space-between",
-  padding: theme.spacing(2),
-  gap: theme.spacing(2), // Space between buttons
 }));
 
 // Rating component remains unchanged
@@ -237,27 +223,6 @@ const StyledButton = styled(Button)(({ theme, color }) => ({
 }));
 
 // ButtonContent and IconWrapper for consistent button layout
-const ButtonContent = styled("span")({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  gap: "8px",
-  position: "relative",
-  zIndex: 1,
-});
-
-const IconWrapper = styled("span")(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  backgroundColor: "rgba(255, 255, 255, 0.2)",
-  borderRadius: "50%",
-  padding: "6px",
-  transition: "all 0.3s ease",
-  "& svg": {
-    fontSize: "1.2rem",
-  },
-}));
 
 // Add new styled component for QuickView button
 const QuickViewButton = styled(IconButton)(({ theme }) => ({
@@ -361,7 +326,7 @@ const OurProduct = ({ filters }) => {
   // Modify handleWishlistToggle to accept event and stop propagation
   const handleWishlistToggle = async (productId, event) => {
     event.stopPropagation(); // Prevent card navigation
-    const isInWishlist = wishlist.some(item => item.product_id === productId);
+    const isInWishlist = wishlist.some((item) => item.product_id === productId);
     try {
       if (isInWishlist) {
         await removeFromWishlist(productId);
@@ -377,20 +342,6 @@ const OurProduct = ({ filters }) => {
     }
   };
 
-  // Handle Add to Wishlist
-  const onAddToWishlist = (variant_id, event) => {
-    event.stopPropagation(); // Prevent card navigation
-    console.log(`Added product ${variant_id} to wishlist`);
-  };
-
-  // Handle Add to Cart
-  const onAddToCart = (variantId, event) => {
-    event.stopPropagation(); // Prevent card navigation
-    // Implement cart addition logic here
-    console.log(`Added variant ${variantId} to cart.`);
-    setOpenSnackbar(true);
-  };
-
   // Snackbar Close Handler
   const handleCloseSnackbar = (event, reason) => {
     if (reason === "clickaway") {
@@ -402,7 +353,10 @@ const OurProduct = ({ filters }) => {
   // Pagination Logic
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const currentProducts = products.slice(indexOfFirstProduct, indexOfLastProduct);
+  const currentProducts = products.slice(
+    indexOfFirstProduct,
+    indexOfLastProduct
+  );
   const totalPages = Math.ceil(products.length / productsPerPage);
 
   const handleNextPage = () => {
@@ -464,9 +418,17 @@ const OurProduct = ({ filters }) => {
                   <WishlistButton
                     aria-label="add to wishlist"
                     color="secondary"
-                    onClick={(event) => handleWishlistToggle(product.product_id, event)}
+                    onClick={(event) =>
+                      handleWishlistToggle(product.product_id, event)
+                    }
                   >
-                    {wishlist.some(item => item.product_id === product.product_id) ? <Favorite /> : <FavoriteBorder />}
+                    {wishlist.some(
+                      (item) => item.product_id === product.product_id
+                    ) ? (
+                      <Favorite />
+                    ) : (
+                      <FavoriteBorder />
+                    )}
                   </WishlistButton>
 
                   {/* Product Image with Badge */}
@@ -555,7 +517,10 @@ const OurProduct = ({ filters }) => {
                     <Typography variant="body2" color="text.secondary">
                       Weight: {product.weight}
                     </Typography>
-                    <Rating value={product.rating} count={product.ratingCount} />
+                    <Rating
+                      value={product.rating}
+                      count={product.ratingCount}
+                    />
                   </Content>
 
                   {/* Action Buttons Removed */}
@@ -637,7 +602,7 @@ const OurProduct = ({ filters }) => {
                   <img
                     src={selectedProduct.product_image}
                     alt={selectedProduct.product_name}
-                    style={{ width: '100%', height: 'auto' }}
+                    style={{ width: "100%", height: "auto" }}
                   />
                 </Grid>
                 <Grid item xs={12} md={6}>
@@ -648,12 +613,15 @@ const OurProduct = ({ filters }) => {
                     {selectedProduct.description}
                   </Typography>
                   <Typography variant="h6" color="primary" gutterBottom>
-                    ${selectedProduct.variants?.[0]?.total_price || 'N/A'}
+                    ${selectedProduct.variants?.[0]?.total_price || "N/A"}
                   </Typography>
                   <Typography variant="body2" gutterBottom>
                     Weight: {selectedProduct.weight}
                   </Typography>
-                  <Rating value={selectedProduct.rating} count={selectedProduct.ratingCount} />
+                  <Rating
+                    value={selectedProduct.rating}
+                    count={selectedProduct.ratingCount}
+                  />
                   <Box sx={{ mt: 2 }}>
                     <StyledButton
                       variant="contained"

@@ -14,7 +14,6 @@ import {
   Stack,
   Button,
   styled,
-  CircularProgress,
 } from "@mui/material";
 import {
   CloudUpload as UploadIcon,
@@ -23,7 +22,6 @@ import {
   ErrorOutline as ErrorIcon,
   Download as DownloadIcon,
 } from "@mui/icons-material";
-import axios from "axios";
 
 // Styled components
 const UploadBox = styled(Paper)(({ theme, isDragging }) => ({
